@@ -20,18 +20,22 @@ const LoginScreen = () => {
     Alert.alert('Login', 'You have logged in');
   };
 
-  const handleSignUpButton = () => {};
+  const handleSignUpButton = () => {
+
+
+    navigation.navigate('SignUp');
+  };
 
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('../images/screen.png')}
+        source={require('../../images/screen.png')}
         style={styles.imageContainer}
       >
         <View style={styles.blurOverlay} />
 
         <View style={styles.logoContainer}>
-          <Image source={require('../images/logo.png')} style={styles.logo} />
+          <Image source={require('../../images/logo.png')} style={styles.logo} />
         </View>
 
         <View style={styles.formContainer}>

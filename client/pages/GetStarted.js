@@ -13,7 +13,7 @@ const GetStarted = () => {
             <Text style={styles.fitNetText}>FitNet</Text>
             <Text style={styles.guideText}>The <Text style={{ color: '#FF4C0A' }}>ultimate</Text> guide to your</Text>
             <Text style={styles.guideText}>fitness journey</Text>
-            <TouchableOpacity style={styles.loginButton} onPress={handleGetStarted}>
+            <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStarted}>
                 <Text style={styles.buttonText}>Get Started</Text>
             </TouchableOpacity>
         </View>
@@ -50,11 +50,11 @@ const styles = StyleSheet.create({
         top:2,
         marginBottom: 10,
     },
-    loginButton: {
+    getStartedButton: {
         width: 272,
         height: 52,
         backgroundColor: '#FF4C0A',
-        borderRadius: 48,
+        borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,
