@@ -1,99 +1,223 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
+import {
+  Alert,
+  Dimensions,
+  Image,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import api from '../../Components/Config';
+
 export default function SignUp() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [reEnteredPassword, setReEnteredPassword] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [userType, setUserType] = useState('User');
-  const navigation=useNavigation()
-  const handleSignUp = () => {
-    console.log('Username:', username);
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('Re-entered Password:', reEnteredPassword);
-    console.log('User Type:', userType);
-    navigation.navigate('OTP');
+  const navigation = useNavigation();
+
+  const handleSignUp = async () => {
+    setUsernameError('');
+    setEmailError('');
+    setPasswordError('');
+    setErrorMessage('');
+    try {
+      const data = { username, email, password };
+      const response = await api.post('fitnet/registeruser', data);
+
+      if (response.status === 201) {
+        console.log('Account created successfully:', data);
+        Alert.alert('Account Created:', response.data.message);
+        navigation.navigate('Login');
+      } else {
+        console.log('Unexpected status:', response.status);
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response) {
+        const responseData = error.response.data;
+        if (responseData && responseData.message) {
+          if (error.response.status === 401)
+            setUsernameError(responseData.message);
+          if (error.response.status === 402)
+            setEmailError(responseData.message);
+          if (error.response.status === 403)
+            setPasswordError(responseData.message);
+          else {
+            setErrorMessage(responseData.message);
+          }
+        } else {
+          console.log('Unexpected error:', responseData);
+        }
+      } else {
+        console.log('Error occurred during sign up:', error);
+      }
+    }
+  };
+
+  const handleSignInButton = () => {
+    navigation.navigate('Login');
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../../images/workout.jpg')} style={styles.backgroundImage} />
+    <View style={styles.container}>
+      <StatusBar backgroundColor="#1C1C1E" />
+      <View style={styles.imageContainer}>
+        <ImageBackground
+          source={require('../../images/workout.jpg')}
+          style={styles.backgroundImage}
+        >
+          <View style={styles.bottomLeft}>
+            <Text style={styles.signUpText2}>Sign Up</Text>
+          </View>
+        </ImageBackground>
+      </View>
       <View style={styles.inputContainer}>
+        {usernameError ? (
+          <Text style={styles.errorText}>{usernameError}</Text>
+        ) : null}
         <TextInput
-          style={styles.input}
+          style={[styles.input, usernameError && styles.inputError]}
           placeholder="Username"
           placeholderTextColor="#FFFFFF"
           value={username}
-          onChangeText={text => setUsername(text)}
+          onChangeText={(text) => setUsername(text)}
         />
+
+        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         <TextInput
-          style={styles.input}
+          style={[styles.input, emailError && styles.inputError]}
           placeholder="Email"
           placeholderTextColor="#FFFFFF"
           value={email}
-          onChangeText={text => setEmail(text)}
+          onChangeText={(text) => setEmail(text)}
           keyboardType="email-address"
         />
+
+        {passwordError ? (
+          <Text style={styles.errorText}>{passwordError}</Text>
+        ) : null}
         <TextInput
-          style={styles.input}
+          style={[styles.input, passwordError && styles.inputError]}
           placeholder="Password"
           placeholderTextColor="#FFFFFF"
           value={password}
-          onChangeText={text => setPassword(text)}
+          onChangeText={(text) => setPassword(text)}
           secureTextEntry
         />
+
+        {passwordError ? (
+          <Text style={styles.errorText}>{passwordError}</Text>
+        ) : null}
         <TextInput
-          style={styles.input}
+          style={[styles.input, passwordError && styles.inputError]}
           placeholder="Re-enter Password"
           placeholderTextColor="#FFFFFF"
           value={reEnteredPassword}
-          onChangeText={text => setReEnteredPassword(text)}
+          onChangeText={(text) => setReEnteredPassword(text)}
           secureTextEntry
         />
+
         <View style={styles.toggleContainer}>
-          <TouchableOpacity onPress={() => setUserType('User')} style={[styles.toggleButton, userType === 'User' && styles.activeButton]}>
-            <Text style={[styles.toggleText, userType === 'User' && styles.activeText]}>User</Text>
+          <TouchableOpacity
+            onPress={() => setUserType('User')}
+            style={[
+              styles.toggleButton,
+              userType === 'User' && styles.activeButton,
+            ]}
+          >
+            <Text
+              style={[
+                styles.toggleText,
+                userType === 'User' && styles.activeText,
+              ]}
+            >
+              User
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setUserType('Gym')} style={[styles.toggleButton, userType === 'Gym' && styles.activeButton]}>
-            <Text style={[styles.toggleText, userType === 'Gym' && styles.activeText]}>Gym</Text>
+          <TouchableOpacity
+            onPress={() => setUserType('Gym')}
+            style={[
+              styles.toggleButton,
+              userType === 'Gym' && styles.activeButton,
+            ]}
+          >
+            <Text
+              style={[
+                styles.toggleText,
+                userType === 'Gym' && styles.activeText,
+              ]}
+            >
+              Gym
+            </Text>
           </TouchableOpacity>
         </View>
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
       </View>
-      <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-        <Text style={styles.signUpText}>Sign Up</Text>
+      <TouchableOpacity
+        style={styles.signUpButton}
+        onPress={() => handleSignUp()}
+      >
+        <Text style={styles.signUpText2}>Sign Up</Text>
       </TouchableOpacity>
-      <TouchableOpacity>
-      <Text style={styles.alreadyHaveAccount}>Already have an account? Sign in</Text>
-      </TouchableOpacity>
-    </ScrollView>
+
+      <View style={styles.logInView}>
+        <Text style={styles.HaveAccount}>Already have an account?</Text>
+        <TouchableOpacity
+          style={styles.signInButton}
+          onPress={handleSignInButton}
+        >
+          <Text style={styles.logInText}>Log In</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
+
+const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    justifyContent: 'flex-start', 
+    justifyContent: 'flex-start',
     backgroundColor: '#1C1C1E',
-    paddingTop: 35, 
+    paddingTop: 35,
+    height: windowHeight + 100,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 220,
   },
   backgroundImage: {
     width: '100%',
-    height: 220, 
+    height: '100%',
   },
-  signUpTitle: {
+  bottomLeft: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    marginBottom: 20,
+    marginLeft: 20,
+  },
+  signUpText2: {
     fontWeight: '600',
-    fontSize: 32,
-    lineHeight: 43,
+    fontSize: 24,
+    lineHeight: 23,
+    textAlign: 'center',
     color: '#FFFFFF',
-    marginTop: 6,
-  },
-  knowYouBetter: {
-    fontSize: 20,
-    lineHeight: 43,
-    color: '#FFFFFF',
-    marginTop: 6,
   },
   inputContainer: {
     marginTop: 24,
@@ -138,7 +262,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     width: 313,
   },
-  signUpText: {
+  signUpText2: {
     fontWeight: '600',
     fontSize: 17,
     lineHeight: 23,
@@ -150,5 +274,29 @@ const styles = StyleSheet.create({
     lineHeight: 43,
     color: '#FFFFFF',
     marginTop: 12,
+  },
+  logInText: {
+    color: '#FF4C0A',
+    fontSize: 15,
+    fontWeight: '400',
+    marginTop: 10,
+  },
+  HaveAccount: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '400',
+    marginTop: 10,
+  },
+  logInView: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  inputError: {
+    borderColor: 'red',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 5,
   },
 });
