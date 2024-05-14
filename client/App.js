@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import GetStartedScreen from './pages/GetStarted';
@@ -12,6 +13,7 @@ import MainProfileScreen from './pages/Profile/MainProfile';
 import { AuthProvider } from './Context/authContext';
 
 const Stack = createStackNavigator();
+const BottomTab = createBottomTabNavigator();
 
 export default function App() {
   return (

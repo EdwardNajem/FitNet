@@ -46,6 +46,7 @@ const OTPScreen = ({ route }) => {
   const handleVerifyOTP = () => {
       if (otp === generatedOtp) {
         console.log('OTP verified successfully');
+        navigation.navigate('MainProfile');
       } else {
         setErrorMessage('Invalid OTP');
       }
