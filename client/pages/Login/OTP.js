@@ -6,7 +6,7 @@ const OTPScreen = () => {
   const navigation = useNavigation();
   const handleVerifyOTP = () => {
     console.log('Verifying OTP:', otp);
-    navigation.navigate('SignUpInfo');
+    navigation.navigate('MainProfile');
   };
 
   return (

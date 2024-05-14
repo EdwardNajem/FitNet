@@ -1,105 +1,216 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
+export default function SignUp() {
+  const [gender, setGender] = useState('Male'); 
+  const[height,setHeight] = useState('');
+  const [weight,setWeight] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [reEnteredPassword, setReEnteredPassword] = useState('');
+  const [userType, setUserType] = useState('User');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dobText, setDobText] = useState('Date of birth');
+  const [dob, setDOB] = useState(new Date());
+  const navigation=useNavigation()
+  const handleSignUp = () => {
 
-const ProfilePage = () => {
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={require('../../images/logo.png')} 
-          style={styles.profileImage}
-        />
-        <View style={styles.infoContainer}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoText}>100</Text>
-            <Text style={styles.infoLabel}>Workouts</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoText}>500</Text>
-            <Text style={styles.infoLabel}>Followers</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoText}>200</Text>
-            <Text style={styles.infoLabel}>Following</Text>
-          </View>
-        </View>
-      </View>
-      <View style={styles.bioContainer}>
-        <Text style={styles.bioText}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        </Text>
-      </View>
-      <View style={styles.nameContainer}>
-        <Text style={styles.nameText}>John Doe</Text>
-        <TouchableOpacity style={styles.editProfileButton}>
-          <Text style={styles.editProfileButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    navigation.navigate('OTP');
+  };
+
+
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || dob;
+    setShowDatePicker(false);
+    setDOB(currentDate);
+    setDobText(currentDate.toLocaleDateString());
 };
+
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Image source={require('../../images/workout.jpg')} style={styles.backgroundImage} />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Height (CM)"
+          placeholderTextColor="#FFFFFF"
+          value={height}
+          onChangeText={text => setHeight(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Weight (KG)"
+          placeholderTextColor="#FFFFFF"
+          value={email}
+          onChangeText={text => setEmail(text)}
+          keyboardType="email-address"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#FFFFFF"
+          value={password}
+          onChangeText={text => setPassword(text)}
+          secureTextEntry
+        />
+     <View >
+    <Picker
+        selectedValue={gender}
+        onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
+        style={styles.picker}
+    >
+        <Picker.Item label="Male" value="Male" />
+        <Picker.Item label="Female" value="Female" />
+    </Picker>
+    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePicker}>
+                    <Text style={styles.dateText}>{dobText}</Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                    <DateTimePicker
+                        testID="dateTimePicker"
+                        value={dob}
+                        mode="date"
+                        display="default"
+                        onChange={handleDateChange}
+                    />
+                )}
+</View>
+
+    
+      </View>
+      <TouchableOpacity style={styles.signUpButton}>
+        <Text style={styles.signUpText} onPress={handleSignUp}>Sign Up</Text>
+      </TouchableOpacity>
+      <TouchableOpacity>
+      <Text style={styles.alreadyHaveAccount}>Already have an account? Sign in</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 20,
-    paddingTop: 40,
-  },
-  header: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
+    backgroundColor: '#1C1C1E',
+    paddingTop: 0, 
   },
-  profileImage: {
-    width: 108,
-    height: 112,
-    borderRadius: 72,
+  
+  backgroundImage: {
+    width: '100%',
+    height: 220, 
   },
-  infoContainer: {
-    marginLeft: 20,
-    flexDirection: 'row',
+  signUpTitle: {
+    fontWeight: '600',
+    fontSize: 32,
+    lineHeight: 43,
+    color: '#FFFFFF',
+    marginTop: 6,
   },
-  infoItem: {
-    marginRight: 20,
-    alignItems: 'center',
-  },
-  infoText: {
+  knowYouBetter: {
     fontSize: 20,
+    lineHeight: 43,
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    marginTop: 6,
   },
-  infoLabel: {
-    fontSize: 15,
+  inputContainer: {
+    marginTop: 24,
+  },
+  input: {
+    width: 313,
+    height: 54,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingLeft: 10,
     color: '#FFFFFF',
   },
-  bioContainer: {
-    marginTop: 20,
-  },
-  bioText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  nameContainer: {
+  toggleContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
+    justifyContent: 'center',
+    marginBottom: 10,
   },
-  nameText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginRight: 10,
-  },
-  editProfileButton: {
-    backgroundColor: '#007bff',
+  toggleButton: {
+    backgroundColor: '#FF4C0A',
+    borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 15,
-    borderRadius: 5,
+    marginHorizontal: 5,
   },
-  editProfileButtonText: {
-    color: '#fff',
+  activeButton: {
+    backgroundColor: '#FFFFFF',
+  },
+  toggleText: {
+    color: '#FFFFFF',
     fontSize: 16,
+    fontWeight: '500',
   },
+  activeText: {
+    color: '#FF4C0A',
+  },
+  signUpButton: {
+    backgroundColor: '#FF4C0A',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 24,
+    width: 313,
+  },
+  signUpText: {
+    fontWeight: '600',
+    fontSize: 17,
+    lineHeight: 23,
+    textAlign: 'center',
+    color: '#FFFFFF',
+  },
+  alreadyHaveAccount: {
+    fontSize: 15,
+    lineHeight: 43,
+    color: '#FFFFFF',
+    marginTop: 12,
+  },
+  picker: {
+    height: 50, 
+    width: '100%', 
+    marginBottom: 20,
+    backgroundColor: '#f5f5f5', 
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+        width: 0,
+        height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+},
+datePicker: {
+    height: 50,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+        width: 0,
+        height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    width: '100%',
+},
+dateText: {
+    fontSize: 16,
+    color: '#333',
+},
 });
-
-export default ProfilePage;
