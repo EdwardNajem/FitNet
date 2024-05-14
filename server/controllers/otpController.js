@@ -25,8 +25,8 @@ const sendOTPController = async (req, res) => {
     const mailOptions = {
       from: 'edward.najem65@gmail.com',
       to: email,
-      subject: 'Your OTP for registration',
-      text: `Your OTP is: ${otp}`,
+      subject: 'FitNet One-Time Password',
+      text: `Greetings, \n Welcome to FitNet! This is the first step of many before starting your journey with us. Your OTP is: ${otp}`,
     };
     await transporter.sendMail(mailOptions);
     console.log(otp);

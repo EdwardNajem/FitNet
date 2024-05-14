@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import api from '../../Components/Config';
 
-const OTPScreen = ({ route }) => {
+const OTPScreen = ({ route, setLoggedin }) => {
   const { email } = route.params;
   const [otp, setOTP] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -44,11 +44,12 @@ const OTPScreen = ({ route }) => {
   }, [email]);
 
   const handleVerifyOTP = () => {
-      if (otp === generatedOtp) {
-        console.log('OTP verified successfully');
-      } else {
-        setErrorMessage('Invalid OTP');
-      }
+    if (otp === generatedOtp) {
+      console.log('OTP verified successfully');
+      setLoggedin(true);
+    } else {
+      setErrorMessage('Invalid OTP');
+    }
   };
 
   return (
