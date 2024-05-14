@@ -5,30 +5,26 @@ const { hashPassword, comparePassword } = require('../helpers/authHelper');
 // sign up
 const registerUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     //validation
-    if (!firstname) {
+    if (!username) {
       return res
-        .status(400)
-        .send({ success: false, message: 'First name is required' });
-    }
-    if (!lastname) {
-      return res
-        .status(400)
-        .send({ success: false, message: 'Last name is required' });
+        .status(401)
+        .send({ success: false, message: 'Username is required!' });
     }
     if (!email) {
       return res
-        .status(400)
-        .send({ success: false, message: 'Email is required' });
+        .status(402)
+        .send({ success: false, message: 'Email is required!' });
     }
     if (!password || password.length < 8) {
-      return res.status(400).send({
+      return res.status(403).send({
         success: false,
         message: 'Password is required and 8 characters long!',
       });
     }
+
     //exisiting user
     const existingEntrep = await UserModel.findOne({ email });
     if (existingEntrep) {
@@ -43,10 +39,10 @@ const registerUser = async (req, res) => {
 
     //save user into database
     const user = await UserModel({
-      firstname,
-      lastname,
+      username,
       email,
       password: hashedPassword,
+      usertype: 'Attendee'
     }).save();
 
     return res
@@ -75,7 +71,7 @@ const loginUser = async (req, res) => {
     }
 
     //find user
-    const user = await EntrepModel.findOne({ email });
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return res
         .status(500)
@@ -108,7 +104,6 @@ const loginUser = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   registerUser,

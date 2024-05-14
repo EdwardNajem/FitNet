@@ -1,0 +1,13 @@
+export const API_URL = 'http://192.168.1.5:8080'; //Edward Home
+// export const API_URL = 'http://172.16.128.39:8080'; //UNI WIFI
+// export const API_URL = 'http://10.1.0.108:8080'; //WIFI ROADSTER
+// export const API_URL = 'http://192.168.141.191:8080'; //Edward 3G
+// export const API_URL = 'http://172.23.48.1:8080'; //The Nook
+
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: API_URL,
+});
+
+export default api;
