@@ -33,7 +33,7 @@ const LoginScreen = () => {
       const response = await api.post('fitnet/loginuser', data);
       if (response.status == 200) {
         console.log('Account logged in successfully:');
-        await AsyncStorage.setItem('@auth', JSON.stringify(data));
+        await AsyncStorage.setItem('@auth', JSON.stringify(response.data));
         navigation.navigate('OTP', { email });
       } else {
         setErrorMessage(response.data?.message || 'Invalid Email or Password');

@@ -1,21 +1,138 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import HomeLogo from '../client/assets/icons/home.png';
+import ProfileLogo from '../client/assets/icons/profile.png';
+import WorkoutLogo from '../client/assets/icons/workout.png';
+import { AuthProvider } from './Context/authContext';
+import HomeNav from './Navigation/HomeNav';
+import ProfileNav from './Navigation/ProfileNav';
+import WorkoutNav from './Navigation/WorkoutNav';
 import GetStartedScreen from './pages/GetStarted';
 import LoginScreen from './pages/Login/LoginScreen';
 import OTPScreen from './pages/Login/OTPScreen';
 import SignUpScreen from './pages/Login/SignUp';
 import SignUpInfoScreen from './pages/Login/SignUpInformation';
-import MainProfileScreen from './pages/Profile/MainProfile';
-import { AuthProvider } from './Context/authContext';
+import MainProfileScreen from './pages/Profile/ProfileScreen';
 
 const Stack = createStackNavigator();
-const BottomTab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator();
+
+const tabOptions = {
+  activeTintColor: '#FF4C0A',
+  inactiveTintColor: '#ADB5B9',
+  style: {
+    backgroundColor: '#1C1C1E',
+    height: 70,
+    borderTopWidth: 0,
+  },
+  labelStyle: {
+    fontSize: 12,
+  },
+};
 
 export default function App() {
+  const [loggedin, setLoggedin] = useState(true);
+
+  if (loggedin) {
+    return (
+      <NavigationContainer>
+        <AuthProvider>
+          <Tab.Navigator
+            screenOptions={{
+              headerShown: false,
+              presentation: 'transparentModal',
+              tabBarActiveTintColor: tabOptions.activeTintColor,
+              tabBarInactiveTintColor: tabOptions.inactiveTintColor,
+              tabBarStyle: tabOptions.style,
+              tabBarLabelStyle: tabOptions.labelStyle,
+              tabBarLabel: '',
+            }}
+          >
+            <Tab.Screen
+              name="Home"
+              options={{
+                tabBarIcon: ({ focused }) => (
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      top: 10,
+                    }}
+                  >
+                    <Image
+                      source={HomeLogo}
+                      style={{
+                        width: 35,
+                        height: 35,
+                        tintColor: focused ? '#FF4C0A' : '#fff',
+                      }}
+                    />
+                  </View>
+                ),
+              }}
+            >
+              {(props) => <HomeNav {...props} setLoggedin={setLoggedin} />}
+            </Tab.Screen>
+            <Tab.Screen
+              name="Workout"
+              component={WorkoutNav}
+              options={{
+                tabBarIcon: ({ focused }) => (
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      top: 10,
+                    }}
+                  >
+                    <Image
+                      source={WorkoutLogo}
+                      style={{
+                        width: 36,
+                        height: 25.02,
+                        tintColor: focused ? '#FF4C0A' : '#fff',
+                      }}
+                    />
+                  </View>
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Profile"
+              options={{
+                tabBarIcon: ({ focused }) => (
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      top: 10,
+                    }}
+                  >
+                    <Image
+                      source={ProfileLogo}
+                      style={{
+                        width: 27,
+                        height: 34.4,
+                        tintColor: focused ? '#FF4C0A' : '#fff',
+                      }}
+                    />
+                  </View>
+                ),
+              }}
+            >
+              {(props) => <ProfileNav {...props} setLoggedin={setLoggedin} />}
+            </Tab.Screen>
+          </Tab.Navigator>
+        </AuthProvider>
+      </NavigationContainer>
+    );
+  }
+
   return (
     <NavigationContainer>
       <AuthProvider>
@@ -29,10 +146,8 @@ export default function App() {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
           <Stack.Screen name="OTP">
-            {(props) => <OTPScreen {...props}/>}
+            {(props) => <OTPScreen {...props} setLoggedin={setLoggedin} />}
           </Stack.Screen>
-          <Stack.Screen name="SignUpInfo" component={SignUpInfoScreen} />
-          <Stack.Screen name="MainProfile" component={MainProfileScreen} />
         </Stack.Navigator>
       </AuthProvider>
     </NavigationContainer>
