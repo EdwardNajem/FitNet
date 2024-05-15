@@ -64,14 +64,14 @@ const LoginScreen = () => {
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
       <ImageBackground
-        source={require('../../images/screen.png')}
+        source={require('../../assets/images/screen.png')}
         style={styles.imageContainer}
       >
         <View style={styles.blurOverlay} />
 
         <View style={styles.logoContainer}>
           <Image
-            source={require('../../images/logo.png')}
+            source={require('../../assets/images/logo.png')}
             style={styles.logo}
           />
         </View>

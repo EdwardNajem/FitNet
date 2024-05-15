@@ -1,11 +1,22 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { createStackNavigator } from '@react-navigation/stack';
+import HomeScreen from '../pages/SocialMedia/Home';
 
-const HomeNav = () => {
+const HomeNav = ({ setLoggedin })=> {
+  const Stack = createStackNavigator();
+
   return (
-    <View>
-      <Text>HomeNav</Text>
-    </View>
+    <Stack.Navigator
+       screenOptions={{
+        presentation: 'transparentModal',
+      }}>
+     <Stack.Screen
+        options={{ headerShown: false, presentation: 'transparentModal' }}
+        name="Home-Screen"
+        component={HomeScreen}
+      />
+    </Stack.Navigator>
   )
 }
 

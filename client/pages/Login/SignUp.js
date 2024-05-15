@@ -75,7 +75,7 @@ export default function SignUp() {
       <StatusBar backgroundColor="#1C1C1E" />
       <View style={styles.imageContainer}>
         <ImageBackground
-          source={require('../../images/workout.jpg')}
+          source={require('../../assets/images/workout.jpg')}
           style={styles.backgroundImage}
         >
           <View style={styles.bottomLeft}>

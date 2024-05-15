@@ -31,7 +31,7 @@ export default function SignUp() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../../images/workout.jpg')} style={styles.backgroundImage} />
+      <Image source={require('../../assets/images/workout.jpg')} style={styles.backgroundImage} />
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}

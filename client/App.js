@@ -17,8 +17,7 @@ import LoginScreen from './pages/Login/LoginScreen';
 import OTPScreen from './pages/Login/OTPScreen';
 import SignUpScreen from './pages/Login/SignUp';
 import SignUpInfoScreen from './pages/Login/SignUpInformation';
-import MainProfileScreen from './pages/Profile/ProfileScreen';
-
+import HomeScreen from './pages/SocialMedia/Home';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 

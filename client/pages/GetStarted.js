@@ -10,7 +10,7 @@ const GetStarted = () => {
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
-      <Image source={require('../images/logo.png')} style={styles.logoImage} />
+      <Image source={require('../assets/images/logo.png')} style={styles.logoImage} />
       <Text style={styles.welcomeText}>Welcome to</Text>
       <Text style={styles.fitNetText}>FitNet</Text>
       <Text style={styles.guideText}>
