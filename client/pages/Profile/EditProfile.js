@@ -162,6 +162,9 @@ const EditProfile = ({ navigation }) => {
               />
               <Text style={styles.inputText}>Weight (kg)</Text>
             </View>
+            <TouchableOpacity style={styles.Button} onPress={() => saveChangesClick()}>
+              <Text style={styles.ButtonText}>Save Changes</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -171,15 +174,12 @@ const EditProfile = ({ navigation }) => {
 
 export default EditProfile;
 
-const windowHeight = Dimensions.get('window').height;
-
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingBottom: 20,
     position: 'relative',
     flex: 1,
-    //  height: windowHeight,
     backgroundColor: '#1C1C1E',
   },
   content: {
@@ -224,5 +224,19 @@ const styles = StyleSheet.create({
   inputText: {
     color: '#fff',
     position: 'absolute',
+  },
+  Button: {
+    backgroundColor: '#FF4C0A',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 24,
+    width: 313,
+  },
+  ButtonText: {
+    fontWeight: '600',
+    fontSize: 17,
+    lineHeight: 23,
+    textAlign: 'center',
+    color: '#FFFFFF',
   },
 });

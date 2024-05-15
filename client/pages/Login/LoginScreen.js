@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   ImageBackground,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -22,7 +23,12 @@ const LoginScreen = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
+
+  const isLoginDisabled = () => {
+    return !email || !password;
+  };
 
   const handleLogin = async () => {
     setEmailError('');
@@ -40,86 +46,116 @@ const LoginScreen = () => {
       }
     } catch (error) {
       if (error.response && error.response.status === 500) {
-        setErrorMessage(
-          error.response.data?.message
-        );
-      if(error.response && error.response.status === 400){
-         setErrorMessage(
-           error.response.data?.message || 'Internal Server Error'
-         );
-      }
+        setErrorMessage(error.response.data?.message);
+        if (error.response && error.response.status === 400) {
+          setErrorMessage(
+            error.response.data?.message || 'Internal Server Error'
+          );
+        }
       } else {
         setErrorMessage('Sign in Failed');
       }
     }
-       console.log('Email:', email);
-       console.log('Password:', password);
+    console.log('Email:', email);
+    console.log('Password:', password);
   };
 
   const handleSignUpButton = () => {
     navigation.navigate('SignUp');
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
-      <ImageBackground
-        source={require('../../images/screen.png')}
-        style={styles.imageContainer}
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
       >
-        <View style={styles.blurOverlay} />
+        <ImageBackground
+          source={require('../../assets/images/screen.png')}
+          style={styles.imageContainer}
+        >
+          <View style={styles.blurOverlay} />
 
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('../../images/logo.png')}
-            style={styles.logo}
-          />
-        </View>
-
-        <View style={styles.formContainer}>
-          {emailError ? (
-            <Text style={styles.errorText}>{emailError}</Text>
-          ) : null}
-          <TextInput
-            style={[styles.input, emailError && styles.inputError]}
-            placeholder="Email"
-            placeholderTextColor="#FFFFFF"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            keyboardType="email-address"
-          />
-
-          {passwordError ? (
-            <Text style={styles.errorText}>{passwordError}</Text>
-          ) : null}
-          <TextInput
-            style={[styles.input, passwordError && styles.inputError]}
-            placeholder="Password"
-            placeholderTextColor="#FFFFFF"
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-            secureTextEntry
-          />
-          {errorMessage ? (
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          ) : null}
-          <TouchableOpacity style={styles.forgotPasswordButton}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginText}>Login</Text>
-          </TouchableOpacity>
-          <View style={styles.signUpView}>
-            <Text style={styles.dontHaveAccount}>Don't have an account?</Text>
-            <TouchableOpacity
-              style={styles.signUpButton}
-              onPress={handleSignUpButton}
-            >
-              <Text style={styles.signUpText}>Sign up</Text>
-            </TouchableOpacity>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../../assets/images/logo.png')}
+              style={styles.logo}
+            />
           </View>
-        </View>
-      </ImageBackground>
+
+          <View style={styles.formContainer}>
+            {emailError ? (
+              <Text style={styles.errorText}>{emailError}</Text>
+            ) : null}
+            <TextInput
+              style={[styles.input, emailError && styles.inputError]}
+              placeholder="Email"
+              placeholderTextColor="#FFFFFF"
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            {passwordError ? (
+              <Text style={styles.errorText}>{passwordError}</Text>
+            ) : null}
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                style={[
+                  styles.passwordInput,
+                  passwordError && styles.inputError,
+                ]}
+                placeholder="Password"
+                placeholderTextColor="#FFFFFF"
+                value={password}
+                onChangeText={(text) => setPassword(text)}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity
+                style={styles.passwordVisibilityButton}
+                onPress={togglePasswordVisibility}
+              >
+                <Text style={styles.passwordVisibilityButtonText}>
+                  {showPassword ? 'Hide' : 'Show'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {errorMessage ? (
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            ) : null}
+            <TouchableOpacity style={styles.forgotPasswordButton}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                isLoginDisabled() && styles.disabledButton,
+              ]}
+              onPress={handleLogin}
+              disabled={isLoginDisabled()}
+            >
+              <Text style={styles.loginText}>Login</Text>
+            </TouchableOpacity>
+            <View style={styles.signUpView}>
+              <Text style={styles.dontHaveAccount}>Don't have an account?</Text>
+              <TouchableOpacity
+                style={styles.signUpButton}
+                onPress={handleSignUpButton}
+              >
+                <Text style={styles.signUpText}>Sign up</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ImageBackground>
+      </ScrollView>
     </View>
   );
 };
@@ -130,6 +166,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
   },
   imageContainer: {
     flex: 1,
@@ -153,16 +192,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     color: '#FFFFFF',
   },
-  Emailinput: {
-    width: 313,
-    height: 54,
-    borderWidth: 1,
-    borderColor: '#FFFFFF',
-    borderRadius: 10,
-    marginBottom: 20,
-    paddingLeft: 10,
-    color: '#FFFFFF',
-  },
   loginButton: {
     width: 313,
     height: 54,
@@ -171,6 +200,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
+  },
+  disabledButton: {
+    backgroundColor: '#CCCCCC',
   },
   loginText: {
     color: '#FFFFFF',
@@ -217,6 +249,27 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     marginBottom: 5,
+  },
+  passwordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 313,
+    height: 54,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingLeft: 10,
+    color: '#FFFFFF',
+  },
+  passwordVisibilityButton: {
+    padding: 10,
+  },
+  passwordVisibilityButtonText: {
+    color: '#FFFFFF',
   },
 });
 

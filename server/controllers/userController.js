@@ -5,8 +5,9 @@ const { hashPassword, comparePassword } = require('../helpers/authHelper');
 // sign up
 const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    let { username, email, password } = req.body;
 
+    email = email.toLowerCase();
     //validation
     if (!username) {
       return res
@@ -61,7 +62,9 @@ const registerUser = async (req, res) => {
 // log in
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    email = email.toLowerCase();
 
     //validation
     if (!email || !password) {

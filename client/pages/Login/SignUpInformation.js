@@ -31,21 +31,24 @@ export default function SignUp() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../../images/workout.jpg')} style={styles.backgroundImage} />
+      <Image
+        source={require('../../assets/images/workout.jpg')}
+        style={styles.backgroundImage}
+      />
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Height (CM)"
           placeholderTextColor="#FFFFFF"
           value={height}
-          onChangeText={text => setHeight(text)}
+          onChangeText={(text) => setHeight(text)}
         />
         <TextInput
           style={styles.input}
           placeholder="Weight (KG)"
           placeholderTextColor="#FFFFFF"
           value={email}
-          onChangeText={text => setEmail(text)}
+          onChangeText={(text) => setEmail(text)}
           keyboardType="email-address"
         />
         <TextInput
@@ -53,39 +56,44 @@ export default function SignUp() {
           placeholder="Password"
           placeholderTextColor="#FFFFFF"
           value={password}
-          onChangeText={text => setPassword(text)}
+          onChangeText={(text) => setPassword(text)}
           secureTextEntry
         />
-     <View >
-    <Picker
-        selectedValue={gender}
-        onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
-        style={styles.picker}
-    >
-        <Picker.Item label="Male" value="Male" />
-        <Picker.Item label="Female" value="Female" />
-    </Picker>
-    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePicker}>
-                    <Text style={styles.dateText}>{dobText}</Text>
-                </TouchableOpacity>
-                {showDatePicker && (
-                    <DateTimePicker
-                        testID="dateTimePicker"
-                        value={dob}
-                        mode="date"
-                        display="default"
-                        onChange={handleDateChange}
-                    />
-                )}
-</View>
-
-    
+        <View>
+          <Picker
+            selectedValue={gender}
+            onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Male" value="Male" />
+            <Picker.Item label="Female" value="Female" />
+          </Picker>
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
+            style={styles.datePicker}
+          >
+            <Text style={styles.dateText}>{dobText}</Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={dob}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+        </View>
       </View>
       <TouchableOpacity style={styles.signUpButton}>
-        <Text style={styles.signUpText} onPress={handleSignUp}>Sign Up</Text>
+        <Text style={styles.signUpText} onPress={handleSignUp}>
+          Sign Up
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity>
-      <Text style={styles.alreadyHaveAccount}>Already have an account? Sign in</Text>
+        <Text style={styles.alreadyHaveAccount}>
+          Already have an account? Sign in
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
