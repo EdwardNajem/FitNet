@@ -1,40 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { AuthContext } from '../Context/authContext';
+import Logo from '../assets/images/logo.png';
 import api from './Config';
 import GreyCircle from './GreyCircle';
 
 const ProfileHeader = ({ user, navigation }) => {
   const [state] = useContext(AuthContext);
-  const [users, setUsers] = useState(null);
-  const [loading, setloading] = useState(false);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        let response;
-        if (state.type === 'Entrepreneur') {
-          response = await api.get('api/v1/auth/geentreptacceptedconnections', {
-            params: { entrepid: state.user._id },
-          });
-          setUsers(response.data.requests.length);
-        } else {
-          response = await api.get(
-            'api/v1/auth/getinvestoracceptedconnections',
-            {
-              params: { investorid: state.user._id },
-            }
-          );
-          setUsers(response.data.requests.length);
-        }
-      } catch (error) {
-        console.log('Error fetching users:', error);
-      }
-    };
-
-    //  fetchUsers();
-  }, []);
 
   if (!user) {
     return <Text>No Profile</Text>;
@@ -44,11 +23,14 @@ const ProfileHeader = ({ user, navigation }) => {
         <View style={styles.content}>
           <View style={styles.header}>
             {user.avatar ? (
-              <Image source={{ uri: user.avatar }} style={styles.avatar} />
+              <Image
+                source={{ uri: user.avatar }}
+                style={styles.avatar}
+              />
             ) : (
               <GreyCircle size={100} />
             )}
-            
+
             <View style={styles.infoContainer}>
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Workouts</Text>
@@ -155,5 +137,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     color: '#FFF',
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+  },
+  loading: {
+    width: 100,
+    height: 100,
+    borderRadius: 100,
+    marginBottom: 10,
   },
 });

@@ -43,7 +43,7 @@ const registerUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      usertype: 'Attendee'
+      usertype: 'Attendee',
     }).save();
 
     return res
@@ -108,7 +108,62 @@ const loginUser = async (req, res) => {
   }
 };
 
+const updateUserInfo = async (req, res) => {
+  try {
+    const { _id, username, height, weight, dateofbirth, gender, avatar } =
+      req.body;
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id },
+      {
+        username: username,
+        height: height,
+        weight: weight,
+        dateofbirth: dateofbirth,
+        gender: gender,
+        avatar: avatar,
+      },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: 'Account Updated',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Error in Account Update API',
+      error,
+    });
+  }
+};
+
+const getUserInfo = async (req, res) => {
+  try {
+    const { _id } = req.body;
+
+    const user = await UserModel.findOne({ _id });
+
+    res.status(200).send({
+      success: true,
+      message: 'Account Found',
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Error in Get Account API',
+      error,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  updateUserInfo,
 };
