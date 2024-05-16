@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import api from '../../Components/Config';
+import CustomAlert from '../../Components/CustomAlert';
 
 export default function SignUp() {
   const [username, setUsername] = useState('');
@@ -25,7 +26,21 @@ export default function SignUp() {
   const [passwordError, setPasswordError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [userType, setUserType] = useState('User');
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
   const navigation = useNavigation();
+
+  // Function to open the custom alert
+  const openAlert = (message) => {
+    setAlertMessage(message);
+    setAlertVisible(true);
+  };
+
+  // Function to close the custom alert
+  const closeAlert = () => {
+    setAlertVisible(false);
+    navigation.navigate('Login');
+  };
 
   const handleSignUp = async () => {
     setUsernameError('');
@@ -38,8 +53,7 @@ export default function SignUp() {
 
       if (response.status === 201) {
         console.log('Account created successfully:', data);
-        Alert.alert('Account Created:', response.data.message);
-        navigation.navigate('Login');
+        openAlert(response.data.message);
       } else {
         console.log('Unexpected status:', response.status);
       }
@@ -72,14 +86,19 @@ export default function SignUp() {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#1C1C1E" />
+      <CustomAlert
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={closeAlert}
+      />
+      <StatusBar translucent backgroundColor="transparent" />
       <View style={styles.imageContainer}>
         <ImageBackground
           source={require('../../assets/images/workout.jpg')}
           style={styles.backgroundImage}
         >
           <View style={styles.bottomLeft}>
-            <Text style={styles.signUpText2}>Sign Up</Text>
+            <Text style={styles.signUpText}>Sign Up</Text>
           </View>
         </ImageBackground>
       </View>
@@ -103,6 +122,7 @@ export default function SignUp() {
           value={email}
           onChangeText={(text) => setEmail(text)}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
 
         {passwordError ? (
@@ -173,7 +193,6 @@ export default function SignUp() {
       >
         <Text style={styles.signUpText2}>Sign Up</Text>
       </TouchableOpacity>
-
       <View style={styles.logInView}>
         <Text style={styles.HaveAccount}>Already have an account?</Text>
         <TouchableOpacity
@@ -194,12 +213,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     backgroundColor: '#1C1C1E',
-    paddingTop: 35,
     height: windowHeight + 100,
   },
   imageContainer: {
     width: '100%',
-    height: 220,
+    height: 250,
   },
   backgroundImage: {
     width: '100%',
@@ -214,7 +232,7 @@ const styles = StyleSheet.create({
   },
   signUpText2: {
     fontWeight: '600',
-    fontSize: 24,
+    fontSize: 17,
     lineHeight: 23,
     textAlign: 'center',
     color: '#FFFFFF',
@@ -262,7 +280,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     width: 313,
   },
-  signUpText2: {
+  signUpText: {
     fontWeight: '600',
     fontSize: 17,
     lineHeight: 23,

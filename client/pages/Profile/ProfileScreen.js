@@ -12,8 +12,8 @@ import {
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ProfileHeader from '../../Components/ProfileHeader';
-import { AuthContext } from '../../Context/authContext';
 import ProfileTabs from '../../Components/ProfileTabs';
+import { AuthContext } from '../../Context/authContext';
 
 const ProfileScreen = ({ navigation }) => {
   const [state] = useContext(AuthContext);
@@ -33,13 +33,13 @@ const ProfileScreen = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
         <TouchableOpacity style={styles.chatButton}>
-          <Fontisto name="share" color="white" size={29} />
+          <Fontisto name="share" color="white" size={24} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.chatButton}
           onPress={() => navigation.navigate('Settings')}
         >
-          <Ionicons name="settings-sharp" color="white" size={35} />
+          <Ionicons name="settings-sharp" color="white" size={30} />
         </TouchableOpacity>
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#2F2F2F',
   },
-  title:{
+  title: {
     color: '#FFFFFF',
     fontSize: 24,
     fontWeight: 'bold',
