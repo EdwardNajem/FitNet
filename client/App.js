@@ -2,9 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { Image, View } from 'react-native';
 import HomeLogo from '../client/assets/icons/home.png';
 import ProfileLogo from '../client/assets/icons/profile.png';
 import WorkoutLogo from '../client/assets/icons/workout.png';
@@ -16,8 +14,7 @@ import GetStartedScreen from './pages/GetStarted';
 import LoginScreen from './pages/Login/LoginScreen';
 import OTPScreen from './pages/Login/OTPScreen';
 import SignUpScreen from './pages/Login/SignUp';
-import SignUpInfoScreen from './pages/Login/SignUpInformation';
-import MainProfileScreen from './pages/Profile/ProfileScreen';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();

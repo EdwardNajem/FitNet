@@ -11,8 +11,16 @@ const SettingsScreen = ({ setLoggedin }) => {
       <View style={styles.content}>
         <View style={styles.centered}>
           <WhiteButton
+            title="Change Email"
+            onPress={() => navigation.navigate('ChangeEmail')}
+          />
+          <WhiteButton
             title="Change Password"
             onPress={() => navigation.navigate('ChangePassword')}
+          />
+          <WhiteButton
+            title="Contact Us"
+            onPress={() => navigation.navigate('ContactUs')}
           />
           <WhiteButton title="Logout" onPress={() => setLoggedin(false)} />
         </View>

@@ -3,6 +3,8 @@ const {
   registerUser,
   loginUser,
   updateUserInfo,
+  updateUserPassword,
+  updateUserEmail,
 } = require('../controllers/userController');
 const { sendOTPController } = require('../controllers/otpController');
 
@@ -14,6 +16,8 @@ router.post('/registeruser', registerUser);
 router.post('/loginuser', loginUser);
 router.post('/sendOtp', sendOTPController);
 router.put('/updateUserInfo', updateUserInfo);
+router.put('/updateUserPassword', updateUserPassword);
+router.put('/updateUserEmail', updateUserEmail);
 
 //export
 module.exports = router;

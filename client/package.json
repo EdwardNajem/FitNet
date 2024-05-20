@@ -18,17 +18,15 @@
     "@react-navigation/stack": "^6.3.29",
     "axios": "^1.6.8",
     "expo": "~51.0.7",
+    "expo-image-manipulator": "~12.0.5",
     "expo-image-picker": "~15.0.5",
     "expo-status-bar": "^1.12.1",
     "firebase": "^10.12.0",
     "react": "18.2.0",
     "react-native": "^0.74.1",
-    "react-native-dropdown-picker": "^5.4.6",
     "react-native-element-dropdown": "^2.12.0",
     "react-native-gesture-handler": "^2.16.1",
-    "react-native-select-dropdown": "^4.0.1",
-    "react-native-vector-icons": "^10.1.0",
-    "expo-image-manipulator": "~12.0.5"
+    "react-native-vector-icons": "^10.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
