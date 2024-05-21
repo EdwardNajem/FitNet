@@ -162,8 +162,144 @@ const getUserInfo = async (req, res) => {
   }
 };
 
+const updateUserPassword = async (req, res) => {
+  try {
+    const { _id, oldPassword, newPassword } = req.body;
+
+    const user = await UserModel.findOne({ _id });
+
+    //validation
+    if (!oldPassword) {
+      return res
+        .status(400)
+        .send({ success: false, message: 'Please enter the old password!' });
+    }
+    if (!newPassword) {
+      return res
+        .status(400)
+        .send({ success: false, message: 'Please enter the new password!' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).send({
+        success: false,
+        message: 'The new password should be 8 characters long!',
+      });
+    }
+
+    const match = await comparePassword(oldPassword, user.password);
+    if (!match) {
+      return res.status(400).send({
+        success: false,
+        message: 'The old password is incorrect!',
+      });
+    }
+    const match2 = await comparePassword(newPassword, user.password);
+
+    if (oldPassword === newPassword || match2) {
+      return res.status(400).send({
+        success: false,
+        message: 'The old password cannot be the same as the new password!',
+      });
+    }
+    //undefined password
+    user.password = undefined;
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id },
+      {
+        password: hashedPassword,
+      },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: 'Change Password Successful',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: 'Error in Update User Password API',
+      error,
+    });
+  }
+};
+
+const updateUserEmail = async (req, res) => {
+  try {
+    let { _id, oldEmail, newEmail } = req.body;
+
+    oldEmail = oldEmail.toLowerCase();
+    newEmail = newEmail.toLowerCase();
+
+    const user = await UserModel.findOne({ _id });
+
+    //validation
+    if (!oldEmail) {
+      return res
+        .status(400)
+        .send({ success: false, message: 'Please enter the old email!' });
+    }
+    if (!newEmail) {
+      return res
+        .status(400)
+        .send({ success: false, message: 'Please enter the new email!' });
+    }
+
+    if (oldEmail !== user.email) {
+      return res.status(400).send({
+        success: false,
+        message: 'The old email is incorrect!',
+      });
+    }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newEmail)) {
+        return res.status(400).send({
+          success: false,
+          message: 'The new email is not a valid email address!',
+        });
+      }
+
+    if (oldEmail === newEmail || newEmail === user.email) {
+      return res.status(400).send({
+        success: false,
+        message: 'The old email cannot be the same as the new email!',
+      });
+    }
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id },
+      {
+        email: newEmail,
+      },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: 'Change Email Successful',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: 'Error in Update User Email API',
+      error,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   updateUserInfo,
+  updateUserPassword,
+  updateUserEmail,
 };
