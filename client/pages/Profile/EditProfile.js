@@ -47,11 +47,10 @@ const EditProfile = ({ navigation }) => {
 
   const userDateOfBirth = user.dateofbirth;
   const formattedDateOfBirth = formatDate(userDateOfBirth);
-
   const [image, setImage] = useState(user.avatar || '');
   const [username, setUsername] = useState(user.username || '');
-  const [height, setHeight] = useState(user.height.toString() || '');
-  const [weight, setWeight] = useState(user.weight.toString() || '');
+  const [height, setHeight] = useState((user.height?.toString()) || '');
+  const [weight, setWeight] = useState((user.weight?.toString()) || '');
   const [dateofbirth, setdateofbirth] = useState(formattedDateOfBirth || '');
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -59,7 +58,6 @@ const EditProfile = ({ navigation }) => {
   const [isFocus, setIsFocus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-
   const data = [
     { label: 'Male', value: 'Male' },
     { label: 'Female', value: 'Female' },

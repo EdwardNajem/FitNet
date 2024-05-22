@@ -88,12 +88,7 @@ const LoginScreen = () => {
             style={styles.logo}
           />
         </View>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('../../assets/images/logo.png')}
-              style={styles.logo}
-            />
-          </View>
+     
 
           <View style={styles.formContainer}>
             {emailError ? (
