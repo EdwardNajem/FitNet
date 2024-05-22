@@ -1,8 +1,11 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import ProfileScreen from '../pages/Profile/ProfileScreen';
-import SettingsScreen from '../pages/Profile/SettingsScreen';
 import EditProfile from '../pages/Profile/EditProfile';
+import ProfileScreen from '../pages/Profile/ProfileScreen';
+import ChangeEmail from '../pages/Profile/Settings/ChangeEmail';
+import ChangePassword from '../pages/Profile/Settings/ChangePassword';
+import ContactUs from '../pages/Profile/Settings/ContactUs';
+import SettingsScreen from '../pages/Profile/SettingsScreen';
 
 const ProfileNav = ({ setLoggedin }) => {
   const Stack = createStackNavigator();
@@ -43,18 +46,42 @@ const ProfileNav = ({ setLoggedin }) => {
       >
         {() => <SettingsScreen setLoggedin={setLoggedin} />}
       </Stack.Screen>
-      {/* <Stack.Screen
+      <Stack.Screen
         name="ChangePassword"
         component={ChangePassword}
         options={{
           headerTitle: 'Change Password',
           headerStyle: {
-            backgroundColor: '#0A2533',
+            backgroundColor: '#2F2F2F',
           },
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
         }}
-      /> */}
+      />
+      <Stack.Screen
+        name="ChangeEmail"
+        component={ChangeEmail}
+        options={{
+          headerTitle: 'Change Email',
+          headerStyle: {
+            backgroundColor: '#2F2F2F',
+          },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="ContactUs"
+        component={ContactUs}
+        options={{
+          headerTitle: 'Contact Us',
+          headerStyle: {
+            backgroundColor: '#2F2F2F',
+          },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
     </Stack.Navigator>
   );
 };
