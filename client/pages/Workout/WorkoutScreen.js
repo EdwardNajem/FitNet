@@ -11,6 +11,7 @@ const WorkoutScreen = ({navigation}) => {
 
   const handleStartWorkout = (workoutId) => {
     console.log('Start workout:', workoutId);
+    navigation.navigate('StartWorkout');
   };
 
 

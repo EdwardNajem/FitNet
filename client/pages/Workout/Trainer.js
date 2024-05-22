@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 8,
     paddingVertical: 2,
+    right:'65%',
   },
   rating: {
     color: '#FFFFFF',
