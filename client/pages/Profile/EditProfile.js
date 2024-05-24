@@ -122,40 +122,40 @@ const EditProfile = ({ navigation }) => {
   const saveChangesClick = async () => {
     setErrorMessage('');
     const { _id } = state.user;
-
+  
     // Validation checks
     if (!username) {
       setErrorMessage('Please fill in username field');
       return;
     }
-
+  
     if (parseInt(height) <= 0) {
       setErrorMessage('Please enter a valid height');
       return;
     }
-
+  
     if (parseInt(weight) <= 0) {
       setErrorMessage('Please enter a valid weight');
       return;
     }
-
+  
     const currentDate = new Date();
-    const birthdate = new Date(dateofbirth);
-
-    if (birthdate >= currentDate) {
-      setErrorMessage('Birthdate should be in the past');
+    const birthdateParts = dateofbirth.split('/');
+    const birthdate = new Date(birthdateParts[2], birthdateParts[1] - 1, birthdateParts[0]);
+  
+    if (!dateofbirth || isNaN(birthdate.getTime()) || birthdate >= currentDate) {
+      setErrorMessage('Please enter a valid birthdate in the past');
       return;
     }
-
+  
     try {
       setLoading(true);
-      let savedImage = image; // Set savedImage to image by default
-
-      // Check if image is different from user.avatar
+      let savedImage = image;
+  
       if (image !== user.avatar) {
         savedImage = await uploadImage(image);
       }
-
+  
       const data = {
         _id,
         username,
@@ -165,28 +165,39 @@ const EditProfile = ({ navigation }) => {
         dateofbirth,
         gender,
       };
-
-      console.log('State:', state);
-
+  
+      console.log('Sending data to API:', JSON.stringify(data, null, 2)); // Pretty-print the data
+  
       const response = await api.put('fitnet/updateUserInfo', data);
-
+  
       setLoading(false);
-
+  
       if (response.status === 200) {
-        console.log('Account Updated successfully\n');
-        let UD = JSON.stringify(response.data);
+        console.log('Account Updated successfully\n', response.data);
         setState({ ...state, user: response.data.user });
         navigation.navigate('profile-tab');
       } else {
-        console.error('Unexpected status:', response.status);
-        setErrorMessage('Invalid Email or Password');
+        console.error('Unexpected status:', response.status, response.data);
+        setErrorMessage('An error occurred while updating profile.');
       }
     } catch (error) {
-      console.error('Error occurred during sign up:', error);
+      console.error('Error occurred during profile update:', error);
+  
+      if (error.response) {
+        console.error('Server responded with error:', error.response.data);
+        setErrorMessage(error.response.data.message || 'Server error occurred');
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        setErrorMessage('No response from server');
+      } else {
+        console.error('Error in setting up request:', error.message);
+        setErrorMessage('Error occurred during request setup');
+      }
+  
       setLoading(false);
-      setErrorMessage('Registration Failed');
     }
   };
+  
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>

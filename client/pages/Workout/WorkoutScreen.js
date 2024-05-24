@@ -11,8 +11,12 @@ const WorkoutScreen = ({navigation}) => {
 
   const handleStartWorkout = (workoutId) => {
     console.log('Start workout:', workoutId);
-    navigation.navigate('StartWorkout');
+
   };
+
+  const handleStartWorkoutPlan=() =>{
+    navigation.navigate('StartWorkout');
+  }
 
 
   return (
@@ -20,7 +24,7 @@ const WorkoutScreen = ({navigation}) => {
     <ScrollView style={styles.container}>
       {/* Start Workout Plan */}
       <Text style={styles.sectionTitle}>Quick Start</Text>
-      <TouchableOpacity onPress={() => console.log('Start Workout Plan')} style={[styles.button, { backgroundColor: '#2F2F2F', marginBottom: 20 }]}>
+      <TouchableOpacity onPress={handleStartWorkoutPlan} style={[styles.button, { backgroundColor: '#2F2F2F', marginBottom: 20 }]}>
         <View style={styles.buttonContent}>
           <AntDesign name="plus" size={24} color="#FF4C0A" />
           <Text style={styles.buttonText}>Start Workout Plan</Text>

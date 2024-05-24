@@ -110,21 +110,48 @@ const loginUser = async (req, res) => {
 
 const updateUserInfo = async (req, res) => {
   try {
-    const { _id, username, height, weight, dateofbirth, gender, avatar } =
-      req.body;
+    const { _id, username, height, weight, dateofbirth, gender, avatar } = req.body;
+
+    console.log('Incoming request data:', JSON.stringify(req.body, null, 2)); // Pretty-print the request data
+
+    if (!_id || !username || !height || !weight || !dateofbirth || !gender || !avatar) {
+      return res.status(400).send({
+        success: false,
+        message: 'Missing required fields',
+      });
+    }
+
+    // Convert the dateofbirth string to a Date object
+    const birthdateParts = dateofbirth.split('/');
+    if (birthdateParts.length !== 3) {
+      return res.status(400).send({
+        success: false,
+        message: 'Invalid birthdate format. Expected format: DD/MM/YYYY',
+      });
+    }
+
+    const [day, month, year] = birthdateParts;
+    const birthdate = new Date(year, month - 1, day);
+
+    if (isNaN(birthdate.getTime())) {
+      return res.status(400).send({
+        success: false,
+        message: 'Invalid birthdate',
+      });
+    }
 
     const updatedUser = await UserModel.findOneAndUpdate(
       { _id },
-      {
-        username: username,
-        height: height,
-        weight: weight,
-        dateofbirth: dateofbirth,
-        gender: gender,
-        avatar: avatar,
-      },
+      { username, height, weight, dateofbirth: birthdate, gender, avatar },
       { new: true }
     );
+
+    if (!updatedUser) {
+      return res.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+    }
 
     res.status(200).send({
       success: true,
@@ -132,14 +159,15 @@ const updateUserInfo = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
-    console.log(error);
+    console.error('Error in updateUserInfo:', error);
     res.status(500).send({
       success: false,
       message: 'Error in Account Update API',
-      error,
+      error: error.message,
     });
   }
 };
+
 
 const getUserInfo = async (req, res) => {
   try {

@@ -32,7 +32,7 @@ const tabOptions = {
 };
 
 export default function App() {
-  const [loggedin, setLoggedin] = useState(false);
+  const [loggedin, setLoggedin] = useState(true);
 
   if (loggedin) {
     return (
