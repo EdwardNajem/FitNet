@@ -21,5 +21,3 @@ const HomeNav = ({ setLoggedin })=> {
 }
 
 export default HomeNav
-
-const styles = StyleSheet.create({})

@@ -28,7 +28,7 @@ const EditProfile = ({ navigation }) => {
   const user = state?.user || {};
 
   useEffect(() => {
-    console.log(user);
+    console.log(userDateOfBirth);
   }, []);
 
   const formatDate = (dateString) => {
@@ -46,11 +46,16 @@ const EditProfile = ({ navigation }) => {
   };
 
   const userDateOfBirth = user.dateofbirth;
-  const formattedDateOfBirth = formatDate(userDateOfBirth);
+  let formattedDateOfBirth;
+  if (userDateOfBirth) {
+    formattedDateOfBirth = formatDate(userDateOfBirth);
+  } else {
+    formattedDateOfBirth = '';
+  }
   const [image, setImage] = useState(user.avatar || '');
   const [username, setUsername] = useState(user.username || '');
-  const [height, setHeight] = useState((user.height?.toString()) || '');
-  const [weight, setWeight] = useState((user.weight?.toString()) || '');
+  const [height, setHeight] = useState(user.height?.toString() || '');
+  const [weight, setWeight] = useState(user.weight?.toString() || '');
   const [dateofbirth, setdateofbirth] = useState(formattedDateOfBirth || '');
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -111,6 +116,10 @@ const EditProfile = ({ navigation }) => {
   };
 
   const uploadImage = async (imageUri) => {
+    if (!imageUri) {
+      return null;
+    }
+
     const resp = await fetch(imageUri);
     const blob = await resp.blob();
     const storageRef = ref(storage, 'FitNet/Profile/' + Date.now() + '.jpg');
@@ -122,56 +131,69 @@ const EditProfile = ({ navigation }) => {
   const saveChangesClick = async () => {
     setErrorMessage('');
     const { _id } = state.user;
-  
+
     // Validation checks
     if (!username) {
       setErrorMessage('Please fill in username field');
       return;
     }
-  
+
     if (parseInt(height) <= 0) {
       setErrorMessage('Please enter a valid height');
       return;
     }
-  
+
     if (parseInt(weight) <= 0) {
       setErrorMessage('Please enter a valid weight');
       return;
     }
-  
+
+    let birthdate = null;
+    if (dateofbirth && dateofbirth !== 'NaN/NaN/NaN') {
+      const birthdateParts = dateofbirth.split('/');
+      birthdate = new Date(
+        birthdateParts[2],
+        birthdateParts[1] - 1,
+        birthdateParts[0]
+      );
+
+      if (isNaN(birthdate.getTime())) {
+        setErrorMessage('Please enter a valid birthdate');
+        return;
+      }
+    }
+
     const currentDate = new Date();
-    const birthdateParts = dateofbirth.split('/');
-    const birthdate = new Date(birthdateParts[2], birthdateParts[1] - 1, birthdateParts[0]);
-  
-    if (!dateofbirth || isNaN(birthdate.getTime()) || birthdate >= currentDate) {
+
+    if (birthdate && birthdate >= currentDate) {
       setErrorMessage('Please enter a valid birthdate in the past');
       return;
     }
-  
+
     try {
       setLoading(true);
       let savedImage = image;
-  
+
       if (image !== user.avatar) {
         savedImage = await uploadImage(image);
       }
-  
+
       const data = {
         _id,
         username,
         avatar: savedImage,
         height: parseInt(height),
         weight: parseInt(weight),
-        dateofbirth,
+        dateofbirth: dateofbirth !== 'NaN/NaN/NaN' ? dateofbirth : null,
         gender,
       };
-  
+
       console.log('Sending data to API:', JSON.stringify(data, null, 2)); // Pretty-print the data
-  
+
       const response = await api.put('fitnet/updateUserInfo', data);
-  
+
       setLoading(false);
-  
+
       if (response.status === 200) {
         console.log('Account Updated successfully\n', response.data);
         setState({ ...state, user: response.data.user });
@@ -182,7 +204,7 @@ const EditProfile = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error occurred during profile update:', error);
-  
+
       if (error.response) {
         console.error('Server responded with error:', error.response.data);
         setErrorMessage(error.response.data.message || 'Server error occurred');
@@ -193,11 +215,10 @@ const EditProfile = ({ navigation }) => {
         console.error('Error in setting up request:', error.message);
         setErrorMessage('Error occurred during request setup');
       }
-  
+
       setLoading(false);
     }
   };
-  
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>

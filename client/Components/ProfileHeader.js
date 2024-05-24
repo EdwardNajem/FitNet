@@ -1,6 +1,14 @@
-// Import Animated and Easing from react-native
 import React, { useContext, useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Animated, Easing } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  Easing,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { AuthContext } from '../Context/authContext';
 import GreyCircle from './GreyCircle';
@@ -38,9 +46,7 @@ const ProfileHeader = ({ user, navigation }) => {
   });
 
   // Function to render shimmer effect
-  const renderShimmer = () => (
-    <View style={styles.shimmer}/>
-  );
+  const renderShimmer = () => <View style={styles.shimmer} />;
 
   return (
     <View style={styles.container}>
@@ -50,55 +56,65 @@ const ProfileHeader = ({ user, navigation }) => {
             <Animated.View style={[styles.placeholderAvatar, { opacity }]}>
               {renderShimmer()}
             </Animated.View>
+          ) : user.avatar ? (
+            <Image source={{ uri: user.avatar }} style={styles.avatar} />
           ) : (
-            user.avatar ? (
-              <Image source={{ uri: user.avatar }} style={styles.avatar} />
-            ) : (
-              <GreyCircle size={100} />
-            )
+            <GreyCircle size={100} />
           )}
 
           <View style={styles.infoContainer}>
             {loading ? (
-              <View style={styles.placeholderInfoItem}>
-                {renderShimmer()}
-              </View>
-            ) : (
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Workouts</Text>
                 <Text style={styles.infoText}>{0}</Text>
               </View>
+            ) : (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Workouts</Text>
+                <Text style={styles.infoText}>{1}</Text>
+              </View>
             )}
             {loading ? (
-              <View style={styles.placeholderInfoItem}>
-                {renderShimmer()}
-              </View>
-            ) : (
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Followers</Text>
                 <Text style={styles.infoText}>{0}</Text>
               </View>
+            ) : (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Followers</Text>
+                <Text style={styles.infoText}>{2}</Text>
+              </View>
             )}
             {loading ? (
-              <View style={styles.placeholderInfoItem}>
-                {renderShimmer()}
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Following</Text>
+                <Text style={styles.infoText}>{0}</Text>
               </View>
             ) : (
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Following</Text>
-                <Text style={styles.infoText}>{0}</Text>
+                <Text style={styles.infoText}>{3}</Text>
               </View>
             )}
           </View>
         </View>
         {loading ? (
-          <View style={styles.placeholderText}>
-            {renderShimmer()}
-          </View>
+          <>
+            <Animated.View style={[styles.placeholderText, { opacity }]}>
+              {renderShimmer()}
+            </Animated.View>
+            <TouchableOpacity style={styles.button} disabled>
+              <FontAwesome5 name="pen" color="white" size={13} />
+              <Text style={styles.buttonText}>Edit Profile</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           <React.Fragment>
             <Text style={styles.username}>{user.username}</Text>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('EditProfile')}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('EditProfile')}
+            >
               <FontAwesome5 name="pen" color="white" size={13} />
               <Text style={styles.buttonText}>Edit Profile</Text>
             </TouchableOpacity>
@@ -141,7 +157,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f0f0f0', // Background color for placeholder
+    backgroundColor: '#f0f0f0',
   },
   shimmer: {
     backgroundColor: '#e1e1e1', // Shimmer color
@@ -204,16 +220,10 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   placeholderText: {
-    width: '70%',
-    height: 24,
+    width: '50%',
+    height: 26,
     backgroundColor: '#ccc', // Placeholder color
-    // Implement placeholder animation styles here
-  },
-  placeholderInfoItem: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#ccc', // Placeholder color
-    // Implement placeholder animation styles here
+    borderRadius: 5,
+    marginBottom: 10,
   },
 });

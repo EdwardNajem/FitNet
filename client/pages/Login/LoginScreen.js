@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -18,6 +18,7 @@ import api from '../../Components/Config';
 import { AuthContext } from '../../Context/authContext';
 
 const LoginScreen = () => {
+  const [state, setState] = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -39,6 +40,7 @@ const LoginScreen = () => {
       const response = await api.post('fitnet/loginuser', data);
       if (response.status == 200) {
         console.log('Account logged in successfully:');
+        setState(response.data);
         await AsyncStorage.setItem('@auth', JSON.stringify(response.data));
         navigation.navigate('OTP', { email });
       } else {
@@ -82,13 +84,12 @@ const LoginScreen = () => {
         >
           <View style={styles.blurOverlay} />
 
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('../../assets/images/logo.png')}
-            style={styles.logo}
-          />
-        </View>
-     
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../../assets/images/logo.png')}
+              style={styles.logo}
+            />
+          </View>
 
           <View style={styles.formContainer}>
             {emailError ? (

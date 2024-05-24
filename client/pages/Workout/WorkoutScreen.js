@@ -1,61 +1,79 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet ,StatusBar} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  StatusBar,
+} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
-const WorkoutScreen = ({navigation}) => {
+const WorkoutScreen = ({ navigation }) => {
   const workouts = [
     { id: 1, name: 'Chest - Biceps' },
     { id: 2, name: 'Legs - Abs' },
     { id: 3, name: 'Shoulders - Triceps' },
-    ];
+  ];
 
   const handleStartWorkout = (workoutId) => {
     console.log('Start workout:', workoutId);
-
   };
 
-  const handleStartWorkoutPlan=() =>{
+  const handleStartWorkoutPlan = () => {
     navigation.navigate('StartWorkout');
-  }
-
+  };
 
   return (
-    
     <ScrollView style={styles.container}>
-      {/* Start Workout Plan */}
-      <Text style={styles.sectionTitle}>Quick Start</Text>
-      <TouchableOpacity onPress={handleStartWorkoutPlan} style={[styles.button, { backgroundColor: '#2F2F2F', marginBottom: 20 }]}>
-        <View style={styles.buttonContent}>
-          <AntDesign name="plus" size={24} color="#FF4C0A" />
-          <Text style={styles.buttonText}>Start Workout Plan</Text>
-        </View>
-      </TouchableOpacity>
+      <StatusBar backgroundColor="#2f2f2f" />
+      <View style={styles.header}>
+        <Text style={styles.title}>Workout</Text>
+      </View>
 
-      {/* Hire a Trainer */}
-         <Text style={styles.sectionTitle}>Trainer</Text>
-      <TouchableOpacity 
-            onPress={() => navigation.navigate('Trainer')}
-            style={[styles.button, { backgroundColor: '#2F2F2F' }]}>
-        <View style={styles.buttonContent}>
-          <AntDesign name="plus" size={24} color="#FF4C0A" />
-          <Text style={styles.buttonText}>Hire a Trainer</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Workout Plan */}
-   
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-     Workout Plan
-        </Text>
-        {workouts.map((workout) => (
-          <View key={workout.id} style={styles.workoutCard}>
-            <Text style={styles.workoutName}>{workout.name}</Text>
-            <TouchableOpacity onPress={() => handleStartWorkout(workout.id)} style={styles.startButton}>
-              <Text style={styles.startButtonText}>Start Workout</Text>
-            </TouchableOpacity>
+      <View style={styles.content}>
+        {/* Start Workout Plan */}
+        <Text style={styles.sectionTitle}>Quick Start</Text>
+        <TouchableOpacity
+          onPress={handleStartWorkoutPlan}
+          style={[
+            styles.button,
+            { backgroundColor: '#2F2F2F', marginBottom: 20 },
+          ]}
+        >
+          <View style={styles.buttonContent}>
+            <AntDesign name="plus" size={24} color="#FF4C0A" />
+            <Text style={styles.buttonText}>Start Workout Plan</Text>
           </View>
-        ))}
+        </TouchableOpacity>
+
+        {/* Hire a Trainer */}
+        <Text style={styles.sectionTitle}>Trainer</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Trainer')}
+          style={[styles.button, { backgroundColor: '#2F2F2F' }]}
+        >
+          <View style={styles.buttonContent}>
+            <AntDesign name="plus" size={24} color="#FF4C0A" />
+            <Text style={styles.buttonText}>Hire a Trainer</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Workout Plan */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Workout Plan</Text>
+          {workouts.map((workout) => (
+            <View key={workout.id} style={styles.workoutCard}>
+              <Text style={styles.workoutName}>{workout.name}</Text>
+              <TouchableOpacity
+                onPress={() => handleStartWorkout(workout.id)}
+                style={styles.startButton}
+              >
+                <Text style={styles.startButtonText}>Start Workout</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
@@ -65,7 +83,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
-    padding: 20,
+  },
+  content: {
+    paddingHorizontal: 20,
   },
   section: {
     marginBottom: 20,
@@ -83,20 +103,19 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    bottom:6,
+    bottom: 6,
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 10, 
-  
+    paddingLeft: 10,
   },
   buttonText: {
     color: '#FFFFFF',
     fontWeight: '500',
     fontSize: 20,
     lineHeight: 30,
-    marginLeft: 10, 
+    marginLeft: 10,
   },
   workoutCard: {
     backgroundColor: '#2F2F2F',
@@ -123,7 +142,7 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     textAlign: 'center',
   },
-  title:{
+  title: {
     color: '#FFFFFF',
     fontSize: 24,
     fontWeight: 'bold',
@@ -132,11 +151,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 15,
+    justifyContent: 'center',
     width: '100%',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    padding: 10,
     backgroundColor: '#2F2F2F',
   },
 });

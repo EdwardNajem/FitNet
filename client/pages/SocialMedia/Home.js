@@ -1,18 +1,47 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { FontAwesome, AntDesign, Entypo } from '@expo/vector-icons';
+import { AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import React, { useState } from 'react';
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-const Home = () => {
-  
-
+const HomeScreen = () => {
   return (
-    <ScrollView>
-   <Text>Feed</Text>
-      
+    <ScrollView style={styles.container}>
+      <StatusBar backgroundColor="#2F2F2F" />
+      <View style={styles.header}>
+        <Text style={styles.title}>Home</Text>
+      </View>
     </ScrollView>
   );
 };
 
+export default HomeScreen;
 
-export default Home;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1C1C1E',
+  },
+  title: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    padding: 10,
+    backgroundColor: '#2F2F2F',
+  },
+});
+
