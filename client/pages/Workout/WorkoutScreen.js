@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,14 @@ import {
   ScrollView,
   StyleSheet,
   StatusBar,
+  Modal,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
 const WorkoutScreen = ({ navigation }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+
   const workouts = [
     { id: 1, name: 'Chest - Biceps' },
     { id: 2, name: 'Legs - Abs' },
@@ -20,8 +24,19 @@ const WorkoutScreen = ({ navigation }) => {
     console.log('Start workout:', workoutId);
   };
 
-  const handleStartWorkoutPlan = () => {
-    navigation.navigate('StartWorkout');
+  const handleWorkoutOptions = (workout) => {
+    setSelectedWorkout(workout);
+    setModalVisible(true);
+  };
+
+  const handleEditWorkout = () => {
+    console.log('Edit workout:', selectedWorkout);
+    setModalVisible(false);
+  };
+
+  const handleDeleteWorkout = () => {
+    console.log('Delete workout:', selectedWorkout);
+    setModalVisible(false);
   };
 
   return (
@@ -32,14 +47,33 @@ const WorkoutScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.content}>
-        {/* Start Workout Plan */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity onPress={handleEditWorkout} style={styles.modalButton}>
+                <Text style={styles.modalButtonText}>Edit Workout</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDeleteWorkout} style={styles.modalButton}>
+                <Text style={styles.modalButtonText}>Delete Workout</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
         <Text style={styles.sectionTitle}>Quick Start</Text>
         <TouchableOpacity
-          onPress={handleStartWorkoutPlan}
-          style={[
-            styles.button,
-            { backgroundColor: '#2F2F2F', marginBottom: 20 },
-          ]}
+          onPress={() => navigation.navigate('StartWorkout')}
+          style={[styles.button, { backgroundColor: '#2F2F2F', marginBottom: 20 }]}
         >
           <View style={styles.buttonContent}>
             <AntDesign name="plus" size={24} color="#FF4C0A" />
@@ -47,7 +81,6 @@ const WorkoutScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        {/* Hire a Trainer */}
         <Text style={styles.sectionTitle}>Trainer</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('Trainer')}
@@ -59,12 +92,16 @@ const WorkoutScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        {/* Workout Plan */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Workout Plan</Text>
           {workouts.map((workout) => (
             <View key={workout.id} style={styles.workoutCard}>
-              <Text style={styles.workoutName}>{workout.name}</Text>
+              <View style={styles.workoutHeader}>
+                <Text style={styles.workoutName}>{workout.name}</Text>
+                <TouchableOpacity onPress={() => handleWorkoutOptions(workout)}>
+                <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 onPress={() => handleStartWorkout(workout.id)}
                 style={styles.startButton}
@@ -123,12 +160,17 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  workoutHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 25,
+  },
   workoutName: {
     color: '#FFFFFF',
     fontWeight: '500',
     fontSize: 20,
     lineHeight: 30,
-    marginBottom: 10,
   },
   startButton: {
     backgroundColor: '#FF4C0A',
@@ -155,6 +197,28 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 10,
     backgroundColor: '#2F2F2F',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+  },
+  modalButton: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCCCCC',
+  },
+  modalButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 
