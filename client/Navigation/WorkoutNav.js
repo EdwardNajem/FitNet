@@ -17,9 +17,9 @@ const WorkoutNav = ({ setLoggedin }) => {
     </TouchableOpacity>
   );
 
-  const PostButton = ({ onPress }) => (
+  const SkipButton = ({ onPress }) => (
     <TouchableOpacity onPress={onPress} style={styles.Button}>
-      <Text style={styles.ButtonText}>Post</Text>
+      <Text style={styles.ButtonText}>Skip</Text>
     </TouchableOpacity>
   );
 
@@ -82,7 +82,7 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
           headerRight: () => (
-            <PostButton onPress={() => navigation.goBack()} />
+            <SkipButton onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -106,7 +106,7 @@ export default WorkoutNav;
 
 const styles = StyleSheet.create({
   Button: {
-    marginLeft: 10, // Changed from marginRight to marginLeft to adjust spacing
+    marginLeft: 10,
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderRadius: 4,
@@ -119,6 +119,6 @@ const styles = StyleSheet.create({
   headerRightContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 10, // Added padding to the right for better alignment
+    paddingRight: 10, 
   },
 });

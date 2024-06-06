@@ -179,14 +179,14 @@ const styles = StyleSheet.create({
     
   },
   submitButton: {
-    backgroundColor: '#2F2F2F',
+    backgroundColor: '#FF4C0A',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
   },
   submitButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
 
