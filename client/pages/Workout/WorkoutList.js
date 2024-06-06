@@ -16,17 +16,18 @@ const workouts = [
     { id: 1, name: 'Push-Up', muscle: 'Chest', image: require('../../assets/images/logo.png') },
     { id: 2, name: 'Squat', muscle: 'Legs', image: require('../../assets/images/logo.png') },
     { id: 3, name: 'Bicep Curl', muscle: 'Biceps', image: require('../../assets/images/logo.png') },
-  ];
+];
 
 const WorkoutList = () => {
   const [search, setSearch] = useState('');
   const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+  const [selectedWorkouts, setSelectedWorkouts] = useState([]);
 
   const handleSearch = (text) => {
     setSearch(text);
     if (text) {
       const filtered = workouts.filter((item) =>
-        item.name.toLowerCase().includes(text.toLowerCase())||
+        item.name.toLowerCase().includes(text.toLowerCase()) ||
         item.muscle.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredWorkouts(filtered);
@@ -35,19 +36,29 @@ const WorkoutList = () => {
     }
   };
 
+  const handlePress = (id) => {
+    if (selectedWorkouts.includes(id)) {
+      setSelectedWorkouts(selectedWorkouts.filter((workoutId) => workoutId !== id));
+    } else {
+      setSelectedWorkouts([...selectedWorkouts, id]);
+    }
+  };
+
   const renderWorkout = ({ item }) => (
-    <View style={styles.workoutItem}>
-      <Image source={item.image} style={styles.image} />
-      <View style={styles.textContainer}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.muscle}>{item.muscle}</Text>
+    <TouchableOpacity onPress={() => handlePress(item.id)}>
+      <View style={[styles.workoutItem, selectedWorkouts.includes(item.id) && styles.selectedWorkoutItem]}>
+        {selectedWorkouts.includes(item.id) && <View style={styles.selectedIndicator} />}
+        <Image source={item.image} style={styles.image} />
+        <View style={styles.textContainer}>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.muscle}>{item.muscle}</Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
-  
 
   return (
-    <View style={styles.container}>    
+    <View style={styles.container}>
       <TextInput
         style={styles.searchBar}
         placeholder="Search workouts"
@@ -105,6 +116,20 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#2F2F2F',
     borderRadius: 10,
+  },
+  selectedWorkoutItem: {
+    backgroundColor: '#2F2F2F',
+    borderColor: '#FF4C0A',
+    borderWidth: 1,
+    paddingLeft: 15,
+    marginLeft: -10,
+  },
+  selectedIndicator: {
+    width: 5,
+    height: '100%',
+    backgroundColor: '#FF4C0A',
+    position: 'absolute',
+    left: 0,
   },
   image: {
     width: 50,

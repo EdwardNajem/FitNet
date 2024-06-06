@@ -6,6 +6,8 @@ import TrainerScreen from '../pages/Workout/Trainer';
 import StartWorkoutScreen from '../pages/Workout/StartWorkout';
 import FinishWorkoutScreen from '../pages/Workout/FinishWorkout';
 import WorkoutListScreen from '../pages/Workout/WorkoutList';
+import ClockModal from '../Components/ClockModal';
+
 const WorkoutNav = ({ setLoggedin }) => {
   const Stack = createStackNavigator();
 
@@ -21,6 +23,12 @@ const WorkoutNav = ({ setLoggedin }) => {
     </TouchableOpacity>
   );
 
+  const HeaderRightButtons = ({ navigation }) => (
+    <View style={styles.headerRightContainer}>
+      <ClockModal />
+      <FinishButton onPress={() => navigation.navigate("FinishWorkout")} />
+    </View>
+  );
 
   return (
     <Stack.Navigator
@@ -59,11 +67,10 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
           headerRight: () => (
-            <FinishButton onPress={() => navigation.navigate("FinishWorkout")} />
+            <HeaderRightButtons navigation={navigation} />
           ),
         })}
       />
-
       <Stack.Screen
         name="FinishWorkout"
         component={FinishWorkoutScreen}
@@ -79,13 +86,11 @@ const WorkoutNav = ({ setLoggedin }) => {
           ),
         })}
       />
-
-
       <Stack.Screen
         name="WorkoutList"
         component={WorkoutListScreen}
         options={{
-          headerTitle: 'WorkoutList',
+          headerTitle: 'Workout List',
           headerStyle: {
             backgroundColor: '#2F2F2F',
           },
@@ -93,8 +98,6 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerShadowVisible: false,
         }}
       />
-
-
     </Stack.Navigator>
   );
 };
@@ -103,7 +106,7 @@ export default WorkoutNav;
 
 const styles = StyleSheet.create({
   Button: {
-    marginRight: 10,
+    marginLeft: 10, // Changed from marginRight to marginLeft to adjust spacing
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderRadius: 4,
@@ -112,5 +115,10 @@ const styles = StyleSheet.create({
     color: '#FF4C0A',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  headerRightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 10, // Added padding to the right for better alignment
   },
 });
