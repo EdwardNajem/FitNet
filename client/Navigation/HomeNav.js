@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View ,TouchableOpacity} from 'react-native'
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../pages/SocialMedia/Home';
-
+import { Ionicons } from '@expo/vector-icons';
 const HomeNav = ({ setLoggedin })=> {
   const Stack = createStackNavigator();
 
@@ -12,12 +12,22 @@ const HomeNav = ({ setLoggedin })=> {
         presentation: 'transparentModal',
       }}>
      <Stack.Screen
-        options={{ headerShown: false, presentation: 'transparentModal' }}
         name="Home-Screen"
         component={HomeScreen}
+        options={{ headerShown: false, presentation: 'transparentModal' }}
+      
       />
     </Stack.Navigator>
   )
 }
 
 export default HomeNav
+
+const styles=StyleSheet.create({
+  Button: {
+    marginLeft: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+})
