@@ -1,57 +1,72 @@
-import { AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  StatusBar,
+  FlatList,
+  Image,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Image,
-  FlatList
 } from 'react-native';
-
-const workouts = [
-    { id: 1, name: 'Push-Up', muscle: 'Chest', image: require('../../assets/images/logo.png') },
-    { id: 2, name: 'Squat', muscle: 'Legs', image: require('../../assets/images/logo.png') },
-    { id: 3, name: 'Bicep Curl', muscle: 'Biceps', image: require('../../assets/images/logo.png') },
-];
+import api from '../../Components/Config';
 
 const WorkoutList = () => {
   const [search, setSearch] = useState('');
-  const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+  const [workout, setWorkout] = useState([]);
+  const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
+
+  useEffect(() => {
+    const fetchExercises = async () => {
+      console.log('Fetching');
+      const response = await api.get('fitnet/getAllExercises');
+      console.log(response.data); // Check the response structure
+      setWorkout(response.data.exercises);
+      setFilteredWorkouts(response.data.exercises);
+    };
+
+    fetchExercises();
+  }, []);
 
   const handleSearch = (text) => {
     setSearch(text);
     if (text) {
-      const filtered = workouts.filter((item) =>
-        item.name.toLowerCase().includes(text.toLowerCase()) ||
-        item.muscle.toLowerCase().includes(text.toLowerCase())
+      const filtered = workout.filter(
+        (item) =>
+          item.name.toLowerCase().includes(text.toLowerCase()) ||
+          item.primary.toLowerCase().includes(text.toLowerCase()) // Assuming 'primary' is correct
       );
       setFilteredWorkouts(filtered);
     } else {
-      setFilteredWorkouts(workouts);
+      setFilteredWorkouts(workout);
     }
   };
 
   const handlePress = (id) => {
     if (selectedWorkouts.includes(id)) {
-      setSelectedWorkouts(selectedWorkouts.filter((workoutId) => workoutId !== id));
+      setSelectedWorkouts(
+        selectedWorkouts.filter((workoutId) => workoutId !== id)
+      );
     } else {
       setSelectedWorkouts([...selectedWorkouts, id]);
     }
   };
 
   const renderWorkout = ({ item }) => (
-    <TouchableOpacity onPress={() => handlePress(item.id)}>
-      <View style={[styles.workoutItem, selectedWorkouts.includes(item.id) && styles.selectedWorkoutItem]}>
-        {selectedWorkouts.includes(item.id) && <View style={styles.selectedIndicator} />}
-        <Image source={item.image} style={styles.image} />
+    <TouchableOpacity onPress={() => handlePress(item._id)}>
+      <View
+        style={[
+          styles.workoutItem,
+          selectedWorkouts.includes(item._id) && styles.selectedWorkoutItem,
+        ]}
+      >
+        {selectedWorkouts.includes(item._id) && (
+          <View style={styles.selectedIndicator} />
+        )}
+        <Image source={{ uri: item.image }} style={styles.image} />
         <View style={styles.textContainer}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.muscle}>{item.muscle}</Text>
+          <Text style={styles.muscle}>{item.primary}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -68,7 +83,7 @@ const WorkoutList = () => {
       />
       <FlatList
         data={filteredWorkouts}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item._id}
         renderItem={renderWorkout}
         contentContainerStyle={styles.listContainer}
       />
@@ -82,20 +97,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    padding: 10,
-    backgroundColor: '#2F2F2F',
   },
   searchBar: {
     height: 40,
@@ -118,7 +119,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   selectedWorkoutItem: {
-    backgroundColor: '#2F2F2F',
     borderColor: '#FF4C0A',
     borderWidth: 1,
     paddingLeft: 15,
