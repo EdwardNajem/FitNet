@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, View, Text, Image, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
 import { FontAwesome, Entypo,Ionicons } from '@expo/vector-icons';
-
+import { useNavigation } from '@react-navigation/native';
 const staticPosts = [
   {
     id: 1,
@@ -36,14 +36,16 @@ const staticPosts = [
 ];
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
+
   return (
     
     <ScrollView style={styles.container}>
      <StatusBar backgroundColor="#2F2F2F" />
       <View style={styles.header}>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.title}>Home</Text>
        
-        <TouchableOpacity>
+        <TouchableOpacity  onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications" size={25} color="#FF4C0A" />
         </TouchableOpacity>
       </View>

@@ -8,7 +8,7 @@ import {
   StatusBar,
   Modal,
 } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign,Entypo } from '@expo/vector-icons';
 
 const WorkoutScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
