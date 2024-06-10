@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const trainers = [
   {
@@ -27,35 +28,13 @@ const trainers = [
     rating: '4.5',
     image: require('../../assets/images/logo.png'),
   },
-  {
-    id: 4,
-    name: 'Jennifer James',
-    description: 'Functional Strength',
-    experience: '8 years experience',
-    rating: '4.6',
-    image: require('../../assets/images/logo.png'),
-  },
-  {
-    id: 5,
-    name: 'Brian Edward',
-    description: 'Strength training',
-    experience: '6 years experience',
-    rating: '4.5',
-    image: require('../../assets/images/logo.png'),
-  },
-  {
-    id: 6,
-    name: 'Jennifer James',
-    description: 'Functional Strength',
-    experience: '8 years experience',
-    rating: '4.6',
-    image: require('../../assets/images/logo.png'),
-  },
 ];
 
 const Trainer = () => {
+  const navigation = useNavigation();
+
   const handlePress = (trainer) => {
-    console.log('Trainer :', trainer.name);
+    navigation.navigate('TrainerInformation', { trainer });
   };
 
   return (

@@ -205,20 +205,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#2F2F2F',
     borderRadius: 10,
     padding: 20,
     width: '80%',
   },
   modalButton: {
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#CCCCCC',
+    marginVertical: 5, 
+    borderRadius: 10,
+    backgroundColor: '#FF4C0A',
   },
   modalButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+    color:'white',
   },
 });
 

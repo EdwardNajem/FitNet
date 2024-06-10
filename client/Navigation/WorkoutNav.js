@@ -7,7 +7,7 @@ import StartWorkoutScreen from '../pages/Workout/StartWorkout';
 import FinishWorkoutScreen from '../pages/Workout/FinishWorkout';
 import WorkoutListScreen from '../pages/Workout/WorkoutList';
 import ClockModal from '../Components/ClockModal';
-
+import TrainerInformationScreen from '../pages/Workout/TrainerInformation';
 const WorkoutNav = ({ setLoggedin }) => {
   const Stack = createStackNavigator();
 
@@ -91,6 +91,19 @@ const WorkoutNav = ({ setLoggedin }) => {
         component={WorkoutListScreen}
         options={{
           headerTitle: 'Workout List',
+          headerStyle: {
+            backgroundColor: '#2F2F2F',
+          },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="TrainerInformation"
+        component={TrainerInformationScreen}
+        options={{
+          headerTitle: 'Trainer Information',
           headerStyle: {
             backgroundColor: '#2F2F2F',
           },
