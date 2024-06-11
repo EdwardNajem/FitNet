@@ -1,42 +1,58 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
-const StartWorkout = ({navigation}) => {
+const StartWorkout = ({ navigation }) => {
   const [sets, setSets] = useState([{ id: 1, kg: 0, reps: 0 }]);
+  const [completedSets, setCompletedSets] = useState([]);
 
   const addSet = () => {
     setSets([...sets, { id: sets.length + 1, kg: 0, reps: 0 }]);
   };
 
   const addExercise = () => {
-  navigation.navigate('WorkoutList')
+    navigation.navigate('WorkoutList');
   };
 
-  const renderSet = ({ item, index }) => (
-    <View style={styles.setRow}>
-      <Text style={styles.setText}>{item.id}</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        value={item.kg.toString()}
-        onChangeText={(text) => {
-          const newSets = [...sets];
-          newSets[index].kg = text ? parseInt(text) : 0;
-          setSets(newSets);
-        }}
-      />
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        value={item.reps.toString()}
-        onChangeText={(text) => {
-          const newSets = [...sets];
-          newSets[index].reps = text ? parseInt(text) : 0;
-          setSets(newSets);
-        }}
-      />
-    </View>
-  );
+  const toggleSetCompletion = (id) => {
+    if (completedSets.includes(id)) {
+      setCompletedSets(completedSets.filter((setId) => setId !== id));
+    } else {
+      setCompletedSets([...completedSets, id]);
+    }
+  };
+
+  const renderSet = ({ item, index }) => {
+    const isCompleted = completedSets.includes(item.id);
+    return (
+      <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
+        <Text style={styles.setText}>{item.id}</Text>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          value={item.kg.toString()}
+          onChangeText={(text) => {
+            const newSets = [...sets];
+            newSets[index].kg = text ? parseInt(text) : 0;
+            setSets(newSets);
+          }}
+        />
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          value={item.reps.toString()}
+          onChangeText={(text) => {
+            const newSets = [...sets];
+            newSets[index].reps = text ? parseInt(text) : 0;
+            setSets(newSets);
+          }}
+        />
+        <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(item.id)}>
+          <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -49,6 +65,7 @@ const StartWorkout = ({navigation}) => {
           <Text style={styles.columnHeader}>Set</Text>
           <Text style={styles.columnHeader}>KG</Text>
           <Text style={styles.columnHeader}>Reps</Text>
+          <Text style={styles.columnHeader}><FontAwesome name="check" size={24} color= 'white' /></Text>
         </View>
         <FlatList
           data={sets}
@@ -60,7 +77,6 @@ const StartWorkout = ({navigation}) => {
         <Text style={styles.addButtonText}>Add Set</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.addExerciseButton} onPress={addExercise}>
-      
         <Text style={styles.addButtonText}>Add Exercise</Text>
       </TouchableOpacity>
     </View>
@@ -99,7 +115,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   columnHeader: {
-    width: 60,
+    width: '25%',
     fontSize: 16,
     fontWeight: 'bold',
     color: 'white',
@@ -110,18 +126,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  completedSetRow: {
+    backgroundColor: '#006400', // Dark green background for completed sets
+  },
   setText: {
-    width: 60,
+    width: '25%',
     fontSize: 16,
     color: 'white',
     textAlign: 'center',
   },
   input: {
-    width: 60,
+    width: '25%',
     height: 40,
     color: 'white',
     textAlign: 'center',
-    marginLeft: 'auto',
+  },
+  tickIcon: {
+    width: '25%',
+    alignItems: 'center',
   },
   addButton: {
     marginTop: 5,
@@ -130,9 +152,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
-    bottom:25,
-    top:15,
-
+    bottom: 25,
+    top: 15,
   },
   addButtonText: {
     color: '#fff',
@@ -143,7 +164,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
-    top:25,
+    top: 25,
   },
 });
 

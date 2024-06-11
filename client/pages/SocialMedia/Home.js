@@ -109,8 +109,12 @@ const HomeScreen = () => {
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
         <StatusBar backgroundColor="#2F2F2F" />
+
         <View style={styles.header}>
           <Text style={styles.title}>Home</Text>
+          <TouchableOpacity>
+            <Ionicons name="search" size={25} color="#FF4C0A" />
+          </TouchableOpacity>          
           <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications" size={25} color="#FF4C0A" />
           </TouchableOpacity>
