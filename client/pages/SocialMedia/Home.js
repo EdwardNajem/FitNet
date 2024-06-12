@@ -43,6 +43,8 @@ const HomeScreen = () => {
   const [currentPostId, setCurrentPostId] = useState(null);
   const [comment, setComment] = useState('');
   const [posts, setPosts] = useState(staticPosts);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const slideAnim = useState(new Animated.Value(500))[0];
 
   const handleCommentPress = (postId) => {
@@ -87,6 +89,11 @@ const HomeScreen = () => {
     }));
   };
 
+  const handleSearchPress = () => {
+    setIsSearchVisible(!isSearchVisible);
+    setSearchQuery('');
+  };
+
   const renderCommentItem = ({ item }) => (
     <Swipeable
       renderRightActions={() => (
@@ -111,10 +118,20 @@ const HomeScreen = () => {
         <StatusBar backgroundColor="#2F2F2F" />
 
         <View style={styles.header}>
-          <Text style={styles.title}>Home</Text>
-          <TouchableOpacity>
-            <Ionicons name="search" size={25} color="#FF4C0A" />
-          </TouchableOpacity>          
+          {isSearchVisible ? (
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search..."
+              placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          ) : (
+            <Text style={styles.title}>Home</Text>
+          )}
+          <TouchableOpacity onPress={handleSearchPress}>
+            <Ionicons name={isSearchVisible ? "close" : "search"} size={25} color="#FF4C0A" />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications" size={25} color="#FF4C0A" />
           </TouchableOpacity>
@@ -201,6 +218,15 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    borderColor: '#666',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingLeft: 10,
+    color: '#FFF',
   },
   postCard: {
     backgroundColor: '#2F2F2F',

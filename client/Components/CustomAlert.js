@@ -33,6 +33,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',
+    width: '80%',
+
   },
   modalText: {
     marginBottom: 20,

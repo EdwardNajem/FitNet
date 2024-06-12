@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const reviews = [
   {
@@ -21,6 +22,11 @@ const reviews = [
 
 const TrainerInformation = ({ route }) => {
   const { trainer } = route.params;
+  const navigation = useNavigation();
+
+  const handleBookPress = () => {
+    navigation.navigate('BookTrainer', { trainer });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -66,14 +72,13 @@ const TrainerInformation = ({ route }) => {
             </View>
           ))}
         </ScrollView>
-        <TouchableOpacity style={styles.bookButton}>
+        <TouchableOpacity style={styles.bookButton} onPress={handleBookPress}>
           <Text style={styles.bookButtonText}>Book Appointment</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

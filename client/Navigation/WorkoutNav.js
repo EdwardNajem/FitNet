@@ -8,6 +8,8 @@ import FinishWorkoutScreen from '../pages/Workout/FinishWorkout';
 import WorkoutListScreen from '../pages/Workout/WorkoutList';
 import ClockModal from '../Components/ClockModal';
 import TrainerInformationScreen from '../pages/Workout/TrainerInformation';
+import BookTrainerScreen from '../pages/Workout/BookTrainer';
+
 const WorkoutNav = ({ setLoggedin }) => {
   const Stack = createStackNavigator();
 
@@ -111,7 +113,22 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerShadowVisible: false,
         }}
       />
+
+      <Stack.Screen
+        name="BookTrainer"
+        component={BookTrainerScreen}
+        options={{
+          headerTitle: 'Book Trainer',
+          headerStyle: {
+            backgroundColor: '#2F2F2F',
+          },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
     </Stack.Navigator>
+
+    
   );
 };
 
