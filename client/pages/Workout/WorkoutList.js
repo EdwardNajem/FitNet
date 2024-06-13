@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
+  Animated,
   FlatList,
   Image,
   StyleSheet,
@@ -15,6 +16,7 @@ const WorkoutList = () => {
   const [workout, setWorkout] = useState([]);
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
+  const slideAnim = useRef(new Animated.Value(-100)).current;
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -27,6 +29,30 @@ const WorkoutList = () => {
 
     fetchExercises();
   }, []);
+
+  useEffect(() => {
+    if (selectedWorkouts.length > 0) {
+      showAddButton();
+    } else {
+      hideAddButton();
+    }
+  }, [selectedWorkouts]);
+
+  const showAddButton = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const hideAddButton = () => {
+    Animated.timing(slideAnim, {
+      toValue: -100,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const handleSearch = (text) => {
     setSearch(text);
@@ -87,6 +113,13 @@ const WorkoutList = () => {
         renderItem={renderWorkout}
         contentContainerStyle={styles.listContainer}
       />
+      <Animated.View style={[styles.addButtonContainer, { transform: [{ translateY: slideAnim }] }]}>
+        {selectedWorkouts.length > 0 && (
+          <TouchableOpacity style={styles.addButton}>
+            <Text style={styles.addButtonText}>Add {selectedWorkouts.length} Exercise(s)</Text>
+          </TouchableOpacity>
+        )}
+      </Animated.View>
     </View>
   );
 };
@@ -148,5 +181,24 @@ const styles = StyleSheet.create({
   muscle: {
     color: '#999',
     fontSize: 14,
+  },
+  addButtonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButton: {
+    backgroundColor: '#FF4C0A',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    elevation: 3,
+  },
+  addButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

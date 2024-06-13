@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import WhiteLine from '../../Components/WhiteLine';
 
 const FinishWorkout = () => {
   const [rating, setRating] = useState(0);
@@ -34,6 +33,22 @@ const FinishWorkout = () => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={styles.exerciseName}>Exercise</Text>
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statTitle}>Time</Text>
+            <Text style={styles.statValue}>45 mins</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statTitle}>Reps</Text>
+            <Text style={styles.statValue}>15</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statTitle}>Sets</Text>
+            <Text style={styles.statValue}>3</Text>
+          </View>
+        </View>
+
         <Text style={styles.trainerTitle}>Trainer</Text>
         <Text style={styles.trainerFeedback}>How was Trainer ?</Text>
 
@@ -123,13 +138,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
-   
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-  
   },
   trainerImage: {
     width: 60,
@@ -176,7 +189,6 @@ const styles = StyleSheet.create({
     height: 100,
     marginBottom: 20,
     textAlignVertical: 'top',
-    
   },
   submitButton: {
     backgroundColor: '#FF4C0A',
@@ -189,19 +201,23 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-
-  button: {
-    borderRadius: 20,
+  statsContainer: {
+    backgroundColor: '#2F2F2F',
+    borderRadius: 10,
     padding: 10,
-    elevation: 2,
+    marginBottom: 20,
   },
-  buttonClose: {
-    backgroundColor: '#2196F3',
+  statItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
+  statTitle: {
+    fontSize: 16,
+    color: '#AAAAAA',
   },
-
+  statValue: {
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
 });

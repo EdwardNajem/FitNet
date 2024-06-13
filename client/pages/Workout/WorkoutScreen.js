@@ -8,7 +8,7 @@ import {
   StatusBar,
   Modal,
 } from 'react-native';
-import { AntDesign,Entypo } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 
 const WorkoutScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -60,13 +60,13 @@ const WorkoutScreen = ({ navigation }) => {
               <TouchableOpacity onPress={handleEditWorkout} style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>Edit Workout</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleDeleteWorkout} style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Delete Workout</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
+              <TouchableOpacity onPress={handleDeleteWorkout} style={[styles.modalButton, styles.deleteButton]}>
+                <Text style={[styles.modalButtonText, styles.deleteButtonText]}>Delete Workout</Text>
               </TouchableOpacity>
             </View>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </Modal>
 
@@ -99,7 +99,7 @@ const WorkoutScreen = ({ navigation }) => {
               <View style={styles.workoutHeader}>
                 <Text style={styles.workoutName}>{workout.name}</Text>
                 <TouchableOpacity onPress={() => handleWorkoutOptions(workout)}>
-                <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
+                  <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
@@ -220,7 +220,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    color:'white',
+    color: 'white',
+  },
+  cancelButton: {
+    paddingVertical: 10,
+    marginTop: 10,
+    borderRadius: 10,
+    backgroundColor: '#2F2F2F',
+    width: '80%',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'white',
+  },
+  deleteButton: {
+    backgroundColor: '#FF0000',
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
   },
 });
 

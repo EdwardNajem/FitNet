@@ -3,27 +3,42 @@ import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, FlatList } 
 import { FontAwesome } from '@expo/vector-icons';
 
 const StartWorkout = ({ navigation }) => {
-  const [sets, setSets] = useState([{ id: 1, kg: 0, reps: 0 }]);
+  const initialExercises = [
+    { id: 1, name: 'Exercise 1', image: require('../../assets/images/logo.png'), sets: [{ id: 1, kg: 0, reps: 0 }] },
+    { id: 2, name: 'Exercise 2', image: require('../../assets/images/logo.png'), sets: [{ id: 1, kg: 0, reps: 0 }] },
+  ];
+
+  const [exercises, setExercises] = useState(initialExercises);
   const [completedSets, setCompletedSets] = useState([]);
 
-  const addSet = () => {
-    setSets([...sets, { id: sets.length + 1, kg: 0, reps: 0 }]);
+  const addSet = (exerciseId) => {
+    setExercises((prevExercises) =>
+      prevExercises.map((exercise) =>
+        exercise.id === exerciseId
+          ? {
+              ...exercise,
+              sets: [...exercise.sets, { id: exercise.sets.length + 1, kg: 0, reps: 0 }],
+            }
+          : exercise
+      )
+    );
   };
 
   const addExercise = () => {
     navigation.navigate('WorkoutList');
   };
 
-  const toggleSetCompletion = (id) => {
-    if (completedSets.includes(id)) {
-      setCompletedSets(completedSets.filter((setId) => setId !== id));
+  const toggleSetCompletion = (exerciseId, setId) => {
+    const setIdentifier = `${exerciseId}-${setId}`;
+    if (completedSets.includes(setIdentifier)) {
+      setCompletedSets(completedSets.filter((id) => id !== setIdentifier));
     } else {
-      setCompletedSets([...completedSets, id]);
+      setCompletedSets([...completedSets, setIdentifier]);
     }
   };
 
-  const renderSet = ({ item, index }) => {
-    const isCompleted = completedSets.includes(item.id);
+  const renderSet = (exerciseId, { item, index }) => {
+    const isCompleted = completedSets.includes(`${exerciseId}-${item.id}`);
     return (
       <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
         <Text style={styles.setText}>{item.id}</Text>
@@ -32,9 +47,10 @@ const StartWorkout = ({ navigation }) => {
           keyboardType="numeric"
           value={item.kg.toString()}
           onChangeText={(text) => {
-            const newSets = [...sets];
-            newSets[index].kg = text ? parseInt(text) : 0;
-            setSets(newSets);
+            const newExercises = [...exercises];
+            const exercise = newExercises.find((exercise) => exercise.id === exerciseId);
+            exercise.sets[index].kg = text ? parseInt(text) : 0;
+            setExercises(newExercises);
           }}
         />
         <TextInput
@@ -42,12 +58,13 @@ const StartWorkout = ({ navigation }) => {
           keyboardType="numeric"
           value={item.reps.toString()}
           onChangeText={(text) => {
-            const newSets = [...sets];
-            newSets[index].reps = text ? parseInt(text) : 0;
-            setSets(newSets);
+            const newExercises = [...exercises];
+            const exercise = newExercises.find((exercise) => exercise.id === exerciseId);
+            exercise.sets[index].reps = text ? parseInt(text) : 0;
+            setExercises(newExercises);
           }}
         />
-        <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(item.id)}>
+        <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
           <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
         </TouchableOpacity>
       </View>
@@ -56,29 +73,39 @@ const StartWorkout = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={require('../../assets/images/logo.png')} style={styles.exerciseImage} />
-        <Text style={styles.exerciseName}>Exercise</Text>
-      </View>
-      <View style={styles.table}>
-        <View style={styles.headerRow}>
-          <Text style={styles.columnHeader}>Set</Text>
-          <Text style={styles.columnHeader}>KG</Text>
-          <Text style={styles.columnHeader}>Reps</Text>
-          <Text style={styles.columnHeader}><FontAwesome name="check" size={24} color= 'white' /></Text>
-        </View>
-        <FlatList
-          data={sets}
-          renderItem={renderSet}
-          keyExtractor={(item) => item.id.toString()}
-        />
-      </View>
-      <TouchableOpacity style={styles.addButton} onPress={addSet}>
-        <Text style={styles.addButtonText}>Add Set</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.addExerciseButton} onPress={addExercise}>
-        <Text style={styles.addButtonText}>Add Exercise</Text>
-      </TouchableOpacity>
+      <FlatList
+        data={exercises}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item: exercise }) => (
+          <View style={styles.exerciseContainer}>
+            <View style={styles.header}>
+              <Image source={exercise.image} style={styles.exerciseImage} />
+              <Text style={styles.exerciseName}>{exercise.name}</Text>
+            </View>
+            <View style={styles.table}>
+              <View style={styles.headerRow}>
+                <Text style={styles.columnHeader}>Set</Text>
+                <Text style={styles.columnHeader}>KG</Text>
+                <Text style={styles.columnHeader}>Reps</Text>
+                <Text style={styles.columnHeader}><FontAwesome name="check" size={24} color="white" /></Text>
+              </View>
+              <FlatList
+                data={exercise.sets}
+                renderItem={(set) => renderSet(exercise.id, set)}
+                keyExtractor={(set) => set.id.toString()}
+              />
+              <TouchableOpacity style={styles.addButton} onPress={() => addSet(exercise.id)}>
+                <Text style={styles.addButtonText}>Add Set</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+        ListFooterComponent={
+          <TouchableOpacity style={styles.addExerciseButton} onPress={addExercise}>
+            <Text style={styles.addButtonText}>Add Exercise</Text>
+          </TouchableOpacity>
+        }
+      />
     </View>
   );
 };
@@ -88,6 +115,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#1C1C1E',
+  },
+  exerciseContainer: {
+    marginBottom: 16,
   },
   header: {
     flexDirection: 'row',
@@ -127,7 +157,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   completedSetRow: {
-    backgroundColor: '#006400', // Dark green background for completed sets
+    backgroundColor: '#006400', 
   },
   setText: {
     width: '25%',
@@ -164,7 +194,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
-    top: 25,
+    marginTop: 25,
   },
 });
 
