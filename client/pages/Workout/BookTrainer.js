@@ -55,7 +55,7 @@ const BookTrainer = ({ route }) => {
           <Text style={styles.experience}>{trainer.experience}</Text>
         </View>
       </TouchableOpacity>
-      <Calendar
+      <Calendar  style={styles.Calendar}
         onDayPress={(day) => handleDateSelect(day.dateString)}
         markedDates={selectedDate ? { [selectedDate]: { selected: true, selectedColor: '#FF4C0A' } } : {}}
         theme={{
@@ -66,6 +66,7 @@ const BookTrainer = ({ route }) => {
           selectedDayTextColor: '#FFFFFF',
           monthTextColor: '#FFFFFF',
           arrowColor: '#FF4C0A',
+          
         }}
       />
       <TouchableOpacity style={styles.bookButton} onPress={handleBookAppointment}>
@@ -90,6 +91,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 20,
     alignItems: 'center',
+  },
+  Calendar:{
+    borderRadius: 10,
   },
   image: {
     width: 80,
