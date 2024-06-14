@@ -8,6 +8,8 @@ const StartWorkout = ({ navigation }) => {
     { id: 2, name: 'Exercise 2', image: require('../../assets/images/logo.png'), sets: [{ id: 1, kg: 0, reps: 0 }] },
   ];
 
+  const [isEditingTitle, setIsEditingTitle] = useState(true);
+  const [workoutTitle, setWorkoutTitle] = useState('');
   const [exercises, setExercises] = useState(initialExercises);
   const [completedSets, setCompletedSets] = useState([]);
 
@@ -71,6 +73,39 @@ const StartWorkout = ({ navigation }) => {
     );
   };
 
+  const toggleTitleEditMode = () => {
+    setIsEditingTitle(!isEditingTitle);
+  };
+
+  const handleTitleChange = () => {
+    toggleTitleEditMode();
+  };
+
+  const renderHeader = () => {
+    return (
+      <View style={styles.header}>
+        {isEditingTitle ? (
+          <TextInput
+            style={styles.workoutTitleInput}
+            placeholder="Enter workout title"
+            placeholderTextColor="#999"
+            value={workoutTitle}
+            onChangeText={setWorkoutTitle}
+            autoFocus
+            onBlur={handleTitleChange}
+          />
+        ) : (
+          <View style={styles.titleContainer}>
+            <Text style={styles.workoutTitle}>{workoutTitle}</Text>
+            <TouchableOpacity onPress={toggleTitleEditMode}>
+              <FontAwesome name="edit" size={20} color="#FFF" />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -100,6 +135,7 @@ const StartWorkout = ({ navigation }) => {
             </View>
           </View>
         )}
+        ListHeaderComponent={renderHeader}
         ListFooterComponent={
           <TouchableOpacity style={styles.addExerciseButton} onPress={addExercise}>
             <Text style={styles.addButtonText}>Add Exercise</Text>
@@ -115,6 +151,28 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#1C1C1E',
+  },
+  header: {
+    marginBottom: 10,
+  },
+  workoutTitleInput: {
+    height: 40,
+    borderColor: '#666',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingLeft: 10,
+    color: '#FFF',
+    marginBottom: 10,
+    width:'100%',
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  workoutTitle: {
+    flex: 1,
+    fontSize: 20,
+    color: '#FFF',
   },
   exerciseContainer: {
     marginBottom: 16,
@@ -157,7 +215,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   completedSetRow: {
-    backgroundColor: '#006400', 
+    backgroundColor: '#006400',
   },
   setText: {
     width: '25%',
