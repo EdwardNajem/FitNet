@@ -40,12 +40,8 @@ const FinishWorkout = () => {
             <Text style={styles.statValue}>45 mins</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statTitle}>Reps</Text>
-            <Text style={styles.statValue}>15</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statTitle}>Sets</Text>
-            <Text style={styles.statValue}>3</Text>
+            <Text style={styles.statTitle}>Volume</Text>
+            <Text style={styles.statValue}>250 KG</Text>
           </View>
         </View>
 
@@ -206,6 +202,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
+    height:'11%',
   },
   statItem: {
     flexDirection: 'row',
