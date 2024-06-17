@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
@@ -9,24 +9,45 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import api from '../../Components/Config';
+
+const PAGE_SIZE = 10;
+
+const musclegroups = [
+  { label: 'Abdominals', value: 'Abdominals' },
+  { label: 'Abductors', value: 'Abductors' },
+  { label: 'Adductors', value: 'Adductors' },
+  { label: 'Biceps', value: 'Biceps' },
+  { label: 'Calves', value: 'Calves' },
+  { label: 'Cardio', value: 'Cardio' },
+  { label: 'Chest', value: 'Chest' },
+  { label: 'Forearms', value: 'Forearms' },
+  { label: 'Full Body', value: 'Full Body' },
+  { label: 'Glutes', value: 'Glutes' },
+  { label: 'Hamstrings', value: 'Hamstrings' },
+  { label: 'Lats', value: 'Lats' },
+  { label: 'Lower Back', value: 'Lower Back' },
+  { label: 'Neck', value: 'Neck' },
+  { label: 'Quadriceps', value: 'Quadriceps' },
+  { label: 'Shoulders', value: 'Shoulders' },
+  { label: 'Traps', value: 'Traps' },
+  { label: 'Triceps', value: 'Triceps' },
+  { label: 'Upper Back', value: 'Upper Back' },
+];
 
 const WorkoutList = () => {
   const [search, setSearch] = useState('');
   const [workout, setWorkout] = useState([]);
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const slideAnim = useRef(new Animated.Value(-100)).current;
+  const [isDropdownFocused, setIsDropdownFocused] = useState(false);
 
   useEffect(() => {
-    const fetchExercises = async () => {
-      console.log('Fetching');
-      const response = await api.get('fitnet/getAllExercises');
-      console.log(response.data); // Check the response structure
-      setWorkout(response.data.exercises);
-      setFilteredWorkouts(response.data.exercises);
-    };
-
     fetchExercises();
   }, []);
 
@@ -37,6 +58,37 @@ const WorkoutList = () => {
       hideAddButton();
     }
   }, [selectedWorkouts]);
+
+  const fetchExercises = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('fitnet/getAllExercises');
+      const allExercises = response.data.exercises;
+
+      setWorkout(allExercises);
+      setFilteredWorkouts(allExercises.slice(0, PAGE_SIZE)); // Show first PAGE_SIZE exercises
+    } catch (error) {
+      console.error('Failed to fetch exercises:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!loading && filteredWorkouts.length < workout.length) {
+      const nextPage = page + 1;
+      const nextExercises = workout.slice(
+        nextPage * PAGE_SIZE - PAGE_SIZE,
+        nextPage * PAGE_SIZE
+      );
+
+      setPage(nextPage);
+      setFilteredWorkouts((prevWorkouts) => [
+        ...prevWorkouts,
+        ...nextExercises,
+      ]);
+    }
+  };
 
   const showAddButton = () => {
     Animated.timing(slideAnim, {
@@ -56,16 +108,12 @@ const WorkoutList = () => {
 
   const handleSearch = (text) => {
     setSearch(text);
-    if (text) {
-      const filtered = workout.filter(
-        (item) =>
-          item.name.toLowerCase().includes(text.toLowerCase()) ||
-          item.primary.toLowerCase().includes(text.toLowerCase()) // Assuming 'primary' is correct
-      );
-      setFilteredWorkouts(filtered);
-    } else {
-      setFilteredWorkouts(workout);
-    }
+    filterWorkouts(text, selectedMuscleGroup);
+  };
+
+  const clearSearch = () => {
+    setSearch('');
+    filterWorkouts('', selectedMuscleGroup);
   };
 
   const handlePress = (id) => {
@@ -76,6 +124,36 @@ const WorkoutList = () => {
     } else {
       setSelectedWorkouts([...selectedWorkouts, id]);
     }
+  };
+
+  const handleMuscleGroupSelect = (muscle) => {
+    setSelectedMuscleGroup(muscle);
+    setIsDropdownFocused(false);
+    filterWorkouts(search, muscle);
+  };
+
+  const clearMuscleGroup = () => {
+    setSelectedMuscleGroup(null);
+    setIsDropdownFocused(false);
+    filterWorkouts(search, null);
+  };
+
+  const filterWorkouts = (searchText, muscleGroup) => {
+    let filtered = workout;
+
+    if (searchText) {
+      filtered = filtered.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.primary.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    if (muscleGroup) {
+      filtered = filtered.filter((item) => item.primary === muscleGroup);
+    }
+
+    setFilteredWorkouts(filtered.slice(0, page * PAGE_SIZE));
   };
 
   const renderWorkout = ({ item }) => (
@@ -100,23 +178,69 @@ const WorkoutList = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search workouts"
-        placeholderTextColor="#999"
-        value={search}
-        onChangeText={handleSearch}
-      />
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search workouts"
+          placeholderTextColor="#999"
+          value={search}
+          onChangeText={handleSearch}
+        />
+        {search.length > 0 && (
+          <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+            <Text style={styles.clearButtonText}>X</Text>
+          </TouchableOpacity>
+        )}
+        <Dropdown
+          style={[
+            styles.dropdown,
+            isDropdownFocused && { borderColor: 'blue' },
+          ]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          data={musclegroups}
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={
+            selectedMuscleGroup ? selectedMuscleGroup : 'Select Muscle'
+          }
+          value={selectedMuscleGroup}
+          onFocus={() => setIsDropdownFocused(true)}
+          onBlur={() => setIsDropdownFocused(false)}
+          onChange={(item) => handleMuscleGroupSelect(item.value)}
+        />
+        {selectedMuscleGroup && (
+          <TouchableOpacity
+            onPress={clearMuscleGroup}
+            style={styles.clearButton}
+          >
+            <Text style={styles.clearButtonText}>X</Text>
+          </TouchableOpacity>
+        )}
+      </View>
       <FlatList
         data={filteredWorkouts}
         keyExtractor={(item) => item._id}
         renderItem={renderWorkout}
         contentContainerStyle={styles.listContainer}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          loading && <Text style={styles.loadingText}>Loading...</Text>
+        }
       />
-      <Animated.View style={[styles.addButtonContainer, { transform: [{ translateY: slideAnim }] }]}>
+      <Animated.View
+        style={[
+          styles.addButtonContainer,
+          { transform: [{ translateY: slideAnim }] },
+        ]}
+      >
         {selectedWorkouts.length > 0 && (
           <TouchableOpacity style={styles.addButton}>
-            <Text style={styles.addButtonText}>Add {selectedWorkouts.length} Exercise(s)</Text>
+            <Text style={styles.addButtonText}>
+              Add {selectedWorkouts.length} Exercise(s)
+            </Text>
           </TouchableOpacity>
         )}
       </Animated.View>
@@ -131,14 +255,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1C1C1E',
   },
-  searchBar: {
-    height: 40,
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 10,
     borderColor: '#666',
     borderWidth: 1,
     borderRadius: 8,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
     paddingLeft: 10,
     color: '#FFF',
-    margin: 10,
+  },
+  clearButton: {
+    padding: 10,
+  },
+  clearButtonText: {
+    color: '#FFF',
+    fontSize: 16,
   },
   listContainer: {
     padding: 10,
@@ -200,5 +336,23 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  loadingText: {
+    color: '#FFF',
+    textAlign: 'center',
+    padding: 10,
+  },
+  dropdown: {
+    flex: 1,
+    height: 40,
+    marginHorizontal: 10,
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    color: 'white',
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    color: 'white',
   },
 });

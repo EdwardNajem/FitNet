@@ -1,7 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, View } from 'react-native';
 import HomeLogo from '../client/assets/icons/home.png';
 import ProfileLogo from '../client/assets/icons/profile.png';
@@ -32,7 +33,30 @@ const tabOptions = {
 };
 
 export default function App() {
-  const [loggedin, setLoggedin] = useState(true);
+  const [loggedin, setLoggedin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkUserLoggedIn = async () => {
+      try {
+        const user = await AsyncStorage.getItem('@auth');
+        if (user) {
+          setLoggedin(true);
+        }
+      } catch (error) {
+        console.error('Failed to load user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUserLoggedIn();
+  }, []);
+
+  if (loading) {
+    // Optionally, you can render a loading spinner here while checking AsyncStorage
+    return null;
+  }
 
   if (loggedin) {
     return (

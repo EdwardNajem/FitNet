@@ -2,10 +2,7 @@ const ExerciseModel = require('../models/exerciseModel');
 
 const getAllExercises = async (req, res) => {
   try {
-    console.log('Got all exercises');
     const exercises = await ExerciseModel.find();
-
-    console.log('Got all exercises');
 
     if (!exercises) {
       return res.status(400).send({
