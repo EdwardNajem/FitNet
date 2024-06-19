@@ -1,17 +1,50 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-const StartWorkout = ({ navigation }) => {
-  const initialExercises = [
-    { id: 1, name: 'Exercise 1', image: require('../../assets/images/logo.png'), sets: [{ id: 1, kg: 0, reps: 0 }] },
-    { id: 2, name: 'Exercise 2', image: require('../../assets/images/logo.png'), sets: [{ id: 1, kg: 0, reps: 0 }] },
-  ];
+const StartWorkout = ({ route, navigation }) => {
+  const { selectedExercises = [] } = route.params || {}; // Ensure selectedExercises is an array
 
   const [isEditingTitle, setIsEditingTitle] = useState(true);
   const [workoutTitle, setWorkoutTitle] = useState('');
-  const [exercises, setExercises] = useState(initialExercises);
+  const [exercises, setExercises] = useState(
+    selectedExercises.map((ex) => ({
+      ...ex,
+      sets: ex.sets
+        ? ex.sets.map((set) => ({
+            ...set,
+            kg: set.kg ?? 0,
+            reps: set.reps ?? 0,
+          }))
+        : [{ id: 1, kg: 0, reps: 0 }],
+    }))
+  );
   const [completedSets, setCompletedSets] = useState([]);
+
+  useEffect(() => {
+    if (selectedExercises.length > 0) {
+      setExercises(
+        selectedExercises.map((ex) => ({
+          ...ex,
+          sets: ex.sets
+            ? ex.sets.map((set) => ({
+                ...set,
+                kg: set.kg ?? 0,
+                reps: set.reps ?? 0,
+              }))
+            : [{ id: 1, kg: 0, reps: 0 }],
+        }))
+      );
+    }
+  }, [selectedExercises]);
 
   const addSet = (exerciseId) => {
     setExercises((prevExercises) =>
@@ -19,7 +52,10 @@ const StartWorkout = ({ navigation }) => {
         exercise.id === exerciseId
           ? {
               ...exercise,
-              sets: [...exercise.sets, { id: exercise.sets.length + 1, kg: 0, reps: 0 }],
+              sets: [
+                ...exercise.sets,
+                { id: exercise.sets.length + 1, kg: 0, reps: 0 },
+              ],
             }
           : exercise
       )
@@ -47,10 +83,10 @@ const StartWorkout = ({ navigation }) => {
         <TextInput
           style={styles.input}
           keyboardType="numeric"
-          value={item.kg.toString()}
+          value={(item.sets.kg ?? 0).toString()} // Ensure item.kg is defined
           onChangeText={(text) => {
             const newExercises = [...exercises];
-            const exercise = newExercises.find((exercise) => exercise.id === exerciseId);
+            const exercise = newExercises.find((ex) => ex.id === exerciseId);
             exercise.sets[index].kg = text ? parseInt(text) : 0;
             setExercises(newExercises);
           }}
@@ -58,16 +94,23 @@ const StartWorkout = ({ navigation }) => {
         <TextInput
           style={styles.input}
           keyboardType="numeric"
-          value={item.reps.toString()}
+          value={(item.sets.reps ?? 0).toString()} // Ensure item.reps is defined
           onChangeText={(text) => {
             const newExercises = [...exercises];
-            const exercise = newExercises.find((exercise) => exercise.id === exerciseId);
+            const exercise = newExercises.find((ex) => ex.id === exerciseId);
             exercise.sets[index].reps = text ? parseInt(text) : 0;
             setExercises(newExercises);
           }}
         />
-        <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
-          <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
+        <TouchableOpacity
+          style={styles.tickIcon}
+          onPress={() => toggleSetCompletion(exerciseId, item.id)}
+        >
+          <FontAwesome
+            name="check"
+            size={24}
+            color={isCompleted ? 'green' : 'white'}
+          />
         </TouchableOpacity>
       </View>
     );
@@ -84,24 +127,13 @@ const StartWorkout = ({ navigation }) => {
   const renderHeader = () => {
     return (
       <View style={styles.header}>
-        {isEditingTitle ? (
-          <TextInput
-            style={styles.workoutTitleInput}
-            placeholder="Enter workout title"
-            placeholderTextColor="#999"
-            value={workoutTitle}
-            onChangeText={setWorkoutTitle}
-            autoFocus
-            onBlur={handleTitleChange}
-          />
-        ) : (
-          <View style={styles.titleContainer}>
-            <Text style={styles.workoutTitle}>{workoutTitle}</Text>
-            <TouchableOpacity onPress={toggleTitleEditMode}>
-              <FontAwesome name="edit" size={20} color="#FFF" />
-            </TouchableOpacity>
-          </View>
-        )}
+        <TextInput
+          style={styles.workoutTitleInput}
+          placeholder="Enter workout title"
+          placeholderTextColor="#999"
+          value={workoutTitle}
+          onChangeText={setWorkoutTitle}
+        />
       </View>
     );
   };
@@ -114,7 +146,10 @@ const StartWorkout = ({ navigation }) => {
         renderItem={({ item: exercise }) => (
           <View style={styles.exerciseContainer}>
             <View style={styles.header}>
-              <Image source={exercise.image} style={styles.exerciseImage} />
+              <Image
+                source={{ uri: exercise.image }}
+                style={styles.exerciseImage}
+              />
               <Text style={styles.exerciseName}>{exercise.name}</Text>
             </View>
             <View style={styles.table}>
@@ -122,14 +157,19 @@ const StartWorkout = ({ navigation }) => {
                 <Text style={styles.columnHeader}>Set</Text>
                 <Text style={styles.columnHeader}>KG</Text>
                 <Text style={styles.columnHeader}>Reps</Text>
-                <Text style={styles.columnHeader}><FontAwesome name="check" size={24} color="white" /></Text>
+                <Text style={styles.columnHeader}>
+                  <FontAwesome name="check" size={24} color="white" />
+                </Text>
               </View>
               <FlatList
                 data={exercise.sets}
                 renderItem={(set) => renderSet(exercise.id, set)}
                 keyExtractor={(set) => set.id.toString()}
               />
-              <TouchableOpacity style={styles.addButton} onPress={() => addSet(exercise.id)}>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => addSet(exercise.id)}
+              >
                 <Text style={styles.addButtonText}>Add Set</Text>
               </TouchableOpacity>
             </View>
@@ -137,7 +177,10 @@ const StartWorkout = ({ navigation }) => {
         )}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={
-          <TouchableOpacity style={styles.addExerciseButton} onPress={addExercise}>
+          <TouchableOpacity
+            style={styles.addExerciseButton}
+            onPress={() => navigation.navigate('WorkoutList')}
+          >
             <Text style={styles.addButtonText}>Add Exercise</Text>
           </TouchableOpacity>
         }
@@ -163,7 +206,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     color: '#FFF',
     marginBottom: 10,
-    width:'100%',
+    width: '100%',
   },
   titleContainer: {
     flexDirection: 'row',

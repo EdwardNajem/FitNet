@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -46,6 +47,7 @@ const WorkoutList = () => {
   const [loading, setLoading] = useState(false);
   const slideAnim = useRef(new Animated.Value(-100)).current;
   const [isDropdownFocused, setIsDropdownFocused] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchExercises();
@@ -64,9 +66,8 @@ const WorkoutList = () => {
     try {
       const response = await api.get('fitnet/getAllExercises');
       const allExercises = response.data.exercises;
-
       setWorkout(allExercises);
-      setFilteredWorkouts(allExercises.slice(0, PAGE_SIZE)); // Show first PAGE_SIZE exercises
+      setFilteredWorkouts(allExercises.slice(0, PAGE_SIZE));
     } catch (error) {
       console.error('Failed to fetch exercises:', error);
     } finally {
@@ -81,7 +82,6 @@ const WorkoutList = () => {
         nextPage * PAGE_SIZE - PAGE_SIZE,
         nextPage * PAGE_SIZE
       );
-
       setPage(nextPage);
       setFilteredWorkouts((prevWorkouts) => [
         ...prevWorkouts,
@@ -124,6 +124,13 @@ const WorkoutList = () => {
     } else {
       setSelectedWorkouts([...selectedWorkouts, id]);
     }
+  };
+
+  const handleAddExercises = () => {
+    const selectedExercises = workout.filter((ex) =>
+      selectedWorkouts.includes(ex._id)
+    );
+    navigation.navigate('StartWorkout', { selectedExercises });
   };
 
   const handleMuscleGroupSelect = (muscle) => {
@@ -237,7 +244,10 @@ const WorkoutList = () => {
         ]}
       >
         {selectedWorkouts.length > 0 && (
-          <TouchableOpacity style={styles.addButton}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAddExercises}
+          >
             <Text style={styles.addButtonText}>
               Add {selectedWorkouts.length} Exercise(s)
             </Text>
