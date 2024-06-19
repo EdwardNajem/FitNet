@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
-import { Image, View } from 'react-native';
+import { Image, StatusBar, View } from 'react-native';
 import HomeLogo from '../client/assets/icons/home.png';
 import ProfileLogo from '../client/assets/icons/profile.png';
 import WorkoutLogo from '../client/assets/icons/workout.png';
@@ -54,8 +54,10 @@ export default function App() {
   }, []);
 
   if (loading) {
-    // Optionally, you can render a loading spinner here while checking AsyncStorage
-    return null;
+    <View style={{ backgroundColor: '#1C1C1E' }}>
+      <StatusBar />
+      <Image source={HomeLogo} />
+    </View>;
   }
 
   if (loggedin) {
