@@ -1,4 +1,3 @@
-import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
@@ -9,9 +8,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
 const StartWorkout = ({ route, navigation }) => {
-  const { selectedExercises = [] } = route.params || {}; // Ensure selectedExercises is an array
+  const { selectedExercises = [] } = route.params || {};
 
   const [isEditingTitle, setIsEditingTitle] = useState(true);
   const [workoutTitle, setWorkoutTitle] = useState('');
@@ -49,7 +49,7 @@ const StartWorkout = ({ route, navigation }) => {
   const addSet = (exerciseId) => {
     setExercises((prevExercises) =>
       prevExercises.map((exercise) =>
-        exercise.id === exerciseId
+        exercise._id === exerciseId
           ? {
               ...exercise,
               sets: [
@@ -76,6 +76,9 @@ const StartWorkout = ({ route, navigation }) => {
   };
 
   const renderSet = (exerciseId, { item, index }) => {
+    if (!item) {
+      return null; 
+    }
     const isCompleted = completedSets.includes(`${exerciseId}-${item.id}`);
     return (
       <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
@@ -83,22 +86,22 @@ const StartWorkout = ({ route, navigation }) => {
         <TextInput
           style={styles.input}
           keyboardType="numeric"
-          value={(item.sets.kg ?? 0).toString()} // Ensure item.kg is defined
+          value={item.kg.toString()}
           onChangeText={(text) => {
             const newExercises = [...exercises];
-            const exercise = newExercises.find((ex) => ex.id === exerciseId);
-            exercise.sets[index].kg = text ? parseInt(text) : 0;
+            const exercise = newExercises.find((ex) => ex._id === exerciseId);
+            exercise.sets[index].kg = text ? parseInt(text, 10) : 0;
             setExercises(newExercises);
           }}
         />
         <TextInput
           style={styles.input}
           keyboardType="numeric"
-          value={(item.sets.reps ?? 0).toString()} // Ensure item.reps is defined
+          value={item.reps.toString()}
           onChangeText={(text) => {
             const newExercises = [...exercises];
-            const exercise = newExercises.find((ex) => ex.id === exerciseId);
-            exercise.sets[index].reps = text ? parseInt(text) : 0;
+            const exercise = newExercises.find((ex) => ex._id === exerciseId);
+            exercise.sets[index].reps = text ? parseInt(text, 10) : 0;
             setExercises(newExercises);
           }}
         />
@@ -116,12 +119,19 @@ const StartWorkout = ({ route, navigation }) => {
     );
   };
 
-  const toggleTitleEditMode = () => {
-    setIsEditingTitle(!isEditingTitle);
-  };
-
-  const handleTitleChange = () => {
-    toggleTitleEditMode();
+  const renderExerciseHeader = (item) => {
+    return (
+      <View style={styles.header}>
+        <Image
+          source={{ uri: item.image || '' }}
+          style={styles.exerciseImage}
+        />
+        <View>
+          <Text style={styles.exerciseName}>{item.name}</Text>
+          <Text style={styles.muscleName}>{item.primary}</Text>
+        </View>
+      </View>
+    );
   };
 
   const renderHeader = () => {
@@ -142,16 +152,10 @@ const StartWorkout = ({ route, navigation }) => {
     <View style={styles.container}>
       <FlatList
         data={exercises}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item: exercise }) => (
+        keyExtractor={(exercise) => (exercise._id ? exercise._id.toString() : '')}
+        renderItem={({ item }) => (
           <View style={styles.exerciseContainer}>
-            <View style={styles.header}>
-              <Image
-                source={{ uri: exercise.image }}
-                style={styles.exerciseImage}
-              />
-              <Text style={styles.exerciseName}>{exercise.name}</Text>
-            </View>
+            {renderExerciseHeader(item)}
             <View style={styles.table}>
               <View style={styles.headerRow}>
                 <Text style={styles.columnHeader}>Set</Text>
@@ -162,13 +166,13 @@ const StartWorkout = ({ route, navigation }) => {
                 </Text>
               </View>
               <FlatList
-                data={exercise.sets}
-                renderItem={(set) => renderSet(exercise.id, set)}
-                keyExtractor={(set) => set.id.toString()}
+                data={item.sets || []}
+                renderItem={({ item: set, index }) => renderSet(item._id, { item: set, index })}
+                keyExtractor={(set, index) => `${item._id}-${index}`}
               />
               <TouchableOpacity
                 style={styles.addButton}
-                onPress={() => addSet(exercise.id)}
+                onPress={() => addSet(item._id)}
               >
                 <Text style={styles.addButtonText}>Add Set</Text>
               </TouchableOpacity>
@@ -176,14 +180,14 @@ const StartWorkout = ({ route, navigation }) => {
           </View>
         )}
         ListHeaderComponent={renderHeader}
-        ListFooterComponent={
+        ListFooterComponent={(
           <TouchableOpacity
             style={styles.addExerciseButton}
-            onPress={() => navigation.navigate('WorkoutList')}
+            onPress={addExercise}
           >
             <Text style={styles.addButtonText}>Add Exercise</Text>
           </TouchableOpacity>
-        }
+        )}
       />
     </View>
   );
@@ -208,15 +212,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: '100%',
   },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  workoutTitle: {
-    flex: 1,
-    fontSize: 20,
-    color: '#FFF',
-  },
   exerciseContainer: {
     marginBottom: 16,
   },
@@ -235,6 +230,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+  },
+  muscleName: {
+    fontSize: 16,
+    color: '#999',
   },
   table: {
     marginBottom: 16,

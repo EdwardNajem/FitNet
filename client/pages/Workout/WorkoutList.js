@@ -1,69 +1,28 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import api from '../../Components/Config';
 
 const PAGE_SIZE = 10;
 
-const musclegroups = [
-  { label: 'Abdominals', value: 'Abdominals' },
-  { label: 'Abductors', value: 'Abductors' },
-  { label: 'Adductors', value: 'Adductors' },
-  { label: 'Biceps', value: 'Biceps' },
-  { label: 'Calves', value: 'Calves' },
-  { label: 'Cardio', value: 'Cardio' },
-  { label: 'Chest', value: 'Chest' },
-  { label: 'Forearms', value: 'Forearms' },
-  { label: 'Full Body', value: 'Full Body' },
-  { label: 'Glutes', value: 'Glutes' },
-  { label: 'Hamstrings', value: 'Hamstrings' },
-  { label: 'Lats', value: 'Lats' },
-  { label: 'Lower Back', value: 'Lower Back' },
-  { label: 'Neck', value: 'Neck' },
-  { label: 'Quadriceps', value: 'Quadriceps' },
-  { label: 'Shoulders', value: 'Shoulders' },
-  { label: 'Traps', value: 'Traps' },
-  { label: 'Triceps', value: 'Triceps' },
-  { label: 'Upper Back', value: 'Upper Back' },
-];
-
-const WorkoutList = () => {
+const WorkoutList = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [workout, setWorkout] = useState([]);
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
+  const [muscleGroups, setMuscleGroups] = useState([]);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const slideAnim = useRef(new Animated.Value(-100)).current;
-  const [isDropdownFocused, setIsDropdownFocused] = useState(false);
-  const navigation = useNavigation();
 
   useEffect(() => {
     fetchExercises();
   }, []);
 
-  useEffect(() => {
-    if (selectedWorkouts.length > 0) {
-      showAddButton();
-    } else {
-      hideAddButton();
-    }
-  }, [selectedWorkouts]);
-
   const fetchExercises = async () => {
     setLoading(true);
     try {
+      // Simulating fetching exercises from an API
       const response = await api.get('fitnet/getAllExercises');
       const allExercises = response.data.exercises;
       setWorkout(allExercises);
@@ -88,22 +47,6 @@ const WorkoutList = () => {
         ...nextExercises,
       ]);
     }
-  };
-
-  const showAddButton = () => {
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const hideAddButton = () => {
-    Animated.timing(slideAnim, {
-      toValue: -100,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
   };
 
   const handleSearch = (text) => {
@@ -135,13 +78,11 @@ const WorkoutList = () => {
 
   const handleMuscleGroupSelect = (muscle) => {
     setSelectedMuscleGroup(muscle);
-    setIsDropdownFocused(false);
     filterWorkouts(search, muscle);
   };
 
   const clearMuscleGroup = () => {
     setSelectedMuscleGroup(null);
-    setIsDropdownFocused(false);
     filterWorkouts(search, null);
   };
 
@@ -199,23 +140,16 @@ const WorkoutList = () => {
           </TouchableOpacity>
         )}
         <Dropdown
-          style={[
-            styles.dropdown,
-            isDropdownFocused && { borderColor: 'blue' },
-          ]}
+          style={styles.dropdown}
           placeholderStyle={styles.placeholderStyle}
           selectedTextStyle={styles.selectedTextStyle}
-          data={musclegroups}
+          data={muscleGroups} // Assuming you have fetched muscle groups separately
           maxHeight={300}
-          labelField="label"
-          valueField="value"
-          placeholder={
-            selectedMuscleGroup ? selectedMuscleGroup : 'Select Muscle'
-          }
+          labelField="name" // Assuming the field name for muscle group in database is 'name'
+          valueField="_id" // Assuming the field name for ID in database is '_id'
+          placeholder="Select Muscle"
           value={selectedMuscleGroup}
-          onFocus={() => setIsDropdownFocused(true)}
-          onBlur={() => setIsDropdownFocused(false)}
-          onChange={(item) => handleMuscleGroupSelect(item.value)}
+          onChange={(item) => handleMuscleGroupSelect(item._id)}
         />
         {selectedMuscleGroup && (
           <TouchableOpacity
@@ -237,28 +171,19 @@ const WorkoutList = () => {
           loading && <Text style={styles.loadingText}>Loading...</Text>
         }
       />
-      <Animated.View
-        style={[
-          styles.addButtonContainer,
-          { transform: [{ translateY: slideAnim }] },
-        ]}
-      >
-        {selectedWorkouts.length > 0 && (
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={handleAddExercises}
-          >
-            <Text style={styles.addButtonText}>
-              Add {selectedWorkouts.length} Exercise(s)
-            </Text>
-          </TouchableOpacity>
-        )}
-      </Animated.View>
+      {selectedWorkouts.length > 0 && (
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={handleAddExercises}
+        >
+          <Text style={styles.addButtonText}>
+            Add {selectedWorkouts.length} Exercise(s)
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
-
-export default WorkoutList;
 
 const styles = StyleSheet.create({
   container: {
@@ -328,19 +253,14 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 14,
   },
-  addButtonContainer: {
-    position: 'absolute',
-    bottom: 20,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   addButton: {
     backgroundColor: '#FF4C0A',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
     elevation: 3,
+    marginBottom: 20,
+    alignSelf: 'center',
   },
   addButtonText: {
     color: '#FFF',
@@ -366,3 +286,5 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 });
+
+export default WorkoutList;
