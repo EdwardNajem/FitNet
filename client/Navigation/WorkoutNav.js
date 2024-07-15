@@ -1,7 +1,8 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ClockModal from '../Components/ClockModal';
 import BookTrainerScreen from '../pages/Workout/BookTrainer';
+import CreateWorkout from '../pages/Workout/CreateWorkout';
 import FinishWorkoutScreen from '../pages/Workout/FinishWorkout';
 import StartWorkoutScreen from '../pages/Workout/StartWorkout';
 import TrainerScreen from '../pages/Workout/Trainer';
@@ -39,28 +40,34 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
           headerRight: () => (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingRight: 10,
-              }}
-            >
+            <View style={styles.headerView}>
               <ClockModal />
               <TouchableOpacity
                 onPress={() => navigation.navigate('FinishWorkout')}
-                style={{
-                  marginLeft: 10,
-                  paddingVertical: 8,
-                  paddingHorizontal: 8,
-                  borderRadius: 4,
-                }}
+                style={styles.headerButton}
               >
-                <Text
-                  style={{ color: '#FF4C0A', fontSize: 18, fontWeight: 'bold' }}
-                >
-                  Finish
-                </Text>
+                <Text style={styles.headerButtonText}>Finish</Text>
+              </TouchableOpacity>
+            </View>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="CreateWorkout"
+        component={CreateWorkout}
+        initialParams={{ selectedExercises: [] }}
+        options={({ navigation }) => ({
+          headerTitle: 'Create Workout',
+          headerStyle: { backgroundColor: '#2F2F2F' },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+          headerRight: () => (
+            <View style={styles.headerView}>
+              <TouchableOpacity
+                // onPress={} //Save Workout Function
+                style={styles.headerButton}
+              >
+                <Text style={styles.headerButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
           ),
@@ -77,22 +84,14 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerRight: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
-              style={{
-                marginLeft: 10,
-                paddingVertical: 8,
-                paddingHorizontal: 8,
-                borderRadius: 4,
-              }}
+              style={styles.headerButton}
             >
-              <Text
-                style={{ color: '#FF4C0A', fontSize: 18, fontWeight: 'bold' }}
-              >
-                Skip
-              </Text>
+              <Text style={styles.headerButtonText}>Skip</Text>
             </TouchableOpacity>
           ),
         })}
       />
+
       <Stack.Screen
         name="WorkoutList"
         component={WorkoutListScreen}
@@ -128,3 +127,22 @@ const WorkoutNav = ({ setLoggedin }) => {
 };
 
 export default WorkoutNav;
+
+const styles = StyleSheet.create({
+  headerView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 10,
+  },
+  headerButton: {
+    marginLeft: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  headerButtonText: {
+    color: '#FF4C0A',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
