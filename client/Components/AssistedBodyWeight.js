@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import { FontAwesome6 } from '@expo/vector-icons';
+import { FontAwesome, FontAwesome6, AntDesign } from '@expo/vector-icons';
 import WeightModal from './WeightModal';
+import WorkoutSettingModal from './WorkoutSettingsModal';
 
 const AssistedBodyWeight = ({ exercise, exercises, setExercises, completedSets, toggleSetCompletion, addSet }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [workoutSettingsVisible, setWorkoutSettingsVisible] = useState(false);
 
   const handleWeightSubmit = (weight) => {
     setModalVisible(false);
     console.log('Submitted weight:', weight);
+  };
+
+
+  const handleEditWeight = () => {
+    console.log('Edit Weight');
+    setWorkoutSettingsVisible(false);
+  };
+
+  const handleDeleteWorkout = () => {
+    console.log('Delete workout');
+    setWorkoutSettingsVisible(false);
   };
 
   const renderSet = (exerciseId, { item, index }) => {
@@ -66,9 +78,14 @@ const AssistedBodyWeight = ({ exercise, exercises, setExercises, completedSets, 
           <Text style={styles.exerciseName}>{exercise.name}</Text>
           <Text style={styles.muscleName}>{exercise.primary}</Text>
         </View>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.iconContainer}>
-          <FontAwesome6 name="weight-scale" size={30} color="#FF4C0A" />
-        </TouchableOpacity>
+        <View style={styles.iconGroup}>
+          <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.iconContainer}>
+            <FontAwesome6 name="weight-scale" size={30} color="#FF4C0A" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setWorkoutSettingsVisible(true)} style={styles.iconContainer}>
+            <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.headerRow}>
         <Text style={styles.columnHeader}>Set</Text>
@@ -92,6 +109,12 @@ const AssistedBodyWeight = ({ exercise, exercises, setExercises, completedSets, 
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onSubmit={handleWeightSubmit}
+      />
+     <WorkoutSettingModal
+        visible={workoutSettingsVisible}
+        onClose={() => setWorkoutSettingsVisible(false)}
+        onEdit={handleEditWeight}
+        onDelete={handleDeleteWorkout}
       />
     </View>
   );
@@ -128,6 +151,9 @@ const styles = StyleSheet.create({
   muscleName: {
     fontSize: 16,
     color: '#CCC',
+  },
+  iconGroup: {
+    flexDirection: 'row',
   },
   iconContainer: {
     padding: 8,

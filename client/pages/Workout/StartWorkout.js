@@ -93,27 +93,24 @@ const StartWorkout = ({ route, navigation }) => {
     );
   };
 
-  const renderHeader = () => (
-    <View style={styles.titleContainer}>
-      {isEditingTitle ? (
-        <TextInput
-          style={styles.titleInputBox}
-          value={workoutTitle}
-          onChangeText={handleTitleChange}
-          onBlur={toggleEditingTitle}
-          autoFocus
-        />
-      ) : (
-        <Text style={styles.titleText}>{workoutTitle}</Text>
-      )}
-      <TouchableOpacity onPress={toggleEditingTitle}>
-        <Ionicons name={isEditingTitle ? 'checkmark' : 'pencil'} size={24} color="white" />
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        {isEditingTitle ? (
+          <TextInput
+            style={styles.titleInputBox}
+            value={workoutTitle}
+            onChangeText={handleTitleChange}
+            onBlur={toggleEditingTitle}
+            autoFocus
+          />
+        ) : (
+          <Text style={styles.titleText}>{workoutTitle}</Text>
+        )}
+        <TouchableOpacity onPress={toggleEditingTitle}>
+          <Ionicons name={isEditingTitle ? 'checkmark' : 'pencil'} size={24} color="white" />
+        </TouchableOpacity>
+      </View>
       {exercises.length === 0 ? (
         <View style={styles.messageContainer}>
           <Text style={styles.message}>No exercises selected.</Text>
@@ -129,7 +126,6 @@ const StartWorkout = ({ route, navigation }) => {
           data={exercises}
           renderItem={renderItem}
           keyExtractor={(item) => item._id}
-          ListHeaderComponent={renderHeader}
           ListFooterComponent={() => (
             <TouchableOpacity
               style={styles.addButton}
@@ -170,7 +166,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,
-    width: '100%',
+    width:'100%',
   },
   addButtonText: {
     color: '#FFF',

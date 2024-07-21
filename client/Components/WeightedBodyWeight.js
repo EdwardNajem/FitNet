@@ -2,14 +2,28 @@ import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import WeightModal from './WeightModal';
+import WorkoutSettingModal from './WorkoutSettingsModal';
 
 const WeightedBodyWeight = ({ exercise, exercises, setExercises, completedSets, toggleSetCompletion, addSet }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [workoutSettingsVisible, setWorkoutSettingsVisible] = useState(false);
 
   const handleWeightSubmit = (weight) => {
     setModalVisible(false);
     console.log('Submitted weight:', weight);
+  };
+
+
+  const handleEditWeight = () => {
+    console.log('Edit Weight');
+    setWorkoutSettingsVisible(false);
+  };
+
+  const handleDeleteWorkout = () => {
+    console.log('Delete workout');
+    setWorkoutSettingsVisible(false);
   };
 
   const renderSet = (exerciseId, { item, index }) => {
@@ -69,6 +83,9 @@ const WeightedBodyWeight = ({ exercise, exercises, setExercises, completedSets, 
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.iconContainer}>
           <FontAwesome6 name="weight-scale" size={30} color="#FF4C0A" />       
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => setWorkoutSettingsVisible(true)} style={styles.iconContainer}>
+          <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
+        </TouchableOpacity>
       </View>
       <View style={styles.headerRow}>
         <Text style={styles.columnHeader}>Set</Text>
@@ -92,6 +109,12 @@ const WeightedBodyWeight = ({ exercise, exercises, setExercises, completedSets, 
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onSubmit={handleWeightSubmit}
+      />
+      <WorkoutSettingModal
+        visible={workoutSettingsVisible}
+        onClose={() => setWorkoutSettingsVisible(false)}
+        onEdit={handleEditWeight}
+        onDelete={handleDeleteWorkout}
       />
     </View>
   );

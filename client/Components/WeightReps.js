@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome,AntDesign } from '@expo/vector-icons';
+import WorkoutSettingModal from './WorkoutSettingsModal';
 
 const WeightReps = ({ exercise, exercises, setExercises, completedSets, toggleSetCompletion, addSet }) => {
+  const [workoutSettingsVisible, setWorkoutSettingsVisible] = useState(false);
+
+
+  const handleEditWeight = () => {
+    console.log('Edit Weight');
+    setWorkoutSettingsVisible(false);
+  };
+  const handleDeleteWorkout = () => {
+    console.log('Delete workout');
+    setWorkoutSettingsVisible(false);
+  };
+
+  
   const renderSet = (exerciseId, { item, index }) => {
     if (!item) {
       return null;
@@ -52,10 +66,13 @@ const WeightReps = ({ exercise, exercises, setExercises, completedSets, toggleSe
     <View style={styles.table}>
       <View style={styles.header}>
         <Image source={{ uri: exercise.image || '' }} style={styles.exerciseImage} />
-        <View>
+        <View style={styles.textContainer}>
           <Text style={styles.exerciseName}>{exercise.name}</Text>
           <Text style={styles.muscleName}>{exercise.primary}</Text>
         </View>
+        <TouchableOpacity onPress={() => setWorkoutSettingsVisible(true)} style={styles.iconContainer}>
+          <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
+        </TouchableOpacity>
       </View>
       <View style={styles.headerRow}>
         <Text style={styles.columnHeader}>Set</Text>
@@ -71,6 +88,12 @@ const WeightReps = ({ exercise, exercises, setExercises, completedSets, toggleSe
       <TouchableOpacity style={styles.addButton} onPress={() => addSet(exercise._id)}>
         <Text style={styles.addButtonText}>Add Set</Text>
       </TouchableOpacity>
+      <WorkoutSettingModal
+        visible={workoutSettingsVisible}
+        onClose={() => setWorkoutSettingsVisible(false)}
+        onEdit={handleEditWeight}
+        onDelete={handleDeleteWorkout}
+      />
     </View>
   );
 };
@@ -83,11 +106,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+    justifyContent: 'space-between',
   },
   exerciseImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
     marginRight: 12,
   },
   exerciseName: {
@@ -118,7 +146,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     backgroundColor: '#333',
     borderRadius: 10,
-    height:55,
+    height: 55,
   },
   completedSetRow: {
     backgroundColor: '#006400',
@@ -146,10 +174,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
+    backgroundColor: '#1C1C1E',
   },
   addButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  iconContainer: {
+    padding: 8,
   },
 });
 

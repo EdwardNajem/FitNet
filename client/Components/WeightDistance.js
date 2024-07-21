@@ -1,8 +1,22 @@
-import React from 'react';
+import React,{useState} from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome,AntDesign } from '@expo/vector-icons';
+import WorkoutSettingModal from './WorkoutSettingsModal';
 
 const WeightDistance = ({ exercise, exercises, setExercises, completedSets, toggleSetCompletion, addSet }) => {
+  const [workoutSettingsVisible, setWorkoutSettingsVisible] = useState(false);
+ 
+
+  const handleEditWeight = () => {
+    console.log('Edit Weight');
+    setWorkoutSettingsVisible(false);
+  };
+
+  const handleDeleteWorkout = () => {
+    console.log('Delete workout');
+    setWorkoutSettingsVisible(false);
+  };
+
   const renderSet = (exerciseId, { item, index }) => {
     if (!item) {
       return null;
@@ -53,10 +67,13 @@ const WeightDistance = ({ exercise, exercises, setExercises, completedSets, togg
     <View style={styles.table}>
       <View style={styles.header}>
         <Image source={{ uri: exercise.image || '' }} style={styles.exerciseImage} />
-        <View>
+        <View style={styles.textContainer}>
           <Text style={styles.exerciseName}>{exercise.name}</Text>
           <Text style={styles.muscleName}>{exercise.primary}</Text>
         </View>
+        <TouchableOpacity onPress={() => setWorkoutSettingsVisible(true)} style={styles.iconContainer}>
+            <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
+        </TouchableOpacity>
       </View>
       <View style={styles.headerRow}>
         <Text style={styles.columnHeader}>Set</Text>
@@ -76,6 +93,12 @@ const WeightDistance = ({ exercise, exercises, setExercises, completedSets, togg
       >
         <Text style={styles.addButtonText}>Add Set</Text>
       </TouchableOpacity>
+      <WorkoutSettingModal
+        visible={workoutSettingsVisible}
+        onClose={() => setWorkoutSettingsVisible(false)}
+        onEdit={handleEditWeight}
+        onDelete={handleDeleteWorkout}
+      />
     </View>
   );
 };
@@ -103,6 +126,10 @@ const styles = StyleSheet.create({
   muscleName: {
     fontSize: 16,
     color: '#CCC',
+  },
+  textContainer: {
+    flex: 1,
+    marginRight: 12,
   },
   headerRow: {
     flexDirection: 'row',
