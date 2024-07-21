@@ -1,148 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, TextInput } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import Duration from '../../Components/Duration';
+import WeightReps from '../../Components/WeightReps';
+import BodyWeight from '../../Components/BodyWeight';  
+import WeightedBodyWeight from '../../Components/WeightedBodyWeight';
+import WeightDistance from '../../Components/WeightDistance';
+import AssistedBodyWeight from '../../Components/AssistedBodyWeight';
 
 const StartWorkout = ({ route, navigation }) => {
   const { selectedExercises = [] } = route.params || {};
-
-  const [isEditingTitle, setIsEditingTitle] = useState(true);
-  const [workoutTitle, setWorkoutTitle] = useState('');
-  const [exercises, setExercises] = useState(
-    selectedExercises.map((ex) => ({
-      ...ex,
-      sets: ex.sets
-        ? ex.sets.map((set) => ({
-            ...set,
-            kg: set.kg ?? 0,
-            reps: set.reps ?? 0,
-          }))
-        : [{ id: 1, kg: 0, reps: 0 }],
-    }))
-  );
-  const [completedSets, setCompletedSets] = useState([]);
+  const [exercises, setExercises] = useState([]);
+  const [workoutTitle, setWorkoutTitle] = useState('Workout Plan');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   useEffect(() => {
     if (selectedExercises.length > 0) {
-      setExercises(
-        selectedExercises.map((ex) => ({
-          ...ex,
-          sets: ex.sets
-            ? ex.sets.map((set) => ({
-                ...set,
-                kg: set.kg ?? 0,
-                reps: set.reps ?? 0,
-              }))
-            : [{ id: 1, kg: 0, reps: 0 }],
-        }))
-      );
+      setExercises(selectedExercises);
     }
   }, [selectedExercises]);
 
-  const addSet = (exerciseId) => {
-    setExercises((prevExercises) =>
-      prevExercises.map((exercise) =>
-        exercise._id === exerciseId
-          ? {
-              ...exercise,
-              sets: [
-                ...exercise.sets,
-                { id: exercise.sets.length + 1, kg: 0, reps: 0 },
-              ],
-            }
-          : exercise
-      )
-    );
-  };
-
-  const addExercise = () => {
-    navigation.navigate('WorkoutList');
-  };
+  const [completedSets, setCompletedSets] = useState([]);
 
   const toggleSetCompletion = (exerciseId, setId) => {
-    const setIdentifier = `${exerciseId}-${setId}`;
-    if (completedSets.includes(setIdentifier)) {
-      setCompletedSets(completedSets.filter((id) => id !== setIdentifier));
+    const key = `${exerciseId}-${setId}`;
+    if (completedSets.includes(key)) {
+      setCompletedSets(completedSets.filter((id) => id !== key));
     } else {
-      setCompletedSets([...completedSets, setIdentifier]);
+      setCompletedSets([...completedSets, key]);
     }
   };
 
-  const renderSet = (exerciseId, { item, index }) => {
-    if (!item) {
-      return null; 
+  const addSet = (exerciseId) => {
+    const updatedExercises = exercises.map((exercise) => {
+      if (exercise._id === exerciseId) {
+        const newSet = { id: (exercise.sets ? exercise.sets.length : 0) + 1 ,meters:0,kg: 0, reps: 0, time: '00:00' };
+        return { ...exercise, sets: exercise.sets ? [...exercise.sets, newSet] : [newSet] };
+      }
+      return exercise;
+    });
+    setExercises(updatedExercises);
+  };
+
+  const handleTitleChange = (text) => {
+    setWorkoutTitle(text);
+  };
+
+  const toggleEditingTitle = () => {
+    setIsEditingTitle(!isEditingTitle);
+  };
+
+  const renderItem = ({ item }) => {
+    let ExerciseComponent;
+    switch (item.type) {
+      case 'Duration':
+        ExerciseComponent = Duration;
+        break;
+      case 'Weight & Reps':
+        ExerciseComponent = WeightReps;
+        break;
+      case 'Bodyweight Reps':
+        ExerciseComponent = BodyWeight;
+        break;
+      case 'Weighted Bodyweight':
+        ExerciseComponent = WeightedBodyWeight;
+        break;
+      case 'Weight & Distance':
+        ExerciseComponent = WeightDistance;
+        break;
+      case 'Assisted Bodyweight':
+        ExerciseComponent = AssistedBodyWeight;
+        break;
+      default:
+        ExerciseComponent = null;  
     }
-    const isCompleted = completedSets.includes(`${exerciseId}-${item.id}`);
-    return (
-      <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
-        <Text style={styles.setText}>{item.id}</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={item.kg.toString()}
-          onChangeText={(text) => {
-            const newExercises = [...exercises];
-            const exercise = newExercises.find((ex) => ex._id === exerciseId);
-            exercise.sets[index].kg = text ? parseInt(text, 10) : 0;
-            setExercises(newExercises);
-          }}
-        />
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={item.reps.toString()}
-          onChangeText={(text) => {
-            const newExercises = [...exercises];
-            const exercise = newExercises.find((ex) => ex._id === exerciseId);
-            exercise.sets[index].reps = text ? parseInt(text, 10) : 0;
-            setExercises(newExercises);
-          }}
-        />
-        <TouchableOpacity
-          style={styles.tickIcon}
-          onPress={() => toggleSetCompletion(exerciseId, item.id)}
-        >
-          <FontAwesome
-            name="check"
-            size={24}
-            color={isCompleted ? 'green' : 'white'}
-          />
-        </TouchableOpacity>
-      </View>
-    );
-  };
 
-  const renderExerciseHeader = (item) => {
-    return (
-      <View style={styles.header}>
-        <Image
-          source={{ uri: item.image || '' }}
-          style={styles.exerciseImage}
-        />
-        <View>
-          <Text style={styles.exerciseName}>{item.name}</Text>
-          <Text style={styles.muscleName}>{item.primary}</Text>
-        </View>
-      </View>
-    );
-  };
+    if (!ExerciseComponent) {
+      return null;
+    }
 
-  const renderHeader = () => {
     return (
-      <View style={styles.header}>
-        <TextInput
-          style={styles.workoutTitleInput}
-          placeholder="Enter workout title"
-          placeholderTextColor="#999"
-          value={workoutTitle}
-          onChangeText={setWorkoutTitle}
+      <View style={styles.exerciseContainer}>
+        <ExerciseComponent
+          exercise={item}
+          exercises={exercises}
+          setExercises={setExercises}
+          completedSets={completedSets}
+          toggleSetCompletion={toggleSetCompletion}
+          addSet={addSet}
         />
       </View>
     );
@@ -150,45 +95,47 @@ const StartWorkout = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={exercises}
-        keyExtractor={(exercise) => (exercise._id ? exercise._id.toString() : '')}
-        renderItem={({ item }) => (
-          <View style={styles.exerciseContainer}>
-            {renderExerciseHeader(item)}
-            <View style={styles.table}>
-              <View style={styles.headerRow}>
-                <Text style={styles.columnHeader}>Set</Text>
-                <Text style={styles.columnHeader}>KG</Text>
-                <Text style={styles.columnHeader}>Reps</Text>
-                <Text style={styles.columnHeader}>
-                  <FontAwesome name="check" size={24} color="white" />
-                </Text>
-              </View>
-              <FlatList
-                data={item.sets || []}
-                renderItem={({ item: set, index }) => renderSet(item._id, { item: set, index })}
-                keyExtractor={(set, index) => `${item._id}-${index}`}
-              />
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => addSet(item._id)}
-              >
-                <Text style={styles.addButtonText}>Add Set</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+      <View style={styles.titleContainer}>
+        {isEditingTitle ? (
+          <TextInput
+            style={styles.titleInputBox}
+            value={workoutTitle}
+            onChangeText={handleTitleChange}
+            onBlur={toggleEditingTitle}
+            autoFocus
+          />
+        ) : (
+          <Text style={styles.titleText}>{workoutTitle}</Text>
         )}
-        ListHeaderComponent={renderHeader}
-        ListFooterComponent={(
+        <TouchableOpacity onPress={toggleEditingTitle}>
+          <Ionicons name={isEditingTitle ? 'checkmark' : 'pencil'} size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+      {exercises.length === 0 ? (
+        <View style={styles.messageContainer}>
+          <Text style={styles.message}>No exercises selected.</Text>
           <TouchableOpacity
-            style={styles.addExerciseButton}
-            onPress={addExercise}
+            style={styles.addButton}
+            onPress={() => navigation.navigate('WorkoutList')}
           >
             <Text style={styles.addButtonText}>Add Exercise</Text>
           </TouchableOpacity>
-        )}
-      />
+        </View>
+      ) : (
+        <FlatList
+          data={exercises}
+          renderItem={renderItem}
+          keyExtractor={(item) => item._id}
+          ListFooterComponent={() => (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => navigation.navigate('WorkoutList')}
+            >
+              <Text style={styles.addButtonText}>Add Exercise</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -199,102 +146,50 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#1C1C1E',
   },
-  header: {
-    marginBottom: 10,
+  messageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  workoutTitleInput: {
-    height: 40,
-    borderColor: '#666',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingLeft: 10,
+  message: {
+    fontSize: 18,
     color: '#FFF',
-    marginBottom: 10,
-    width: '100%',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   exerciseContainer: {
-    marginBottom: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  exerciseImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginRight: 10,
-  },
-  exerciseName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  muscleName: {
-    fontSize: 16,
-    color: '#999',
-  },
-  table: {
-    marginBottom: 16,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    marginBottom: 8,
-  },
-  columnHeader: {
-    width: '25%',
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  setRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  completedSetRow: {
-    backgroundColor: '#006400',
-  },
-  setText: {
-    width: '25%',
-    fontSize: 16,
-    color: 'white',
-    textAlign: 'center',
-  },
-  input: {
-    width: '25%',
-    height: 40,
-    color: 'white',
-    textAlign: 'center',
-  },
-  tickIcon: {
-    width: '25%',
-    alignItems: 'center',
+    marginBottom: 24,
   },
   addButton: {
-    marginTop: 5,
-    borderWidth: 3,
-    borderColor: '#FF4C0A',
-    borderRadius: 10,
-    padding: 12,
+    backgroundColor: '#FF4C0A',
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    bottom: 25,
-    top: 15,
+    marginTop: 16,
+    width:'100%',
   },
   addButtonText: {
-    color: '#fff',
+    color: '#FFF',
     fontSize: 16,
+    fontWeight: 'bold',
   },
-  addExerciseButton: {
-    backgroundColor: '#FF4C0A',
-    padding: 12,
-    borderRadius: 10,
+  titleContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 25,
+    marginBottom: 18,
+  },
+  titleText: {
+    fontSize: 24,
+    color: '#FFF',
+    flex: 1,
+  },
+  titleInputBox: {
+    fontSize: 24,
+    color: '#FFF',
+    flex: 1,
+    backgroundColor: '#2C2C2E',
+    padding: 8,
+    borderRadius: 8,
   },
 });
 
