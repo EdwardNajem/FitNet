@@ -1,14 +1,14 @@
+import { AntDesign } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-  View,
+  Modal,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  StatusBar,
-  Modal,
+  View,
 } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
 
 const WorkoutScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -57,14 +57,25 @@ const WorkoutScreen = ({ navigation }) => {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <TouchableOpacity onPress={handleEditWorkout} style={styles.modalButton}>
+              <TouchableOpacity
+                onPress={handleEditWorkout}
+                style={styles.modalButton}
+              >
                 <Text style={styles.modalButtonText}>Edit Workout</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleDeleteWorkout} style={[styles.modalButton, styles.deleteButton]}>
-                <Text style={[styles.modalButtonText, styles.deleteButtonText]}>Delete Workout</Text>
+              <TouchableOpacity
+                onPress={handleDeleteWorkout}
+                style={[styles.modalButton, styles.deleteButton]}
+              >
+                <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
+                  Delete Workout
+                </Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.cancelButton}
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -72,8 +83,11 @@ const WorkoutScreen = ({ navigation }) => {
 
         <Text style={styles.sectionTitle}>Quick Start</Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('StartWorkout')}
-          style={[styles.button, { backgroundColor: '#2F2F2F', marginBottom: 20 }]}
+          onPress={() => navigation.navigate('CreateWorkout')}
+          style={[
+            styles.button,
+            { backgroundColor: '#2F2F2F', marginBottom: 20 },
+          ]}
         >
           <View style={styles.buttonContent}>
             <AntDesign name="plus" size={24} color="#FF4C0A" />
@@ -99,7 +113,12 @@ const WorkoutScreen = ({ navigation }) => {
               <View style={styles.workoutHeader}>
                 <Text style={styles.workoutName}>{workout.name}</Text>
                 <TouchableOpacity onPress={() => handleWorkoutOptions(workout)}>
-                  <AntDesign name="ellipsis1" size={24} color="#FFFFFF" style={{ transform: [{ rotate: '90deg' }] }} />
+                  <AntDesign
+                    name="ellipsis1"
+                    size={24}
+                    color="#FFFFFF"
+                    style={{ transform: [{ rotate: '90deg' }] }}
+                  />
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
@@ -212,7 +231,7 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     paddingVertical: 10,
-    marginVertical: 5, 
+    marginVertical: 5,
     borderRadius: 10,
     backgroundColor: '#FF4C0A',
   },

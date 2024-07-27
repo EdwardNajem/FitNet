@@ -94,7 +94,7 @@ const WorkoutList = ({ navigation }) => {
     const selectedExercises = workout.filter((ex) =>
       selectedWorkouts.includes(ex._id)
     );
-    navigation.navigate('StartWorkout', { selectedExercises });
+    navigation.navigate('CreateWorkout', { selectedExercises });
   };
 
   const showAddButton = () => {
