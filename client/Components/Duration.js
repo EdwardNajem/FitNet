@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
 import { FontAwesome,AntDesign } from 'react-native-vector-icons';
 import WorkoutSettingModal from './WorkoutSettingsModal';
+import { Swipeable } from 'react-native-gesture-handler';
 
-const Duration = ({ exercise, exercises, setExercises, completedSets, toggleSetCompletion, addSet }) => {
+const Duration = ({ exercise, exercises, setExercises, completedSets, toggleSetCompletion, addSet, userWeight }) => {
   const [timers, setTimers] = useState({});
   const [workoutSettingsVisible, setWorkoutSettingsVisible] = useState(false);
  
@@ -13,13 +14,19 @@ const Duration = ({ exercise, exercises, setExercises, completedSets, toggleSetC
     };
   }, [timers]);
 
+  useEffect(() => {
+    console.log(exercises)
+  }, [exercises])
+
   const handleEditWeight = () => {
     console.log('Edit Weight');
     setWorkoutSettingsVisible(false);
   };
 
-  const handleDeleteWorkout = () => {
-    console.log('Delete workout');
+  const handleDeleteWorkout = (exerciseToRemove) => {
+    // console.log('Delete workout');
+    // console.log(exerciseToRemove);
+    setExercises((prevExercises) => prevExercises.filter(exercise => exercise !== exerciseToRemove));
     setWorkoutSettingsVisible(false);
   };
   const startTimer = (exerciseId, setId) => {
@@ -32,10 +39,10 @@ const Duration = ({ exercise, exercises, setExercises, completedSets, toggleSetC
           if (ex._id === exerciseId) {
             const updatedSets = ex.sets.map(set => {
               if (set.id === setId) {
-                const [minutes, seconds] = set.time.split(':').map(Number);
+                const [minutes, seconds] = set.currentTime?set.currentTime.split(':').map(Number):['00','00'];
                 const totalSeconds = minutes * 60 + seconds + 1;
                 const newTime = `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}`;
-                return { ...set, time: newTime };
+                return { ...set, currentTime: newTime };
               }
               return set;
             });
@@ -60,33 +67,87 @@ const Duration = ({ exercise, exercises, setExercises, completedSets, toggleSetC
     }
   };
 
+  // const handleDeleteSet = (item) => {
+  //   exercise.sets = exercise.sets.filter((set) => set.id != item.id);
+  //   console.log(exercise.sets)
+  // }
+
+  const handleDeleteSet = (exerciseToRemoveFrom, setIdToRemove) => {
+    setExercises((prevExercises) => {
+      return prevExercises.map((exercise) => {
+        if (exercise === exerciseToRemoveFrom) {
+          // Filter out the set to be deleted
+          return {
+            ...exercise,
+            sets: exercise.sets.filter(set => set.id !== setIdToRemove),
+          };
+        }
+        return exercise;
+      });
+    });
+  };
+
   const renderSet = (exerciseId, { item, index }) => {
     if (!item) return null;
 
     const isCompleted = completedSets.includes(`${exerciseId}-${item.id}`);
     const isRunning = !!timers[`${exerciseId}-${item.id}`];
 
+    const renderRightActions = (item) => (
+      <TouchableOpacity style={[styles.action, styles.decline]} onPress={()=> handleDeleteSet(exercise, item.id)}>
+        <AntDesign name="delete" size={24} color="#fff" />
+      </TouchableOpacity>
+    );
+
     return (
-      <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
-        <Text style={styles.setText}>{item.id}</Text>
-        <Text style={styles.previousText}>00:00</Text>
-        <View style={styles.playPauseContainer}>
-          <TouchableOpacity
-            style={styles.playPauseIcon}
-            onPress={() => isRunning ? pauseTimer(exerciseId, item.id) : startTimer(exerciseId, item.id)}
-          >
-            <FontAwesome name={isRunning ? "pause" : "play"} size={24} color='white' />
+      <>
+      {!isCompleted&&<Swipeable
+        key={index}
+        renderRightActions={() => renderRightActions(item)}
+      >
+        <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
+          <Text style={styles.setText}>{item.id}</Text>
+          <Text style={styles.previousText}>{item.time}</Text>
+          <View style={styles.playPauseContainer}>
+            <TouchableOpacity
+              style={styles.playPauseIcon}
+              onPress={() => isRunning ? pauseTimer(exerciseId, item.id) : startTimer(exerciseId, item.id)}
+            >
+              <FontAwesome name={isRunning ? "pause" : "play"} size={24} color='white' />
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={[styles.input, isRunning && styles.runningTime]}
+            value={item.currentTime?item.currentTime:'00:00'}
+            editable={false} 
+          />
+          <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
+            <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
           </TouchableOpacity>
         </View>
-        <TextInput
-          style={[styles.input, isRunning && styles.runningTime]}
-          value={item.time}
-          editable={false} 
-        />
-        <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
-          <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
-        </TouchableOpacity>
-      </View>
+      </Swipeable>}
+      {isCompleted&&
+        <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
+          <Text style={styles.setText}>{item.id}</Text>
+          <Text style={styles.previousText}>{item.time}</Text>
+          <View style={styles.playPauseContainer}>
+            <TouchableOpacity
+              style={styles.playPauseIcon}
+              onPress={() => isRunning ? pauseTimer(exerciseId, item.id) : startTimer(exerciseId, item.id)}
+            >
+              <FontAwesome name={isRunning ? "pause" : "play"} size={24} color='white' />
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={[styles.input, isRunning && styles.runningTime]}
+            value={item.currentTime?item.currentTime:'00:00'}
+            editable={false} 
+          />
+          <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
+            <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
+          </TouchableOpacity>
+        </View>}
+      </>
     );
   };
 
@@ -120,7 +181,7 @@ const Duration = ({ exercise, exercises, setExercises, completedSets, toggleSetC
         visible={workoutSettingsVisible}
         onClose={() => setWorkoutSettingsVisible(false)}
         onEdit={handleEditWeight}
-        onDelete={handleDeleteWorkout}
+        onDelete={() => handleDeleteWorkout(exercise)}
       />
     </View>
   );
@@ -224,6 +285,21 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  action: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 55,
+    width: 55
+  },
+  accept: {
+    backgroundColor: 'green',
+    borderRadius: 10,
+  
+  },
+  decline: {
+    backgroundColor: 'red',
+    borderRadius: 10,
   },
 });
 

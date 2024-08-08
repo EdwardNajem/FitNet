@@ -36,7 +36,7 @@ const musclegroups = [
   { label: 'Upper Back', value: 'Upper Back' },
 ];
 
-const WorkoutList = ({ navigation }) => {
+const WorkoutList = ({ navigation, route }) => {
   const [search, setSearch] = useState('');
   const [workout, setWorkout] = useState([]);
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);

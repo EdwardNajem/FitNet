@@ -11,7 +11,8 @@ import {
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-const FinishWorkout = () => {
+const FinishWorkout = ({ route, navigation }) => {
+  const {workoutData} = route.params || {};
   const [rating, setRating] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [description, setDescription] = useState('');
@@ -29,6 +30,16 @@ const FinishWorkout = () => {
     }
   };
 
+  const formatTime = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} mins` : `${minutes} mins`;
+  };
+  
+  const formatWeight = (weight) => {
+    return weight.toLocaleString();
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
@@ -37,11 +48,11 @@ const FinishWorkout = () => {
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statTitle}>Time</Text>
-            <Text style={styles.statValue}>45 mins</Text>
+            <Text style={styles.statValue}>{formatTime(workoutData.duration)}</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statTitle}>Volume</Text>
-            <Text style={styles.statValue}>250 KG</Text>
+            <Text style={styles.statValue}>{formatWeight(workoutData.volume)} KG</Text>
           </View>
         </View>
 

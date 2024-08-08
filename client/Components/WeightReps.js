@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
 import { FontAwesome,AntDesign } from '@expo/vector-icons';
 import WorkoutSettingModal from './WorkoutSettingsModal';
+import { Swipeable } from 'react-native-gesture-handler';
 
 const WeightReps = ({ exercise, exercises, setExercises, completedSets, toggleSetCompletion, addSet }) => {
   const [workoutSettingsVisible, setWorkoutSettingsVisible] = useState(false);
@@ -11,54 +12,119 @@ const WeightReps = ({ exercise, exercises, setExercises, completedSets, toggleSe
     console.log('Edit Weight');
     setWorkoutSettingsVisible(false);
   };
-  const handleDeleteWorkout = () => {
-    console.log('Delete workout');
+  const handleDeleteWorkout = (exerciseToRemove) => {
+    setExercises((prevExercises) => prevExercises.filter(exercise => exercise !== exerciseToRemove));
     setWorkoutSettingsVisible(false);
   };
 
+  const handleDeleteSet = (exerciseToRemoveFrom, setIdToRemove) => {
+    setExercises((prevExercises) => {
+      return prevExercises.map((exercise) => {
+        if (exercise === exerciseToRemoveFrom) {
+          // Filter out the set to be deleted
+          return {
+            ...exercise,
+            sets: exercise.sets.filter(set => set.id !== setIdToRemove),
+          };
+        }
+        return exercise;
+      });
+    });
+  };
   
   const renderSet = (exerciseId, { item, index }) => {
     if (!item) {
       return null;
     }
     const isCompleted = completedSets.includes(`${exerciseId}-${item.id}`);
+
+    const renderRightActions = (item) => (
+      <TouchableOpacity style={[styles.action, styles.decline]} onPress={()=> handleDeleteSet(exercise, item.id)}>
+        <AntDesign name="delete" size={24} color="#fff" />
+      </TouchableOpacity>
+    );
+
     return (
-      <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
-        <Text style={styles.setText}>{item.id}</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={item.kg.toString()}
-          onChangeText={(text) => {
-            const newExercises = exercises.map(ex => {
-              if (ex._id === exerciseId) {
-                const updatedSets = ex.sets.map((set, idx) => (idx === index ? { ...set, kg: text } : set));
-                return { ...ex, sets: updatedSets };
-              }
-              return ex;
-            });
-            setExercises(newExercises);
-          }}
-        />
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={item.reps.toString()}
-          onChangeText={(text) => {
-            const newExercises = exercises.map(ex => {
-              if (ex._id === exerciseId) {
-                const updatedSets = ex.sets.map((set, idx) => (idx === index ? { ...set, reps: text } : set));
-                return { ...ex, sets: updatedSets };
-              }
-              return ex;
-            });
-            setExercises(newExercises);
-          }}
-        />
-        <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
-          <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
-        </TouchableOpacity>
-      </View>
+      <>
+      {!isCompleted&&<Swipeable
+        key={index}
+        renderRightActions={() => renderRightActions(item)}
+      >
+        <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
+          <Text style={styles.setText}>{item.id}</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={item.kg.toString()}
+            onChangeText={(text) => {
+              const newExercises = exercises.map(ex => {
+                if (ex._id === exerciseId) {
+                  const updatedSets = ex.sets.map((set, idx) => (idx === index ? { ...set, kg: text } : set));
+                  return { ...ex, sets: updatedSets };
+                }
+                return ex;
+              });
+              setExercises(newExercises);
+            }}
+          />
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={item.reps.toString()}
+            onChangeText={(text) => {
+              const newExercises = exercises.map(ex => {
+                if (ex._id === exerciseId) {
+                  const updatedSets = ex.sets.map((set, idx) => (idx === index ? { ...set, reps: text } : set));
+                  return { ...ex, sets: updatedSets };
+                }
+                return ex;
+              });
+              setExercises(newExercises);
+            }}
+          />
+          <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
+            <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
+          </TouchableOpacity>
+        </View>
+      </Swipeable>}
+      {isCompleted&&
+        <View style={[styles.setRow, isCompleted && styles.completedSetRow]}>
+          <Text style={styles.setText}>{item.id}</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={item.kg.toString()}
+            onChangeText={(text) => {
+              const newExercises = exercises.map(ex => {
+                if (ex._id === exerciseId) {
+                  const updatedSets = ex.sets.map((set, idx) => (idx === index ? { ...set, kg: text } : set));
+                  return { ...ex, sets: updatedSets };
+                }
+                return ex;
+              });
+              setExercises(newExercises);
+            }}
+          />
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={item.reps.toString()}
+            onChangeText={(text) => {
+              const newExercises = exercises.map(ex => {
+                if (ex._id === exerciseId) {
+                  const updatedSets = ex.sets.map((set, idx) => (idx === index ? { ...set, reps: text } : set));
+                  return { ...ex, sets: updatedSets };
+                }
+                return ex;
+              });
+              setExercises(newExercises);
+            }}
+          />
+          <TouchableOpacity style={styles.tickIcon} onPress={() => toggleSetCompletion(exerciseId, item.id)}>
+            <FontAwesome name="check" size={24} color={isCompleted ? 'green' : 'white'} />
+          </TouchableOpacity>
+        </View>}
+      </>
     );
   };
 
@@ -92,7 +158,7 @@ const WeightReps = ({ exercise, exercises, setExercises, completedSets, toggleSe
         visible={workoutSettingsVisible}
         onClose={() => setWorkoutSettingsVisible(false)}
         onEdit={handleEditWeight}
-        onDelete={handleDeleteWorkout}
+        onDelete={() => handleDeleteWorkout(exercise)}
       />
     </View>
   );
@@ -182,6 +248,21 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     padding: 8,
+  },
+  action: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 55,
+    width: 55
+  },
+  accept: {
+    backgroundColor: 'green',
+    borderRadius: 10,
+  
+  },
+  decline: {
+    backgroundColor: 'red',
+    borderRadius: 10,
   },
 });
 
