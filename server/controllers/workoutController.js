@@ -1,5 +1,6 @@
 const ExerciseModel = require('../models/exerciseModel');
 const WorkoutPlanModel = require('../models/workoutPlanModel');
+const userModel = require('../models/userModel');
 
 const getAllExercises = async (req, res) => {
   try {
@@ -68,7 +69,7 @@ const createWorkoutPlan = async (req, res) => {
   }
 
   try {
-    const newWorkoutPlan = new WorkoutPlan({
+    const newWorkoutPlan = new WorkoutPlanModel({
       title,
       createdBy,
       exercises,
@@ -91,17 +92,137 @@ const createWorkoutPlan = async (req, res) => {
   }
 };
 
+const startWorkout = async (req, res) => {
+  const {workoutId, startTime} = req.body;
 
-const deleteWorkoutPlanById = async (req, res) => {
-  const { id } = req.params;
+  if (!workoutId || !startTime) {
+    return res.status(400).send({
+      success: false,
+      message: 'Please make sure everything is provided',
+    });
+  }
 
   try {
-    const deletedWorkoutPlan = await WorkoutPlanModel.findByIdAndDelete(id);
+    const updatedWorkoutPlan = await WorkoutPlanModel.findByIdAndUpdate(
+      workoutId,
+      { startTime },
+      { new: true, runValidators: true }
+    );
 
-    if (!deletedWorkoutPlan) {
+    if (!updatedWorkoutPlan) {
       return res.status(404).send({
         success: false,
         message: 'Workout plan not found',
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'Workout start time updated successfully',
+      workoutPlan: updatedWorkoutPlan,
+    });
+    
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: 'Error in starting your workout',
+      error,
+    });
+  }
+}
+
+const finishWorkout = async (req, res) => {
+  const {workoutId, endTime} = req.body;
+  if (!workoutId || !endTime) {
+    return res.status(400).send({
+      success: false,
+      message: 'Please make sure everything is provided',
+    });
+  }
+
+  try {
+
+    const workoutPlan = await WorkoutPlanModel.findById(workoutId);
+
+    // first lets get the end time
+    const date1 = new Date(workoutPlan.startTime);
+    const date2 = new Date(endTime);
+    const diffInMs = date2 - date1;
+
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+    // now lets calculate the volume
+    let volume = 0;
+    const user = await userModel.findById(workoutPlan.createdBy); 
+    const weightOfUser = user.weight;
+    for (let index = 0; index < workoutPlan.exercises.length; index++) {
+      const item = workoutPlan.exercises[index];
+      switch (item.type) {
+        case 'Duration':
+          console.log('amogus')
+          break;
+        case 'Weight & Reps':
+          for (let set = 0; set < item.sets.length; set++) {
+            const currentSet = item.sets[set];
+            volume += currentSet.kg * currentSet.reps;   
+          }
+          break;
+        case 'Bodyweight Reps':
+          for (let set = 0; set < item.sets.length; set++) {
+            const currentSet = item.sets[set];
+            volume += weightOfUser * currentSet.reps;   
+          }
+          break;
+        case 'Weighted Bodyweight':
+          for (let set = 0; set < item.sets.length; set++) {
+            const currentSet = item.sets[set];
+            volume += (weightOfUser+currentSet.kg) * currentSet.reps;   
+          }
+          break;
+        case 'Weight & Distance':
+          console.log('amogus')
+          break;
+        case 'Assisted Bodyweight':
+          for (let set = 0; set < item.sets.length; set++) {
+            const currentSet = item.sets[set];
+            volume += (weightOfUser-currentSet.kg) * currentSet.reps;
+          }
+          break;
+        default:
+          ExerciseComponent = null;  
+      }
+    }
+
+
+    return res.status(200).send({
+      success: true,
+      data: {
+        duration: diffInMinutes,
+        volume: volume,
+      },
+    })
+    
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({
+      success: false,
+      message: 'Error in ending your workout',
+      error,
+    });
+  }
+}
+
+
+const deleteWorkoutPlanById = async (req, res) => {
+  const { workoutId } = req.params;
+
+  try {
+    const deletedWorkoutPlan = await WorkoutPlanModel.findByIdAndDelete(workoutId);
+
+    if (!deletedWorkoutPlan) {
+      return res.status(401).send({
+        success: false,
+        message: 'Workout plan not found ' + id,
       });
     }
 
@@ -120,9 +241,63 @@ const deleteWorkoutPlanById = async (req, res) => {
   }
 };
 
+const updateWorkoutPlanById = async (req, res) => {
+  const { workoutId } = req.params; // Assuming the ID is passed as a URL parameter
+  const { title, exercises } = req.body;
+
+  if (!title || !exercises || !exercises.length) {
+    return res.status(400).send({
+      success: false,
+      message: 'Please provide title and exercises with reps',
+    });
+  }
+
+  // Process the exercises array to update time with currentTime if present
+  const updatedExercises = exercises.map(exercise => {
+    const updatedSets = exercise.sets.map(set => ({
+      ...set,
+      time: set.currentTime || set.time,
+      reps: set.currentReps || set.reps,
+      meters: set.currentMeters || set.meters,
+    }));
+    return { ...exercise, sets: updatedSets };
+  });
+
+  try {
+    const updatedWorkoutPlan = await WorkoutPlanModel.findByIdAndUpdate(
+      workoutId,
+      { title, exercises: updatedExercises },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedWorkoutPlan) {
+      return res.status(404).send({
+        success: false,
+        message: 'Workout plan not found',
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'Workout plan updated successfully',
+      workoutPlan: updatedWorkoutPlan,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: 'Error in updating workout plan',
+      error,
+    });
+  }
+};
+
 module.exports = {
   getAllExercises,
   getAllWorkoutPlansByUser,
   createWorkoutPlan,
+  startWorkout,
+  finishWorkout,
   deleteWorkoutPlanById,
+  updateWorkoutPlanById,
 };

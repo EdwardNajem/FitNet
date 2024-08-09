@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
-const WeightModal = ({ visible, onClose, onSubmit }) => {
-  const [weight, setWeight] = useState('');
+const WeightModal = ({ visible, onClose, onSubmit, userWeight }) => {
+  const [weight, setWeight] = useState(`${userWeight}`);
 
   return (
     <Modal

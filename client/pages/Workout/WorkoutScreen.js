@@ -1,5 +1,6 @@
 import { AntDesign } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   ScrollView,
@@ -9,19 +10,62 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import api from '../../Components/Config';
+import { useIsFocused } from '@react-navigation/native';
 
 const WorkoutScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
 
-  const workouts = [
-    { id: 1, name: 'Chest - Biceps' },
-    { id: 2, name: 'Legs - Abs' },
-    { id: 3, name: 'Shoulders - Triceps' },
-  ];
+  const [workouts, setWorkouts] = useState([]);
 
-  const handleStartWorkout = (workoutId) => {
-    console.log('Start workout:', workoutId);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused)
+      getAllWorkoutPlansByUser();
+  }, [navigation,isFocused]);
+
+  const getAllWorkoutPlansByUser = async () => {
+    try {
+      const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+
+      const response = await api.get(`/fitnet/getAllWorkoutPlansByUser/${user.user._id}`);
+
+      if(response){
+        setWorkouts(response.data.workoutPlans);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // const workouts = [
+  //   { id: 1, name: 'Chest - Biceps' },
+  //   { id: 2, name: 'Legs - Abs' },
+  //   { id: 3, name: 'Shoulders - Triceps' },
+  // ];
+
+  const handleStartWorkout = async (workout) => {
+    console.log('Start workout:', workout);
+
+    // set startTime to the current time
+    try {
+      const data = {
+        workoutId: workout._id,
+        startTime: new Date(),
+      }
+
+      const response = await api.post('/fitnet/startWorkout', data);
+
+      if(response){
+        navigation.navigate('StartWorkout', {
+          selectedWorkoutPlan: workout
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleWorkoutOptions = (workout) => {
@@ -30,12 +74,28 @@ const WorkoutScreen = ({ navigation }) => {
   };
 
   const handleEditWorkout = () => {
-    console.log('Edit workout:', selectedWorkout);
+    // console.log('Edit workout:', selectedWorkout);
+    navigation.navigate('EditWorkout', {
+      selectedWorkoutPlan: selectedWorkout
+    });
     setModalVisible(false);
   };
 
-  const handleDeleteWorkout = () => {
+  const handleDeleteWorkout = async () => {
     console.log('Delete workout:', selectedWorkout);
+    setWorkouts((prevWorkouts) => prevWorkouts.filter(workout => workout !== selectedWorkout));
+    try {
+      const response = await api.delete(`/fitnet/deleteWorkoutPlanById/${selectedWorkout._id}`);
+
+      if(response){
+        const data = await response.json();
+        console.log(data);
+        console.log('Deleted the workout with ID: ', selectedWorkout._id);
+      }
+      
+    } catch (error) {
+      console.log(error);
+    }
     setModalVisible(false);
   };
 
@@ -48,7 +108,7 @@ const WorkoutScreen = ({ navigation }) => {
 
       <View style={styles.content}>
         <Modal
-          animationType="slide"
+          animationType="fade"
           transparent={true}
           visible={modalVisible}
           onRequestClose={() => {
@@ -61,14 +121,14 @@ const WorkoutScreen = ({ navigation }) => {
                 onPress={handleEditWorkout}
                 style={styles.modalButton}
               >
-                <Text style={styles.modalButtonText}>Edit Workout</Text>
+                <Text style={styles.modalButtonText}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleDeleteWorkout}
                 style={[styles.modalButton, styles.deleteButton]}
               >
                 <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
-                  Delete Workout
+                  Delete
                 </Text>
               </TouchableOpacity>
             </View>
@@ -109,9 +169,9 @@ const WorkoutScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Workout Plan</Text>
           {workouts.map((workout) => (
-            <View key={workout.id} style={styles.workoutCard}>
+            <View key={workout._id} style={styles.workoutCard}>
               <View style={styles.workoutHeader}>
-                <Text style={styles.workoutName}>{workout.name}</Text>
+                <Text style={styles.workoutName}>{workout.title}</Text>
                 <TouchableOpacity onPress={() => handleWorkoutOptions(workout)}>
                   <AntDesign
                     name="ellipsis1"
@@ -122,7 +182,7 @@ const WorkoutScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
-                onPress={() => handleStartWorkout(workout.id)}
+                onPress={() => handleStartWorkout(workout)}
                 style={styles.startButton}
               >
                 <Text style={styles.startButtonText}>Start Workout</Text>

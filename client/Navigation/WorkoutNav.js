@@ -9,6 +9,9 @@ import TrainerScreen from '../pages/Workout/Trainer';
 import TrainerInformationScreen from '../pages/Workout/TrainerInformation';
 import WorkoutListScreen from '../pages/Workout/WorkoutList';
 import WorkoutScreen from '../pages/Workout/WorkoutScreen';
+import EditWorkout from '../pages/Workout/EditWorkout';
+import WorkoutListEdit from '../pages/Workout/WorkoutListEdit'
+import WorkoutListStartWorkout from '../pages/Workout/WorkoutListStartWorkout';
 
 const Stack = createStackNavigator();
 
@@ -39,17 +42,17 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerStyle: { backgroundColor: '#2F2F2F' },
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
-          headerRight: () => (
-            <View style={styles.headerView}>
-              <ClockModal />
-              <TouchableOpacity
-                onPress={() => navigation.navigate('FinishWorkout')}
-                style={styles.headerButton}
-              >
-                <Text style={styles.headerButtonText}>Finish</Text>
-              </TouchableOpacity>
-            </View>
-          ),
+          // headerRight: () => (
+          //   <View style={styles.headerView}>
+          //     <ClockModal />
+          //     <TouchableOpacity
+          //       onPress={() => navigation.navigate('FinishWorkout')}
+          //       style={styles.headerButton}
+          //     >
+          //       <Text style={styles.headerButtonText}>Finish</Text>
+          //     </TouchableOpacity>
+          //   </View>
+          // ),
         })}
       />
       <Stack.Screen
@@ -61,16 +64,6 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerStyle: { backgroundColor: '#2F2F2F' },
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
-          headerRight: () => (
-            <View style={styles.headerView}>
-              <TouchableOpacity
-                // onPress={} //Save Workout Function
-                style={styles.headerButton}
-              >
-                <Text style={styles.headerButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          ),
         })}
       />
       <Stack.Screen
@@ -83,7 +76,7 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerShadowVisible: false,
           headerRight: () => (
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate('Workout-Screen')}
               style={styles.headerButton}
             >
               <Text style={styles.headerButtonText}>Skip</Text>
@@ -121,6 +114,36 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
         }}
+      />
+      <Stack.Screen
+        name="EditWorkout"
+        component={EditWorkout}
+        options={{
+          headerTitle: 'Book Trainer',
+          headerStyle: { backgroundColor: '#2F2F2F' },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="WorkoutListEdit"
+        component={WorkoutListEdit}
+        options={{
+          headerTitle: 'Book Trainer',
+          headerStyle: { backgroundColor: '#2F2F2F' },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="WorkoutListStartWorkout"
+        component={WorkoutListStartWorkout}
+        options={({ navigation }) => ({
+          headerTitle: 'Finish Workout',
+          headerStyle: { backgroundColor: '#2F2F2F' },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        })}
       />
     </Stack.Navigator>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Duration from '../../Components/Duration';
@@ -7,12 +7,18 @@ import BodyWeight from '../../Components/BodyWeight';
 import WeightedBodyWeight from '../../Components/WeightedBodyWeight';
 import WeightDistance from '../../Components/WeightDistance';
 import AssistedBodyWeight from '../../Components/AssistedBodyWeight';
+import api from '../../Components/Config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../Context/authContext';
 
 const CreateWorkout = ({ route, navigation }) => {
+  const [state] = useContext(AuthContext);
   const { selectedExercises = [] } = route.params || {};
   const [exercises, setExercises] = useState([]);
   const [workoutTitle, setWorkoutTitle] = useState('Workout Plan');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  console.log(state.user)
 
   useEffect(() => {
     if (selectedExercises.length > 0) {
@@ -20,7 +26,43 @@ const CreateWorkout = ({ route, navigation }) => {
     }
   }, [selectedExercises]);
 
+  // Set up the headerRight component
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={styles.headerView}>
+          <TouchableOpacity
+            onPress={handleSaveWorkout}
+            style={styles.headerButton}
+          >
+            <Text style={styles.headerButtonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation, exercises]);
+
   const [completedSets, setCompletedSets] = useState([]);
+
+  const handleSaveWorkout = async () => {
+    try {
+      const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+
+      const data  = {
+        title: workoutTitle,
+        createdBy: user.user._id,
+        exercises: exercises,
+      };
+
+      const response = await api.post('fitnet/createWorkoutPlan', data);
+
+      if(response){
+        navigation.goBack();
+      }
+    } catch (error) {
+      alert("There was an error while creating your workout, make sure you have entered at least 1 set for all the exercices")
+    }
+  }
 
   const toggleSetCompletion = (exerciseId, setId) => {
     const key = `${exerciseId}-${setId}`;
@@ -34,11 +76,12 @@ const CreateWorkout = ({ route, navigation }) => {
   const addSet = (exerciseId) => {
     const updatedExercises = exercises.map((exercise) => {
       if (exercise._id === exerciseId) {
-        const newSet = { id: (exercise.sets ? exercise.sets.length : 0) + 1 ,meters:0,kg: 0, reps: 0, time: '00:00' };
+        const newSet = { id: (exercise.sets ? (exercise.sets.length>0 ? exercise.sets[exercise.sets.length-1].id : 0): 0) + 1 ,meters:0,kg: 0, reps: 0, time: '00:00' };
         return { ...exercise, sets: exercise.sets ? [...exercise.sets, newSet] : [newSet] };
       }
       return exercise;
     });
+    console.log(updatedExercises[0].sets);
     setExercises(updatedExercises);
   };
 
@@ -88,6 +131,7 @@ const CreateWorkout = ({ route, navigation }) => {
           completedSets={completedSets}
           toggleSetCompletion={toggleSetCompletion}
           addSet={addSet}
+          userWeight={state.user.weight}
         />
       </View>
     );
@@ -190,6 +234,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#2C2C2E',
     padding: 8,
     borderRadius: 8,
+  },
+  headerButtonText: {
+    color: '#FF4C0A',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  headerButton: {
+    marginLeft: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 4,
   },
 });
 

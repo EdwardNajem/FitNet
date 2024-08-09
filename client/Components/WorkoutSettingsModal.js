@@ -11,9 +11,9 @@ const WorkoutSettingModal = ({ visible, onClose, onDelete, onEdit }) => {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <TouchableOpacity style={styles.optionButton} onPress={onEdit}>
+          {/* <TouchableOpacity style={styles.optionButton} onPress={onEdit}>
             <Text style={styles.optionText}>Edit Weight</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={styles.optionButton} onPress={onDelete}>
             <Text style={styles.optionText}>Delete Workout</Text>
           </TouchableOpacity>
