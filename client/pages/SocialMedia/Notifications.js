@@ -22,7 +22,7 @@ const UserNotifications = [
     id: 3,
     type: 'request',
     user: 'Edward Najem',
-    action: 'requested for you to be a trainer',
+    action: 'requested to follow you',
     image: require('../../assets/images/logo.png'),
   },
 ];
