@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, StatusBar, TouchableOpacity, TextInput, Animated, FlatList } from 'react-native';
+import { ScrollView, View, Text, TextInput,Image, StyleSheet, StatusBar, TouchableOpacity, Animated, FlatList } from 'react-native';
 import { FontAwesome, Entypo, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -43,8 +43,6 @@ const HomeScreen = () => {
   const [currentPostId, setCurrentPostId] = useState(null);
   const [comment, setComment] = useState('');
   const [posts, setPosts] = useState(staticPosts);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const slideAnim = useState(new Animated.Value(500))[0];
 
   const handleCommentPress = (postId) => {
@@ -90,8 +88,7 @@ const HomeScreen = () => {
   };
 
   const handleSearchPress = () => {
-    setIsSearchVisible(!isSearchVisible);
-    setSearchQuery('');
+    navigation.navigate('Search');
   };
 
   const renderCommentItem = ({ item }) => (
@@ -118,19 +115,9 @@ const HomeScreen = () => {
         <StatusBar backgroundColor="#2F2F2F" />
 
         <View style={styles.header}>
-          {isSearchVisible ? (
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search..."
-              placeholderTextColor="#999"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          ) : (
-            <Text style={styles.title}>Home</Text>
-          )}
+          <Text style={styles.title}>Home</Text>
           <TouchableOpacity onPress={handleSearchPress}>
-            <Ionicons name={isSearchVisible ? "close" : "search"} size={25} color="#FF4C0A" />
+            <Ionicons name="search" size={25} color="#FF4C0A" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications" size={25} color="#FF4C0A" />
@@ -149,7 +136,7 @@ const HomeScreen = () => {
             <Text style={styles.postText}>{post.description}</Text>
             <Image source={post.image} style={styles.postImage} resizeMode="cover" />
             <View style={styles.postStats}>
-              <Text style={styles.likes}>{post.likes} likes</Text>
+                            <Text style={styles.likes}>{post.likes} likes</Text>
               <Text style={styles.comments}>{post.comments.length} comments</Text>
             </View>
             <View style={styles.actionIcons}>
@@ -218,15 +205,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    borderColor: '#666',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingLeft: 10,
-    color: '#FFF',
   },
   postCard: {
     backgroundColor: '#2F2F2F',
@@ -376,3 +354,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
