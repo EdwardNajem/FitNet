@@ -1,21 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import api from '../../Components/Config'; 
+import { AuthContext } from '../../Context/authContext';
 
 const UserProfile = () => {
   const route = useRoute();
   const { user } = route.params;
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const handleFollowPress = () => {
-    setIsFollowing(!isFollowing);
+  const [state] = useContext(AuthContext);
+  const userFollowerId = state.user?._id; 
+
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      try {
+        const response = await api.get('fitnet/followStatus', {
+          params: {
+            UserFollowerId: userFollowerId,
+            UserFollowingId: user._id,
+          },
+        });
+        if (response.status === 200) {
+          setIsFollowing(response.data.isFollowing); // Update state based on response
+        }
+      } catch (error) {
+        console.error('Error fetching follow status:', error);
+      }
+    };
+
+    if (userFollowerId) {
+      checkFollowStatus();
+    }
+  }, [userFollowerId, user._id]);
+
+  const handleFollowPress = async () => {
+    if (!userFollowerId) return; 
+    try {
+      const url = isFollowing ? 'fitnet/unfollowUser' : 'fitnet/followUser';
+      const response = await api.post(url, {
+        UserFollowerId: userFollowerId,
+        UserFollowingId: user._id,
+      });
+
+      if (response.status === 200) {
+        setIsFollowing(!isFollowing); 
+      } else {
+        console.log(`Failed to ${isFollowing ? 'unfollow' : 'follow'}`);
+      }
+    } catch (error) {
+      console.error('Error following/unfollowing user:', error);
+    }
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.imageContainer}>
-          <Image source={user.image} style={styles.userImage} />
-          <Text style={styles.userName}>{user.name}</Text>
+          <Image source={{ uri: user.avatar }} style={styles.userImage} />
+          <Text style={styles.userName}>{user.username}</Text>
         </View>
         <View style={styles.stats}>
           <View style={styles.statItem}>
@@ -116,7 +159,7 @@ const styles = StyleSheet.create({
     borderColor: '#FF4C0A',
   },
   followingButtonText: {
-    color: 'white',
+    color: '#FF4C0A',
   },
 });
 
