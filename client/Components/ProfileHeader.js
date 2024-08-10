@@ -12,15 +12,45 @@ import {
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { AuthContext } from '../Context/authContext';
 import GreyCircle from './GreyCircle';
+import api from './Config';
 
 const ProfileHeader = ({ user, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [animation] = useState(new Animated.Value(0)); // Initialize animation value
+  const [errorMessage, setErrorMessage] = useState('');
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const fetchData = async () => {
+    setLoading(true);
+    setErrorMessage('');
+    try {
+      const followerResponse = await api.get(`fitnet/getFollowerCount?userId=${user._id}`);
+      const followingResponse = await api.get(`fitnet/getFollowingCount?userId=${user._id}`);
+
+      if (followerResponse.status === 200 && followingResponse.status === 200) {
+        setFollowerCount(followerResponse.data.followerCount);
+        setFollowingCount(followingResponse.data.followingCount);
+      } else {
+        setErrorMessage('Failed to fetch follower/following counts');
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 500) {
+        setErrorMessage(error.response.data?.message || 'Internal Server Error');
+      } else if (error.response && error.response.status === 400) {
+        setErrorMessage(error.response.data?.message || 'Failed to fetch counts');
+      } else {
+        setErrorMessage('Failed to fetch follower/following counts');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
     // Simulate fetching user data
     setTimeout(() => {
+      fetchData();
       setLoading(false);
     }, 2000);
     // Start the loading animation
@@ -82,7 +112,7 @@ const ProfileHeader = ({ user, navigation }) => {
             ) : (
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Followers</Text>
-                <Text style={styles.infoText}>{2}</Text>
+                <Text style={styles.infoText}>{followerCount}</Text>
               </View>
             )}
             {loading ? (
@@ -93,7 +123,7 @@ const ProfileHeader = ({ user, navigation }) => {
             ) : (
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Following</Text>
-                <Text style={styles.infoText}>{3}</Text>
+                <Text style={styles.infoText}>{followingCount}</Text>
               </View>
             )}
           </View>
