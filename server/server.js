@@ -23,6 +23,7 @@ app.use(morgan('dev'));
 app.use('/fitnet', require('./routes/userRoutes'));
 app.use('/fitnet', require('./routes/workoutRoutes'));
 app.use('/fitnet', require('./routes/postRoutes'));
+app.use('/fitnet', require('./routes/followRoutes'));
 
 //PORT
 const PORT = process.env.PORT || 8080;

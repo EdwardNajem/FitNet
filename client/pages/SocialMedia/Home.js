@@ -9,39 +9,6 @@ import PostExercises from '../../Components/PostExercises';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../Context/authContext';
 
-// const staticPosts = [
-//   {
-//     id: 1,
-//     userImage: require('../../assets/images/logo.png'),
-//     userName: 'Ahmad Zaarour',
-//     timeAgo: '1 hr ago',
-//     image: require('../../assets/images/logo.png'),
-//     description: 'Great workout today!',
-//     likes: 25,
-//     comments: [],
-//   },
-//   {
-//     id: 2,
-//     userImage: require('../../assets/images/logo.png'),
-//     userName: 'Edward Najem',
-//     timeAgo: '2 hrs ago',
-//     image: require('../../assets/images/logo.png'),
-//     description: 'Really enjoyed the trainer’s instructions.',
-//     likes: 15,
-//     comments: [],
-//   },
-//   {
-//     id: 3,
-//     userImage: require('../../assets/images/logo.png'),
-//     userName: 'Alex Johnson',
-//     timeAgo: '3 hrs ago',
-//     image: require('../../assets/images/logo.png'),
-//     description: 'Good workout but the environment could be better.',
-//     likes: 8,
-//     comments: [],
-//   },
-// ];
-
 const HomeScreen = () => {
   const [state] = useContext(AuthContext);
   const navigation = useNavigation();
@@ -165,8 +132,7 @@ const HomeScreen = () => {
 };
 
   const handleSearchPress = () => {
-    setIsSearchVisible(!isSearchVisible);
-    setSearchQuery('');
+    navigation.navigate('Search');
   };
 
   const handleLikePost = async (post) => {
@@ -288,19 +254,9 @@ const HomeScreen = () => {
         <StatusBar backgroundColor="#2F2F2F" />
 
         <View style={styles.header}>
-          {isSearchVisible ? (
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search..."
-              placeholderTextColor="#999"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          ) : (
-            <Text style={styles.title}>Home</Text>
-          )}
+          <Text style={styles.title}>Home</Text>
           <TouchableOpacity onPress={handleSearchPress}>
-            <Ionicons name={isSearchVisible ? "close" : "search"} size={25} color="#FF4C0A" />
+            <Ionicons name="search" size={25} color="#FF4C0A" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications" size={25} color="#FF4C0A" />
@@ -435,15 +391,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    borderColor: '#666',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingLeft: 10,
-    color: '#FFF',
   },
   postCard: {
     backgroundColor: '#2F2F2F',
@@ -599,3 +546,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
