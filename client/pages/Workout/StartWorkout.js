@@ -68,7 +68,7 @@ React.useLayoutEffect(() => {
             console.log(totalSetsRef.current);
             console.log(completedSetsRef.current.length);
             if(totalSetsRef.current==completedSetsRef.current.length){
-              updateWorkoutPlan();
+              await updateWorkoutPlan();
               try {
                 // now lets go calculate the total time and volume
                 const data = {
@@ -82,7 +82,8 @@ React.useLayoutEffect(() => {
                   // console.log(response.data);
                   setFinishedPressed(true);
                   navigation.navigate('FinishWorkout', {
-                    workoutData: response.data.data
+                    workoutData: response.data.data,
+                    workoutPlanId: selectedWorkoutPlan._id,
                   });
                 }
               } catch (error) {

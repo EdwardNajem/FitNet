@@ -8,26 +8,87 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { Switch } from 'react-native-gesture-handler';
+import ImageWithDelete from './ImageWithDelete';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../Components/Config';
 
 const FinishWorkout = ({ route, navigation }) => {
+  const storage = getStorage();
   const {workoutData} = route.params || {};
+  const {workoutPlanId} = route.params || {};
   const [rating, setRating] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [description, setDescription] = useState('');
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+  const handlePost = async () => {
+
+    const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+
+    let data;
+
+    if(isEnabled){
+      data = {
+        postType: "workout",
+        description: description,
+        workoutData: workoutData,
+        createdBy: user.user._id,
+        workoutPlanId: workoutPlanId,
+      }
+    }else{
+      savedImage = await uploadImage(selectedImage, user.user._id);
+      data = {
+        postType: "image",
+        description: description,
+        workoutData: workoutData,
+        createdBy: user.user._id,
+        imageURL: savedImage,
+      }
+    }
+
+    try {
+      const response = await api.post('/fitnet/uploadPost', data);
+
+      if(response){
+        // console.log(response);
+        navigation.navigate('Workout-Screen');
+      }
+    } catch (error) {
+      console.log(error)
+    }
+
+  }
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.5
     });
 
-    if (!result.cancelled) {
-      setSelectedImage(result.uri);
+    if (!result.canceled) {
+      console.log(result.assets[0].uri);
+      setSelectedImage(result.assets[0].uri);
     }
+  };
+
+  const uploadImage = async (imageUri, userId) => {
+    if (!imageUri) {
+      return null;
+    }
+
+    const resp = await fetch(imageUri);
+    const blob = await resp.blob();
+    const storageRef = ref(storage, 'FitNet/Posts/' + Date.now() + '-' + userId + '.jpg');
+    await uploadBytes(storageRef, blob);
+    const downloadUrl = await getDownloadURL(storageRef);
+    return downloadUrl;
   };
 
   const formatTime = (minutes) => {
@@ -61,7 +122,8 @@ const FinishWorkout = ({ route, navigation }) => {
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Image source={selectedImage ? { uri: selectedImage } : require('../../assets/images/logo.png')} style={styles.trainerImage} />
+            {/* <Image source={selectedImage ? { uri: selectedImage } : require('../../assets/images/logo.png')} style={styles.trainerImage} /> */}
+            <Image source={require('../../assets/images/logo.png')} style={styles.trainerImage} />
             <Text style={styles.trainerName}>Trainer Name</Text>
           </View>
 
@@ -78,12 +140,32 @@ const FinishWorkout = ({ route, navigation }) => {
             ))}
           </View>
         </View>
-        
-        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-          <AntDesign name="plus" size={30} color="#FF4C0A" />
-        </TouchableOpacity>
 
-        {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />}
+        <View style={styles.postTypeContainer}>
+          <Text style={styles.postTypeText}>Upload workout plan only</Text>
+          <Switch
+            trackColor={{false: '#767577', true: '#FF4C0A50'}}
+            thumbColor={isEnabled ? '#FF4C0A' : '#f4f3f4'}
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+          />
+        </View>
+
+        { !isEnabled&&
+        <>
+          <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+            <AntDesign name="plus" size={30} color="#FF4C0A" />
+          </TouchableOpacity>
+
+          {/* {selectedImage && <Image source={{ uri: selectedImage }} style={styles.selectedImage} />} */}
+          {selectedImage &&
+          <ImageWithDelete
+            selectedImage={selectedImage}
+            onDelete={() => setSelectedImage(null)}
+          />
+          }
+        </>
+        }
 
         <TextInput
           style={styles.descriptionInput}
@@ -94,7 +176,7 @@ const FinishWorkout = ({ route, navigation }) => {
           onChangeText={setDescription}
         />
 
-        <TouchableOpacity style={styles.submitButton}>
+        <TouchableOpacity style={styles.submitButton} onPress={() => {handlePost()}}>
           <Text style={styles.submitButtonText}>Post</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -105,6 +187,16 @@ const FinishWorkout = ({ route, navigation }) => {
 export default FinishWorkout;
 
 const styles = StyleSheet.create({
+  postTypeContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10
+  },
+  postTypeText: {
+    color: 'white',
+    fontSize: 18
+  },
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
@@ -144,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2F2F2F',
     borderRadius: 10,
     padding: 10,
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   cardHeader: {
     flexDirection: 'row',
