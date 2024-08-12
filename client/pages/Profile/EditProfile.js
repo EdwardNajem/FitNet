@@ -21,6 +21,7 @@ import LoadingAlert from '../../Components/LoadingAlert';
 import WhiteLine from '../../Components/WhiteLine';
 import { AuthContext } from '../../Context/authContext';
 import { app } from '../../firebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EditProfile = ({ navigation }) => {
   const storage = getStorage();
@@ -102,7 +103,7 @@ const EditProfile = ({ navigation }) => {
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 4],
-      quality: 1,
+      quality: 0.5,
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -197,6 +198,8 @@ const EditProfile = ({ navigation }) => {
       if (response.status === 200) {
         console.log('Account Updated successfully\n', response.data);
         setState({ ...state, user: response.data.user });
+        updateUserObject(response.data.user);
+        // await AsyncStorage.setItem('@auth', JSON.stringify(response.data));
         navigation.navigate('profile-tab');
       } else {
         console.error('Unexpected status:', response.status, response.data);
@@ -217,6 +220,33 @@ const EditProfile = ({ navigation }) => {
       }
 
       setLoading(false);
+    }
+  };
+
+  const updateUserObject = async (newUserData) => {
+    try {
+      // Step 1: Retrieve the existing data from AsyncStorage
+      const jsonValue = await AsyncStorage.getItem('@auth');
+  
+      if (jsonValue !== null) {
+        // Step 2: Parse the JSON string into an object
+        const authData = JSON.parse(jsonValue);
+  
+        // Step 3: Update the user object with the new data
+        authData.user = { ...authData.user, ...newUserData };
+  
+        // Step 4: Convert the updated object back to a JSON string
+        const updatedJsonValue = JSON.stringify(authData);
+  
+        // Step 5: Store the updated JSON string back into AsyncStorage
+        await AsyncStorage.setItem('@auth', updatedJsonValue);
+  
+        console.log('User object updated successfully!');
+      } else {
+        console.log('No auth data found');
+      }
+    } catch (e) {
+      console.error('Failed to update user object in AsyncStorage:', e);
     }
   };
 
