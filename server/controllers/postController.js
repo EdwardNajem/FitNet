@@ -1,5 +1,6 @@
 const WorkoutPlanModel = require('../models/workoutPlanModel');
 const userModel = require('../models/userModel');
+const Follow = require('../models/followModel');
 const postModel = require('../models/postModel');
 const mongoose = require('mongoose');
 
@@ -98,29 +99,80 @@ const uploadPost = async (req,res) => {
 // };
 
 const getAllPosts = async (req, res) => {
-    const {userId} = req.body;
+    const { userId } = req.body;
     try {
-        const userIdObj = new mongoose.Types.ObjectId(userId); // Convert userId to ObjectId
+        // Convert userId from string to ObjectId
+        const userIdObj = new mongoose.Types.ObjectId(userId);
 
+        // Step 1: Retrieve the list of users the current user is following
+        const following = await Follow.find({ UserFollowerId: userId }).lean();
+
+        // Extract the UserFollowingId and convert them to ObjectId
+        const followingIds = following.map(follow => new mongoose.Types.ObjectId(follow.UserFollowingId));
+
+        // Edge Case: If the user isn't following anyone, return an empty array
+        if (followingIds.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        // Step 2: Fetch posts created by the followed users
         const posts = await postModel
-            .find()
-            .populate('createdBy') // Populate the entire user object who created the post
-            .populate('comments.user') // Populate the entire user object in each comment
-            .sort({ createdAt: -1 }) // Sort by creation date, newest first
-            .lean(); // Use lean to get plain JavaScript objects
+            .find({ createdBy: { $in: followingIds } })
+            .populate('createdBy') // Populate the user who created the post
+            .populate('comments.user') // Populate the user in each comment
+            .sort({ createdAt: -1 }) // Sort posts by newest first
+            .lean(); // Get plain JavaScript objects instead of Mongoose documents
 
-        // Add isLikedByCurrentUser field to each post
+        // Step 3: Add isLikedByCurrentUser field to each post
         const postsWithLikeStatus = posts.map(post => ({
             ...post,
-            isLikedByCurrentUser: post.likes.some(like => like.equals(userIdObj)), // Use equals for ObjectId comparison
+            isLikedByCurrentUser: post.likes.some(like => like.equals(userIdObj)),
         }));
 
+        // Return the modified posts
         return res.status(200).json(postsWithLikeStatus);
     } catch (error) {
+        // Handle any errors that occur during the process
         res.status(500).json({ message: 'Error retrieving posts', error: error.message });
     }
 };
 
+const getPostsByUser = async (req, res) => {
+    const { userId } = req.body; // Assume userId is passed as a route parameter
+    const { currentUserId } = req.body; // Assume currentUserId is passed in the request body to check like status
+
+    try {
+        // Convert userId and currentUserId from string to ObjectId
+        const userIdObj = new mongoose.Types.ObjectId(userId);
+        const currentUserIdObj = new mongoose.Types.ObjectId(currentUserId);
+
+        // Fetch posts created by the specific user
+        const posts = await postModel
+            .find({ createdBy: userIdObj })
+            .populate('createdBy') // Populate the user who created the post
+            .populate('comments.user') // Populate the user in each comment
+            .sort({ createdAt: -1 }) // Sort posts by newest first
+            .lean(); // Get plain JavaScript objects instead of Mongoose documents
+
+        // Add isLikedByCurrentUser field to each post
+        const postsWithLikeStatus = posts.map(post => ({
+            ...post,
+            isLikedByCurrentUser: post.likes.some(like => like.equals(currentUserIdObj)),
+        }));
+
+        // Add isLikedByCurrentUser field to each post
+        // const postsWithLikeStatus = posts.map(post => ({
+        //     ...post,
+        //     isLikedByCurrentUser: post.likes.some(like => like.equals(userIdObj)), // Use equals for ObjectId comparison
+        // }));
+
+        // Return the posts with like status
+        return res.status(200).json(postsWithLikeStatus);
+    } catch (error) {
+        // Handle any errors that occur during the process
+        res.status(500).json({ message: 'Error retrieving posts', error: error.message });
+    }
+};
 
 const addLikeToPost = async (req, res) => {
     const { postId, userId } = req.body;
@@ -284,8 +336,9 @@ const deleteCommentFromPost = async (req, res) => {
 module.exports = {
     uploadPost,
     getAllPosts,
+    getPostsByUser,
     addLikeToPost,
     removeLikeFromPost,
     addCommentToPost,
-    deleteCommentFromPost
+    deleteCommentFromPost,
 };

@@ -2,6 +2,7 @@ const express = require('express');
 const {
     uploadPost,
     getAllPosts,
+    getPostsByUser,
     addLikeToPost,
     removeLikeFromPost,
     addCommentToPost,
@@ -14,6 +15,7 @@ const router = express.Router();
 //routes
 router.post('/uploadPost', uploadPost);
 router.post('/getAllPosts', getAllPosts);
+router.post('/getPostsByUser', getPostsByUser);
 router.post('/addLikeToPost', addLikeToPost);
 router.post('/removeLikeFromPost', removeLikeFromPost);
 router.post('/addCommentToPost', addCommentToPost);
