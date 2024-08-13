@@ -6,8 +6,11 @@ import {
   Dimensions,
 } from 'react-native';
 import React from 'react';
+import { useNavigation } from '@react-navigation/native';
 
-const ProfileGym = () => {
+const ProfileTrainer = () => {
+  const navigation = useNavigation(); 
+
   return (
     <View style={styles.container}>
       <View style={styles.topLeftLabelContainer}>
@@ -20,7 +23,9 @@ const ProfileGym = () => {
         <Text style={styles.subtitle}>
           Sign up to start taking{'\n'}in clients
         </Text>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button}           
+                  onPress={() => navigation.navigate('TrainerRegister')}
+                  >
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
       </View>
@@ -28,7 +33,7 @@ const ProfileGym = () => {
   );
 };
 
-export default ProfileGym;
+export default ProfileTrainer;
 
 const windowHeight = Dimensions.get('window').height;
 

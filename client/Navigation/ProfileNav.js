@@ -6,7 +6,7 @@ import ChangeEmail from '../pages/Profile/Settings/ChangeEmail';
 import ChangePassword from '../pages/Profile/Settings/ChangePassword';
 import ContactUs from '../pages/Profile/Settings/ContactUs';
 import SettingsScreen from '../pages/Profile/SettingsScreen';
-
+import TrainerRegister from '../pages/Profile/TrainerRegister';
 const ProfileNav = ({ setLoggedin }) => {
   const Stack = createStackNavigator();
 
@@ -75,6 +75,19 @@ const ProfileNav = ({ setLoggedin }) => {
         component={ContactUs}
         options={{
           headerTitle: 'Contact Us',
+          headerStyle: {
+            backgroundColor: '#2F2F2F',
+          },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="TrainerRegister"
+        component={TrainerRegister}
+        options={{
+          headerTitle: 'Trainer Registeration',
           headerStyle: {
             backgroundColor: '#2F2F2F',
           },
