@@ -1,32 +1,39 @@
-const TrainerRequest = require('../models/trainerRequestModel'); 
+const TrainerRequest = require('../models/trainerRequestModel');
+const User = require('../models/userModel');
 
 const registerTrainer = async (req, res) => {
   try {
-    const { Certificate, Type } = req.body;
+    const { certificate, type, userId } = req.body; // Assuming userId is passed in the request body
 
-    // Validate required fields
-    if (!Certificate || !Type) {
-      return res.status(400).json({ message: 'Certificate and Type are required fields' });
+    // Validation
+    if (!certificate || !type || !userId) {
+      return res.status(400).json({ message: 'Certificate, Type, and UserId are required.' });
     }
 
-    // Create a new trainer request with status 'Pending'
+    // Check if the user already has a pending or approved request
+    const existingRequest = await TrainerRequest.findOne({ User: userId, Status: { $in: ['Pending', 'Approved'] } });
+    if (existingRequest) {
+      return res.status(400).json({ message: 'You already have a pending or approved request.' });
+    }
+
+    // Create a new trainer request
     const newTrainerRequest = new TrainerRequest({
-      Certificate,
-      Type,
-      Status: 'Pending',
+      Certificate: certificate,
+      Type: type,
+      User: userId,
     });
 
-    // Save the new trainer request to the database
     await newTrainerRequest.save();
 
-    // Return a success response
-    return res.status(201).json({
-      message: 'Trainer registration submitted successfully and is pending approval',
-      trainerRequest: newTrainerRequest,
-    });
+    // Update user's type to 'trainer'
+    await User.findByIdAndUpdate(userId, { usertype: 'trainer' });
+
+    res.status(201).json({ message: 'Trainer request submitted successfully.', request: newTrainerRequest });
   } catch (error) {
-    console.error('Error registering trainer:', error);
-    return res.status(500).json({ message: 'An error occurred during trainer registration' });
+    console.error('Error registering trainer:', error); // Detailed logging
+
+    // Custom error response
+    res.status(500).json({ message: 'An error occurred while registering the trainer.', error: error.message });
   }
 };
 

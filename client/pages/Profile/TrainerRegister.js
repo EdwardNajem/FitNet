@@ -1,16 +1,13 @@
-import DatePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import React, { useContext, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,31 +15,30 @@ import { Dropdown } from 'react-native-element-dropdown';
 import api from '../../Components/Config';
 import GreyCircle from '../../Components/GreyCircle';
 import LoadingAlert from '../../Components/LoadingAlert';
-import WhiteLine from '../../Components/WhiteLine';
 import { AuthContext } from '../../Context/authContext';
 
 const TrainerRegister = ({ navigation }) => {
   const storage = getStorage();
   const [state, setState] = useContext(AuthContext);
-  const user = state?.user || {};
+  const user = state?.user || {}; // Ensure user is defined
 
-  const [image, setImage] = useState('');
+  const [certificateImage, setCertificateImage] = useState('');
   const [type, setType] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
   const typeData = [
     { label: 'Strength Conditioning', value: 'Strength Conditioning' },
     { label: 'Cardio Training', value: 'Cardio Training' },
     { label: 'Bodybuilding', value: 'Bodybuilding' },
     { label: 'Weightlifting', value: 'Weightlifting' },
     { label: 'Functional Training', value: 'Functional Training' },
-    // Add more types as needed
   ];
 
-  const openImageLibrary = async () => {
+  const openImageLibrary = async (setImage) => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Changed to Images only
       allowsEditing: true,
       aspect: [4, 4],
       quality: 1,
@@ -52,8 +48,6 @@ const TrainerRegister = ({ navigation }) => {
       const selectedAsset = result.assets[0];
       if (selectedAsset && selectedAsset.uri) {
         setImage(selectedAsset.uri);
-      } else {
-        console.error('Error: Selected asset or its URI is null.');
       }
     }
   };
@@ -73,61 +67,51 @@ const TrainerRegister = ({ navigation }) => {
 
   const saveChangesClick = async () => {
     setErrorMessage('');
-    const { _id } = state.user;
-
-    // Validation checks
+  
+    // Validate inputs
     if (!user.username) {
-      setErrorMessage('Please fill in username field');
+      setErrorMessage('Please fill in the username field');
       return;
     }
     if (!type) {
       setErrorMessage('Please select a type');
       return;
     }
-
+    
     try {
       setLoading(true);
-      let savedImage = image;
-
-      if (image !== user.certificate) {
-        savedImage = await uploadImage(image);
-      }
-
+  
+      // Upload certificate if needed
+      const uploadedCertificate = certificateImage
+        ? await uploadImage(certificateImage)
+        : user.certificate;
+  
+      // Prepare data for the API request
       const data = {
-        _id,
         username: user.username,
-        certificate: savedImage,
+        certificate: uploadedCertificate,
         type,
+        userId: user._id
       };
-
-      console.log('Sending data to API:', JSON.stringify(data, null, 2)); // Pretty-print the data
-
-      // Replace the api call with the correct one that matches your backend setup
-
+  
+      console.log('Sending data to API:', JSON.stringify(data, null, 2));
+  
+      // API request
+      const response = await api.post('fitnet/registerTrainer', data);
+  
       setLoading(false);
-
-      if (response.status === 200) {
-        console.log('Account Updated successfully\n', response.data);
+  
+      if (response.status === 201) {
+        console.log('Trainer request submitted successfully\n', response.data);
         setState({ ...state, user: response.data.user });
         navigation.navigate('profile-tab');
       } else {
         console.error('Unexpected status:', response.status, response.data);
-        setErrorMessage('An error occurred while updating profile.');
+        setErrorMessage('An error occurred while submitting the trainer request.');
       }
     } catch (error) {
-      console.error('Error occurred during profile update:', error);
-
-      if (error.response) {
-        console.error('Server responded with error:', error.response.data);
-        setErrorMessage(error.response.data.message || 'Server error occurred');
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-        setErrorMessage('No response from server');
-      } else {
-        console.error('Error in setting up request:', error.message);
-        setErrorMessage('Error occurred during request setup');
-      }
-
+      console.error('Error occurred during trainer registration:', error);
+      setErrorMessage('Error occurred during trainer registration');
       setLoading(false);
     }
   };
@@ -143,48 +127,45 @@ const TrainerRegister = ({ navigation }) => {
         )}
         <View style={styles.content}>
           <View style={styles.centered}>
-            <WhiteLine title={'Username'} />
-            <View style={styles.inputContainer}>
-              <Text style={styles.uneditableInput}>{user.username}</Text>
-            </View>
-            <WhiteLine title={'Type'} />
-            <View style={styles.inputContainer}>
-              <Dropdown
-                style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                data={typeData}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder={!isFocus ? 'Select Type' : '...'}
-                value={type}
-                onFocus={() => setIsFocus(true)}
-                onBlur={() => setIsFocus(false)}
-                onChange={(item) => {
-                  setType(item.value);
-                  setIsFocus(false);
-                }}
-              />
-            </View>
-            <WhiteLine title={'Trainer Certificate'} />
-            <TouchableOpacity
-              onPress={openImageLibrary}
-              style={styles.centered}
-            >
-              {image ? (
-                <Image source={{ uri: image }} style={styles.avatar} />
+            <Text style={styles.label}>Username</Text>
+            <Text style={styles.uneditableInput}>{user.username || 'N/A'}</Text>
+
+            <Text style={styles.label}>Type</Text>
+            <Dropdown
+              style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              data={typeData}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={!isFocus ? 'Select Type' : '...'}
+              value={type}
+              onFocus={() => setIsFocus(true)}
+              onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setType(item.value);
+                setIsFocus(false);
+              }}
+            />
+
+            <Text style={styles.label}>Trainer Certificate</Text>
+            <TouchableOpacity onPress={() => openImageLibrary(setCertificateImage)} style={styles.centered}>
+              {certificateImage ? (
+                <Image source={{ uri: certificateImage }} style={styles.avatar} />
               ) : (
                 <GreyCircle size={150} />
               )}
               <Text style={styles.edittext}>Edit</Text>
             </TouchableOpacity>
+
             {errorMessage ? (
               <Text style={styles.errorText}>{errorMessage}</Text>
             ) : null}
+
             <TouchableOpacity
               style={[styles.Button, loading && styles.disabledButton]}
-              onPress={() => saveChangesClick()}
+              onPress={saveChangesClick}
               disabled={loading}
             >
               <Text style={styles.ButtonText}>Register</Text>
@@ -228,14 +209,12 @@ const styles = StyleSheet.create({
   edittext: {
     color: '#FF4C0A',
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginHorizontal: 15,
+  label: {
+    color: '#FFF',
+    marginBottom: 5,
+    fontWeight: '600',
   },
   uneditableInput: {
-    flex: 1,
     height: 40,
     borderBottomWidth: 1,
     borderBottomColor: '#fff',
@@ -244,6 +223,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     textAlign: 'left',
     paddingTop: 10,
+    marginBottom: 15,
   },
   Button: {
     backgroundColor: '#FF4C0A',
@@ -265,6 +245,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingRight: 8,
     width: '100%',
+    marginBottom: 15,
   },
   placeholderStyle: {
     fontSize: 14,
