@@ -17,7 +17,7 @@ const ProfileTabs = ({ type }) => {
     setActiveTab(tab);
     switch (tab) {
       case 'Workout':
-        setSelectedComponent(<ProfileWorkout />);
+        setSelectedComponent(<ProfileWorkout/>);
         break;
       case 'Trainer':
         setSelectedComponent(<ProfileTrainer />);
