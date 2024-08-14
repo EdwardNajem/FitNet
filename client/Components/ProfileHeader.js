@@ -24,7 +24,7 @@ const ProfileHeader = ({ user, navigation }) => {
     setLoading(true);
     setErrorMessage('');
     try {
-      const followerResponse = await api.get(`fitnet/getFollowerCount?userId=${user._id}`);
+     const followerResponse = await api.get(`fitnet/getFollowerCount?userId=${user._id}`);
       const followingResponse = await api.get(`fitnet/getFollowingCount?userId=${user._id}`);
 
       if (followerResponse.status === 200 && followingResponse.status === 200) {
@@ -86,7 +86,7 @@ const ProfileHeader = ({ user, navigation }) => {
             <Animated.View style={[styles.placeholderAvatar, { opacity }]}>
               {renderShimmer()}
             </Animated.View>
-          ) : user.avatar ? (
+          ) : (user?user.avatar:false) ? (
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
           ) : (
             <GreyCircle size={100} />
@@ -128,7 +128,7 @@ const ProfileHeader = ({ user, navigation }) => {
             )}
           </View>
         </View>
-        {loading ? (
+        {(loading||!user) ? (
           <>
             <Animated.View style={[styles.placeholderText, { opacity }]}>
               {renderShimmer()}
