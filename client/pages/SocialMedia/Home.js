@@ -1,49 +1,64 @@
-import React, { useState } from 'react';
-import { ScrollView, View, Text, TextInput,Image, StyleSheet, StatusBar, TouchableOpacity, Animated, FlatList } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { ScrollView, View, Text, Image, StyleSheet, StatusBar, TouchableOpacity, TextInput, Animated, FlatList } from 'react-native';
 import { FontAwesome, Entypo, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Swipeable } from 'react-native-gesture-handler';
-
-const staticPosts = [
-  {
-    id: 1,
-    userImage: require('../../assets/images/logo.png'),
-    userName: 'Ahmad Zaarour',
-    timeAgo: '1 hr ago',
-    image: require('../../assets/images/logo.png'),
-    description: 'Great workout today!',
-    likes: 25,
-    comments: [],
-  },
-  {
-    id: 2,
-    userImage: require('../../assets/images/logo.png'),
-    userName: 'Edward Najem',
-    timeAgo: '2 hrs ago',
-    image: require('../../assets/images/logo.png'),
-    description: 'Really enjoyed the trainer’s instructions.',
-    likes: 15,
-    comments: [],
-  },
-  {
-    id: 3,
-    userImage: require('../../assets/images/logo.png'),
-    userName: 'Alex Johnson',
-    timeAgo: '3 hrs ago',
-    image: require('../../assets/images/logo.png'),
-    description: 'Good workout but the environment could be better.',
-    likes: 8,
-    comments: [],
-  },
-];
+import { RefreshControl, Swipeable } from 'react-native-gesture-handler';
+import api from '../../Components/Config';
+import GreyCircle from '../../Components/GreyCircle';
+import PostExercises from '../../Components/PostExercises';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '../../Context/authContext';
 
 const HomeScreen = () => {
+  const [state] = useContext(AuthContext);
   const navigation = useNavigation();
   const [commentVisible, setCommentVisible] = useState(false);
   const [currentPostId, setCurrentPostId] = useState(null);
   const [comment, setComment] = useState('');
-  const [posts, setPosts] = useState(staticPosts);
+  const [posts, setPosts] = useState([]);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const slideAnim = useState(new Animated.Value(500))[0];
+  const [likedPosts, setLikedPosts] = useState([]);
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    setPosts([]);
+    setTimeout(() => {
+        setRefreshing(false);
+    }, await getAllPosts());
+
+}, []);
+
+  useEffect(() => {
+    getAllPosts();
+  }, [])
+
+  const getAllPosts = async () => {
+    setLikedPosts([]);
+    const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+
+    const data = {
+      userId: user.user._id,
+    }
+
+    try {
+      const response = await api.post('/fitnet/getAllPosts', data);
+      setPosts(response.data);
+      response.data.forEach((post) => {
+        setLikedPosts((prevLikedPosts) => {
+          if (post.isLikedByCurrentUser) {
+            return [...prevLikedPosts, post._id];
+          }
+          return prevLikedPosts;
+        });
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleCommentPress = (postId) => {
     setCurrentPostId(postId);
@@ -66,52 +81,176 @@ const HomeScreen = () => {
     });
   };
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (comment.trim()) {
-      setPosts(posts.map(post => {
-        if (post.id === currentPostId) {
-          return { ...post, comments: [...post.comments, { id: post.comments.length + 1, userImage: require('../../assets/images/logo.png'), userName: 'Current User', text: comment }] };
+      const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+
+      const data = {
+        userId: user.user._id,
+        postId: currentPostId,
+        text: comment,
+      }
+
+      try {
+        const response = await api.post('/fitnet/addCommentToPost', data);
+
+        if(response){
+          setPosts((prevPosts) =>
+            prevPosts.map((p) =>
+              p._id === currentPostId
+                ? { ...p, comments: [...p.comments, {user: user.user, text: comment, createdAt: new Date()}] }
+                : p
+            )
+          );
+          setComment('');
         }
-        return post;
-      }));
-      setComment('');
+      } catch (error) {
+        console.log(error)
+      }
     }
   };
 
-  const handleDeleteComment = (postId, commentId) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return { ...post, comments: post.comments.filter(comment => comment.id !== commentId) };
-      }
-      return post;
-    }));
-  };
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+        // Send delete request to backend
+        const response = await api.post('/fitnet/deleteCommentFromPost', { postId, commentId });
+
+        if (response.data.success) {
+            // Update the local state to remove the comment
+            setPosts(posts.map(post => {
+                if (post._id === postId) {
+                    return { ...post, comments: post.comments.filter(comment => comment._id !== commentId) };
+                }
+                return post;
+            }));
+        } else {
+            console.log(response.data.message);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
 
   const handleSearchPress = () => {
     navigation.navigate('Search');
   };
 
+  const handleLikePost = async (post) => {
+    const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+
+    const data = {
+      userId: user.user._id,
+      postId: post._id,
+    }
+
+    try {
+      const response = await api.post('/fitnet/addLikeToPost', data);
+
+      if(response){
+        setPosts((prevPosts) =>
+          prevPosts.map((p) =>
+            p._id === post._id
+              ? { ...p, isLikedByCurrentUser: true, likes: [...p.likes, state.user._id] }
+              : p
+          )
+        );
+        console.log(response);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleUnlikePost = async (post) => {
+    const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+
+    const data = {
+      userId: user.user._id,
+      postId: post._id,
+    }
+
+    try {
+      const response = await api.post('/fitnet/removeLikeFromPost', data);
+
+      if(response){
+        setPosts((prevPosts) =>
+          prevPosts.map((p) =>
+            p._id === post._id
+              ? { ...p, isLikedByCurrentUser: false, likes: p.likes.filter(id => id !== state.user._id) }
+              : p
+          )
+        );
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const formatTime = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} mins` : `${minutes} mins`;
+  };
+  
+  const formatWeight = (weight) => {
+    return weight.toLocaleString();
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const createdAt = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - createdAt) / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    console.log(diffInMinutes)
+  
+    if (diffInSeconds < 60) {
+      return "just now";
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} mins ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hours ago`;
+    } else {
+      // Return the date without the time
+      return createdAt.toLocaleDateString();
+    }
+  };
+
   const renderCommentItem = ({ item }) => (
-    <Swipeable
-      renderRightActions={() => (
-        <TouchableOpacity onPress={() => handleDeleteComment(currentPostId, item.id)} style={styles.deleteButton}>
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
-      )}
-    >
+    <>
+      {item.user._id==state.user._id?<Swipeable
+        renderRightActions={() => (
+          <TouchableOpacity onPress={() => handleDeleteComment(currentPostId, item._id)} style={styles.deleteButton}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        )}
+      >
+        <View style={styles.commentItem}>
+          <Image source={item.user.avatar?{ uri: item.user.avatar }: require('../../assets/images/user.png')} style={styles.commentUserImage} />
+          <View style={styles.commentTextContainer}>
+            <Text style={styles.commentUserName}>{item.user.username}</Text>
+            <Text style={styles.commentText}>{item.text}</Text>
+          </View>
+          <Text style={styles.timeAgo}>{formatTimeAgo(item.createdAt)}</Text>
+        </View>
+      </Swipeable>:
       <View style={styles.commentItem}>
-        <Image source={item.userImage} style={styles.commentUserImage} />
+        <Image source={item.user.avatar?{ uri: item.user.avatar }: require('../../assets/images/user.png')} style={styles.commentUserImage} />
         <View style={styles.commentTextContainer}>
-          <Text style={styles.commentUserName}>{item.userName}</Text>
+          <Text style={styles.commentUserName}>{item.user.username}</Text>
           <Text style={styles.commentText}>{item.text}</Text>
         </View>
+        <Text style={styles.timeAgo}>{formatTimeAgo(item.createdAt)}</Text>
       </View>
-    </Swipeable>
+    }
+    </>
   );
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} refreshControl={<RefreshControl colors={["#FF4C0A"]} refreshing={refreshing} onRefresh={onRefresh} />}>
         <StatusBar backgroundColor="#2F2F2F" />
 
         <View style={styles.header}>
@@ -125,25 +264,46 @@ const HomeScreen = () => {
         </View>
 
         {posts.map((post) => (
-          <View key={post.id} style={styles.postCard}>
+          <View key={post._id} style={styles.postCard}>
             <View style={styles.userInfo}>
-              <Image source={post.userImage} style={styles.userImage} />
+              {post.createdBy.avatar&&<Image source={{ uri: post.createdBy.avatar }} style={styles.userImage} />}
+              {!post.createdBy.avatar&&<Image source={require('../../assets/images/user.png')} style={styles.userImage} />}
               <View>
-                <Text style={styles.userName}>{post.userName}</Text>
-                <Text style={styles.timeAgo}>{post.timeAgo}</Text>
+                <Text style={styles.userName}>{post.createdBy.username}</Text>
+                <Text style={styles.timeAgo}>{formatTimeAgo(post.createdAt)}</Text>
               </View>
             </View>
             <Text style={styles.postText}>{post.description}</Text>
-            <Image source={post.image} style={styles.postImage} resizeMode="cover" />
+            <View style={styles.workoutStatistics}>
+              <View style={styles.workoutStatisticsContainer}>
+                <Text style={styles.workoutStatisticsHeaderText}>Duration</Text>
+                <Text style={styles.workoutStatisticsText}>{formatTime(post.workoutData.duration)}</Text>
+              </View>
+              <View style={styles.workoutStatisticsContainer}>
+                <Text style={styles.workoutStatisticsHeaderText}>Volume</Text>
+                <Text style={styles.workoutStatisticsText}>{formatWeight(post.workoutData.volume)} KG</Text>
+              </View>
+            </View>
+            {post.postType=="image"&&<Image source={{ uri: post.photo }} style={styles.postImage} resizeMode="cover" />}
+            {post.postType=="workout"&&<PostExercises post={post}/>}
             <View style={styles.postStats}>
-                            <Text style={styles.likes}>{post.likes} likes</Text>
+              <Text style={styles.likes}>{post.likes.length} likes</Text>
               <Text style={styles.comments}>{post.comments.length} comments</Text>
             </View>
             <View style={styles.actionIcons}>
-              <TouchableOpacity style={styles.iconButton}>
-                <FontAwesome name="thumbs-o-up" size={24} color="#FF4C0A" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton} onPress={() => handleCommentPress(post.id)}>
+              {(!post.isLikedByCurrentUser) && (
+                  <TouchableOpacity style={styles.iconButton} onPress={() => { 
+                    handleLikePost(post);
+                   }}>
+                    <FontAwesome name="thumbs-o-up" size={24} color="#FF4C0A" />
+                  </TouchableOpacity>
+              )}
+              {(post.isLikedByCurrentUser) && (
+                <TouchableOpacity style={styles.iconButton} onPress={() => { handleUnlikePost(post) }}>
+                  <FontAwesome name="thumbs-up" size={24} color="#FF4C0A" />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.iconButton} onPress={() => handleCommentPress(post._id)}>
                 <FontAwesome name="comment-o" size={24} color="#FF4C0A" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconButton}>
@@ -163,8 +323,8 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
           <FlatList
-            data={posts.find(post => post.id === currentPostId)?.comments || []}
-            keyExtractor={item => item.id.toString()}
+            data={posts.find(post => post._id === currentPostId)?.comments || []}
+            keyExtractor={item => item._id?item._id.toString():null}
             renderItem={renderCommentItem}
           />
           <View style={styles.commentInputContainer}>
@@ -186,6 +346,32 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  exerciseText: {
+    color: 'white',
+    fontSize: 18
+  },
+  exerciseContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 5,
+    marginVertical: 5,
+    alignItems: 'center',
+  },
+  workoutStatistics: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 20
+  },
+  workoutStatisticsHeaderText: {
+    color: '#cccccc',
+  },
+  workoutStatisticsText: {
+    color: 'white',
+    fontSize: 18
+  },
+  workoutStatisticsContainer: {
+    margin: 5
+  },
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
@@ -220,6 +406,12 @@ const styles = StyleSheet.create({
   userImage: {
     width: 40,
     height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  exerciseImage: {
+    width: 60,
+    height: 60,
     borderRadius: 20,
     marginRight: 10,
   },
