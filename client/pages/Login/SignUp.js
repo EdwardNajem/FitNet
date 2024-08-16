@@ -48,7 +48,7 @@ export default function SignUp() {
     setPasswordError('');
     setErrorMessage('');
     try {
-      const data = { username, email, password };
+      const data = { username, email, password, userType };
       const response = await api.post('fitnet/registeruser', data);
 
       if (response.status === 201) {

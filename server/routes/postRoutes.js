@@ -1,6 +1,7 @@
 const express = require('express');
 const {
     uploadPost,
+    uploadPostGym,
     getAllPosts,
     getPostsByUser,
     addLikeToPost,
@@ -14,6 +15,7 @@ const router = express.Router();
 
 //routes
 router.post('/uploadPost', uploadPost);
+router.post('/uploadPostGym', uploadPostGym);
 router.post('/getAllPosts', getAllPosts);
 router.post('/getPostsByUser', getPostsByUser);
 router.post('/addLikeToPost', addLikeToPost);
