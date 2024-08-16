@@ -103,7 +103,6 @@ const TrainerRegister = ({ navigation }) => {
   
       if (response.status === 201) {
         console.log('Trainer request submitted successfully\n', response.data);
-        setState({ ...state, user: response.data.user });
         navigation.navigate('profile-tab');
       } else {
         console.error('Unexpected status:', response.status, response.data);
