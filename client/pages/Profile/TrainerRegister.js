@@ -16,11 +16,12 @@ import api from '../../Components/Config';
 import GreyCircle from '../../Components/GreyCircle';
 import LoadingAlert from '../../Components/LoadingAlert';
 import { AuthContext } from '../../Context/authContext';
+import WhiteLine from '../../Components/WhiteLine';
 
 const TrainerRegister = ({ navigation }) => {
   const storage = getStorage();
   const [state, setState] = useContext(AuthContext);
-  const user = state?.user || {}; // Ensure user is defined
+  const user = state?.user || {};
 
   const [certificateImage, setCertificateImage] = useState('');
   const [type, setType] = useState(null);
@@ -38,7 +39,7 @@ const TrainerRegister = ({ navigation }) => {
 
   const openImageLibrary = async (setImage) => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Changed to Images only
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 4],
       quality: 1,
@@ -68,7 +69,6 @@ const TrainerRegister = ({ navigation }) => {
   const saveChangesClick = async () => {
     setErrorMessage('');
   
-    // Validate inputs
     if (!user.username) {
       setErrorMessage('Please fill in the username field');
       return;
@@ -81,12 +81,10 @@ const TrainerRegister = ({ navigation }) => {
     try {
       setLoading(true);
   
-      // Upload certificate if needed
       const uploadedCertificate = certificateImage
         ? await uploadImage(certificateImage)
         : user.certificate;
   
-      // Prepare data for the API request
       const data = {
         username: user.username,
         certificate: uploadedCertificate,
@@ -96,7 +94,7 @@ const TrainerRegister = ({ navigation }) => {
   
       console.log('Sending data to API:', JSON.stringify(data, null, 2));
   
-      // API request
+      
       const response = await api.post('fitnet/registerTrainer', data);
   
       setLoading(false);
@@ -126,10 +124,11 @@ const TrainerRegister = ({ navigation }) => {
         )}
         <View style={styles.content}>
           <View style={styles.centered}>
-            <Text style={styles.label}>Username</Text>
+            <WhiteLine title={'Username'} />
             <Text style={styles.uneditableInput}>{user.username || 'N/A'}</Text>
 
-            <Text style={styles.label}>Type</Text>
+            <WhiteLine title={'Type'} />
+
             <Dropdown
               style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
               placeholderStyle={styles.placeholderStyle}
@@ -147,8 +146,8 @@ const TrainerRegister = ({ navigation }) => {
                 setIsFocus(false);
               }}
             />
+            <WhiteLine title={'Trainer Certificate'} />
 
-            <Text style={styles.label}>Trainer Certificate</Text>
             <TouchableOpacity onPress={() => openImageLibrary(setCertificateImage)} style={styles.centered}>
               {certificateImage ? (
                 <Image source={{ uri: certificateImage }} style={styles.avatar} />
@@ -212,6 +211,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     marginBottom: 5,
     fontWeight: '600',
+    alignSelf: 'flex-start',
   },
   uneditableInput: {
     height: 40,
@@ -223,6 +223,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     paddingTop: 10,
     marginBottom: 15,
+    width: '100%',
   },
   Button: {
     backgroundColor: '#FF4C0A',

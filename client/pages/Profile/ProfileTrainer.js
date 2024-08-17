@@ -3,11 +3,12 @@ import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ActivityIndicator
 import { useNavigation } from '@react-navigation/native';
 import api from '../../Components/Config';
 import { AuthContext } from '../../Context/authContext';
+import { Ionicons } from '@expo/vector-icons'; // Make sure to install this package if you haven't already
 
 const ProfileTrainer = () => {
   const navigation = useNavigation();
   const [state] = useContext(AuthContext);
-  const user = state?.user || {}; // Ensure user is defined
+  const user = state?.user || {};
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +50,9 @@ const ProfileTrainer = () => {
             <Text style={styles.traineeName}>{trainee.name}</Text>
             <Text style={styles.trainingDate}>{trainee.date}</Text>
           </View>
+          <TouchableOpacity style={styles.messageIconContainer}>
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#FF4C0A" />
+          </TouchableOpacity>
         </View>
       ))}
     </View>
@@ -62,31 +66,24 @@ const ProfileTrainer = () => {
             Your request is currently pending.
           </Text>
         </View>
+      ) : status === 'Accepted' ? (
+        renderTraineeList()
       ) : (
         <>
-          {status === 'Accepted' ? (
-            renderTraineeList()
-          ) : (
-            <>
-              <View style={styles.topLeftLabelContainer}>
-                <Text style={styles.topLeftLabel}>Trainer</Text>
-              </View>
-              <View style={styles.contentContainer}>
-                <Text style={styles.title}>
-                  Are you a <Text style={styles.orangeText}>Trainer</Text>?
-                </Text>
-                <Text style={styles.subtitle}>
-                  Sign up to start taking{'\n'}in clients
-                </Text>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => navigation.navigate('TrainerRegister')}
-                >
-                  <Text style={styles.buttonText}>Register</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
+          <View style={styles.contentContainer}>
+            <Text style={styles.title}>
+              Are you a <Text style={styles.orangeText}>Trainer</Text>?
+            </Text>
+            <Text style={styles.subtitle}>
+              Sign up to start taking{'\n'}in clients
+            </Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('TrainerRegister')}
+            >
+              <Text style={styles.buttonText}>Register</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
     </View>
@@ -177,5 +174,8 @@ const styles = StyleSheet.create({
   trainingDate: {
     fontSize: 14,
     color: 'gray',
+  },
+  messageIconContainer: {
+    marginLeft: 'auto',
   },
 });
