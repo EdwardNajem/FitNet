@@ -1,56 +1,68 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-
-const trainers = [
-  {
-    id: 1,
-    name: 'Richard Will',
-    description: 'High Intensity training',
-    experience: '5 years experience',
-    rating: '4.8',
-    image: require('../../assets/images/logo.png'),
-  },
-  {
-    id: 2,
-    name: 'Jennifer James',
-    description: 'Functional Strength',
-    experience: '8 years experience',
-    rating: '4.6',
-    image: require('../../assets/images/logo.png'),
-  },
-  {
-    id: 3,
-    name: 'Brian Edward',
-    description: 'Strength training',
-    experience: '6 years experience',
-    rating: '4.5',
-    image: require('../../assets/images/logo.png'),
-  },
-];
+import api from '../../Components/Config';
 
 const Trainer = () => {
+  const [trainers, setTrainers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchTrainers = async () => {
+      setLoading(true);
+      setErrorMessage('');
+      try {
+        const response = await api.get('fitnet/getTrainers');
+        if (response.status === 200) {
+          setTrainers(response.data);
+        } else {
+          setErrorMessage(response.data?.message || 'Failed to fetch trainers');
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 500) {
+          setErrorMessage(error.response.data?.message || 'Internal Server Error');
+        } else {
+          setErrorMessage('Failed to fetch trainers');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrainers();
+  }, []);
 
   const handlePress = (trainer) => {
     navigation.navigate('TrainerInformation', { trainer });
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FF4C0A" />
+      </View>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{errorMessage}</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       {trainers.map((trainer) => (
-        <TouchableOpacity key={trainer.id} style={styles.card} onPress={() => handlePress(trainer)}>
-          <Image source={trainer.image} style={styles.image} />
+        <TouchableOpacity key={trainer._id} style={styles.card} onPress={() => handlePress(trainer)}>
+          <Image source={{ uri: trainer.avatar }} style={styles.image} />
           <View style={styles.infoContainer}>
-            <View style={styles.nameContainer}>
-              <Text style={styles.name}>{trainer.name}</Text>
-              <View style={styles.ratingContainer}>
-                <Text style={styles.rating}>{trainer.rating}</Text>
-              </View>
-            </View>
-            <Text style={styles.description}>{trainer.description}</Text>
-            <Text style={styles.experience}>{trainer.experience}</Text>
+            <Text style={styles.name}>{trainer.username}</Text>
+            <Text style={styles.description}>{trainer.type}</Text>
           </View>
           <AntDesign name="right" size={24} color="#FFFFFF" style={styles.icon} />
         </TouchableOpacity>
@@ -84,41 +96,36 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
   },
-  nameContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   name: {
     color: '#FFFFFF',
     fontWeight: '500',
     fontSize: 18,
-  },
-  ratingContainer: {
-    backgroundColor: '#FF4C0A',
-    borderRadius: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    right:'170%',
-  },
-  rating: {
-    color: '#FFFFFF',
-    fontWeight: '500',
-    fontSize: 14,
   },
   description: {
     color: '#FFFFFF',
     fontSize: 14,
     marginTop: 5,
   },
-  experience: {
-    color: '#FF4C0A',
-    fontSize: 14,
-    marginTop: 5,
-  },
   icon: {
     position: 'absolute',
     right: 10, 
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1C1C1E',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1C1C1E',
+  },
+  errorText: {
+    color: '#FF4C0A',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

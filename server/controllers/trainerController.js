@@ -53,7 +53,34 @@ const getTrainerRequestStatus = async (req, res) => {
 };
 
 
+const getTrainers = async (req, res) => {
+  try {
+    const acceptedTrainerRequests = await TrainerRequest.find({ Status: 'Accepted' })
+      .populate('User', 'avatar username') 
+      .select('Type User');
+
+    if (!acceptedTrainerRequests.length) {
+      return res.status(404).json({ message: 'No trainers found.' });
+    }
+
+    const trainers = acceptedTrainerRequests.map(request => ({
+      _id: request.User._id,
+      avatar: request.User.avatar,
+      username: request.User.username,
+      type: request.Type, 
+    }));
+
+    res.json(trainers);
+  } catch (error) {
+    console.error('Error fetching trainers:', error);
+    res.status(500).json({ message: 'An error occurred while fetching trainers.', error: error.message });
+  }
+};
+
+
+
 module.exports = {
   registerTrainer,
   getTrainerRequestStatus,
+  getTrainers,
 };

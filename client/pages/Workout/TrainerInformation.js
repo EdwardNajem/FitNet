@@ -30,29 +30,15 @@ const TrainerInformation = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Image source={trainer.image} style={styles.trainerImage} />
+      <Image source={{ uri: trainer.avatar }} style={styles.trainerImage} />
       <View style={styles.infoContainer}>
         <View style={styles.headerContainer}>
-          <Text style={styles.name}>{trainer.name}</Text>
+          <Text style={styles.name}>{trainer.username}</Text>
           <TouchableOpacity style={styles.messageButton}>
             <FontAwesome name="comment" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.role}>{trainer.description}</Text>
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{trainer.experience.split(' ')[0]}</Text>
-            <Text style={styles.statLabel}>Experience</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>100</Text>
-            <Text style={styles.statLabel}>Clients</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>Performance First </Text>
-            <Text style={styles.statLabel}>Gym</Text>
-          </View>
-        </View>
+        <Text style={styles.role}>{trainer.type}</Text>
         <Text style={styles.sectionTitle}>Reviews</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.reviewSlider}>
           {reviews.map((review) => (
@@ -79,6 +65,7 @@ const TrainerInformation = ({ route }) => {
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -114,26 +101,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     marginVertical: 10,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: '#3A3A3A',
-    borderRadius: 10,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    color: '#FFFFFF',
-    fontSize: 14,
   },
   sectionTitle: {
     color: '#FFFFFF',

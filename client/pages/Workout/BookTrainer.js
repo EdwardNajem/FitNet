@@ -28,7 +28,7 @@ const BookTrainer = ({ route }) => {
       setAlertVisible(true);
       return;
     }
-    setAlertMessage(`Appointment booked with ${trainer.name} on ${selectedDate}.`);
+    setAlertMessage(`Appointment booked with ${trainer.username} on ${selectedDate}.`);
     setAlertVisible(true);
     setIsBookingSuccess(true);
   };
@@ -42,20 +42,15 @@ const BookTrainer = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity style={styles.card}>
-        <Image source={trainer.image} style={styles.image} />
+      <View style={styles.card}>
+        <Image source={{ uri: trainer.avatar }} style={styles.image} />
         <View style={styles.infoContainer}>
-          <View style={styles.nameContainer}>
-            <Text style={styles.name}>{trainer.name}</Text>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.rating}>{trainer.rating}</Text>
-            </View>
-          </View>
-          <Text style={styles.description}>{trainer.description}</Text>
-          <Text style={styles.experience}>{trainer.experience}</Text>
+          <Text style={styles.name}>{trainer.username}</Text>
+          <Text style={styles.type}>{trainer.type}</Text>
         </View>
-      </TouchableOpacity>
-      <Calendar  style={styles.Calendar}
+      </View>
+      <Calendar
+        style={styles.Calendar}
         onDayPress={(day) => handleDateSelect(day.dateString)}
         markedDates={selectedDate ? { [selectedDate]: { selected: true, selectedColor: '#FF4C0A' } } : {}}
         theme={{
@@ -66,7 +61,6 @@ const BookTrainer = ({ route }) => {
           selectedDayTextColor: '#FFFFFF',
           monthTextColor: '#FFFFFF',
           arrowColor: '#FF4C0A',
-          
         }}
       />
       <TouchableOpacity style={styles.bookButton} onPress={handleBookAppointment}>
@@ -87,13 +81,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#2F2F2F',
     borderRadius: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 10,
+    padding: 15,
     marginBottom: 20,
     alignItems: 'center',
-  },
-  Calendar:{
-    borderRadius: 10,
   },
   image: {
     width: 80,
@@ -104,37 +94,18 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
   },
-  nameContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   name: {
     color: '#FFFFFF',
     fontWeight: '500',
     fontSize: 18,
   },
-  ratingContainer: {
-    backgroundColor: '#FF4C0A',
-    borderRadius: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    right: '65%',
-  },
-  rating: {
-    color: '#FFFFFF',
-    fontWeight: '500',
-    fontSize: 14,
-  },
-  description: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    marginTop: 5,
-  },
-  experience: {
+  type: {
     color: '#FF4C0A',
     fontSize: 14,
-    marginTop: 5,
+    top:5,
+  },
+  Calendar: {
+    borderRadius: 10,
   },
   bookButton: {
     backgroundColor: '#FF4C0A',
