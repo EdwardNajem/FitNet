@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, TextInput, FlatList, TouchableOpacity, Image, StyleSheet, StatusBar, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../Components/Config';
+import { AuthContext } from '../../Context/authContext';
 
 const Search = () => {
   const navigation = useNavigation();
+  const [{ user }] = useContext(AuthContext); 
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSearchChange = async (query) => {
     setSearchQuery(query);
-    setErrorMessage(''); 
+    setErrorMessage('');
 
     if (query.length > 0) {
       try {
@@ -36,10 +38,21 @@ const Search = () => {
     }
   };
 
-  const handleUserPress = (user) => {
-    navigation.navigate('UserProfile', { user });
+  const handleUserPress = (selectedUser) => {
+    if (user && selectedUser._id === user._id) {
+      navigation.navigate('Profile'); 
+    } else {
+      navigation.navigate('UserProfile', { user: selectedUser });
+    }
   };
-  
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Loading user data...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

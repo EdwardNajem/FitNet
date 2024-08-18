@@ -9,6 +9,8 @@ const UserProfile = () => {
   const route = useRoute();
   const { user } = route.params;
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   // const { commentVisible, setCommentVisible, currentPostId, setCurrentPostId, posts, setPosts } = useContext(CommentContext);
   // const slideAnim = new Animated.Value(0); // Assuming you have this in your existing code
   // const [comment, setComment] = useState(''); // Local state for the comment input
@@ -37,6 +39,50 @@ const UserProfile = () => {
       checkFollowStatus();
     }
   }, [userFollowerId, user._id]);
+
+useEffect(() => {
+  const fetchFollowerCount = async () => {
+    try {
+      const response = await api.get('fitnet/getFollowerCount', {
+        params: {
+          userId: user._id,
+        },
+      });
+      if (response.status === 200) {
+        setFollowerCount(response.data.followerCount);
+      }
+    } catch (error) {
+      console.error('Error fetching follower count:', error);
+    }
+  };
+
+  if (user._id) {
+    fetchFollowerCount();
+  }
+}, [user._id]);
+
+useEffect(() => {
+  const fetchFollowingCount = async () => {
+    try {
+      const response = await api.get('fitnet/getFollowingCount', {
+        params: {
+          userId: user._id,
+        },
+      });
+      if (response.status === 200) {
+        setFollowingCount(response.data.followingCount);
+      }
+    } catch (error) {
+      console.error('Error fetching following count:', error);
+    }
+  };
+
+  if (user._id) {
+    fetchFollowingCount();
+  }
+}, [user._id]);
+
+
 
   const handleFollowPress = async () => {
     if (!userFollowerId) return; 
@@ -203,11 +249,11 @@ const UserProfile = () => {
             <Text style={styles.statLabel}>Workouts</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statNumber}>{followerCount}</Text>
             <Text style={styles.statLabel}>Followers</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>{followingCount}</Text>
             <Text style={styles.statLabel}>Following</Text>
           </View>
         </View>
