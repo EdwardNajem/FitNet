@@ -171,7 +171,6 @@ const getNearestTrainingSession = async (req, res) => {
   try {
     const { traineeId } = req.params;
 
-    // Find the nearest session
     const nearestSession = await TrainerModel.findOne({
       TraineeId: traineeId,
       TrainingDate: { $gte: new Date() },
@@ -179,15 +178,14 @@ const getNearestTrainingSession = async (req, res) => {
       .sort({ TrainingDate: 1 })
       .populate({
         path: 'TrainerId',
-        select: 'username avatar', // Populate username and avatar from UserModel
-        model: UserModel, // Explicitly specify the model to populate
+        select: 'username avatar', 
+        model: UserModel, 
       });
 
     if (!nearestSession) {
       return res.status(200).json({ message: 'No upcoming sessions found' });
     }
 
-    // Return session details with trainer information
     res.status(200).json({
       nearestSession: {
         _id: nearestSession._id,
@@ -204,10 +202,9 @@ const getNearestTrainingSession = async (req, res) => {
   }
 };
 
-// Delete a training session by _id
 const deleteTrainingSession = async (req, res) => {
   try {
-    const { sessionId } = req.params; // sessionId corresponds to the _id of the training session
+    const { sessionId } = req.params;
     await TrainerModel.findByIdAndDelete(sessionId);
     res.status(200).json({ message: 'Training session deleted successfully' });
   } catch (error) {
