@@ -99,7 +99,7 @@ const TrainerRegister = ({ navigation }) => {
   
       setLoading(false);
   
-      if (response.status === 201) {
+      if (response.status === 200) {
         console.log('Trainer request submitted successfully\n', response.data);
         navigation.navigate('profile-tab');
       } else {

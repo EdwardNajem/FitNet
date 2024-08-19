@@ -1,5 +1,6 @@
-const TrainerRequest = require('../models/trainerRequestModel');
-const User = require('../models/userModel');
+const TrainerRequestModel = require('../models/trainerRequestModel');
+const UserModel = require('../models/userModel');
+const TrainerModel = require('../models/trainerModel');
 
 const registerTrainer = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ const registerTrainer = async (req, res) => {
       return res.status(400).json({ message: 'Certificate, Type, and UserId are required.' });
     }
 
-    const existingRequest = await TrainerRequest.findOne({
+    const existingRequest = await TrainerRequestModel.findOne({
       User: userId,
       Status: { $in: ['Pending', 'Accepted'] },
     });
@@ -18,7 +19,7 @@ const registerTrainer = async (req, res) => {
       return res.status(400).json({ message: 'You already have a pending or accepted request.' });
     }
 
-    const newTrainerRequest = new TrainerRequest({
+    const newTrainerRequest = new TrainerRequestModel({
       Certificate: certificate,
       Type: type,
       User: userId,
@@ -26,7 +27,7 @@ const registerTrainer = async (req, res) => {
 
     await newTrainerRequest.save();
 
-    res.status(201).json({ message: 'Trainer request submitted successfully.', request: newTrainerRequest });
+    res.status(200).json({ message: 'Trainer request submitted successfully.', request: newTrainerRequest });
   } catch (error) {
     console.error('Error registering trainer:', error);
     res.status(500).json({ message: 'An error occurred while registering the trainer.', error: error.message });
@@ -36,11 +37,9 @@ const registerTrainer = async (req, res) => {
 const getTrainerRequestStatus = async (req, res) => {
   try {
     const { userId } = req.params;
-    const trainerRequest = await TrainerRequest.findOne({ User: userId })
+    const trainerRequest = await TrainerRequestModel.findOne({ User: userId })
       .sort({ _id: -1 }); 
-      console.log(trainerRequest);
       
-
     if (trainerRequest) {
       res.json({ status: trainerRequest.Status });
     } else {
@@ -52,10 +51,9 @@ const getTrainerRequestStatus = async (req, res) => {
   }
 };
 
-
 const getTrainers = async (req, res) => {
   try {
-    const acceptedTrainerRequests = await TrainerRequest.find({ Status: 'Accepted' })
+    const acceptedTrainerRequests = await TrainerRequestModel.find({ Status: 'Accepted' })
       .populate('User', 'avatar username') 
       .select('Type User');
 
@@ -77,10 +75,105 @@ const getTrainers = async (req, res) => {
   }
 };
 
+const bookTrainer = async (req, res) => {
+  try {
+    const { trainerId, traineeId, trainingDate } = req.body;
+
+    if (!trainerId || !traineeId || !trainingDate) {
+      return res.status(400).json({ message: 'TrainerId, TraineeId, and TrainingDate are required.' });
+    }
+
+    const trainer = await UserModel.findById(trainerId);
+    if (!trainer || trainer.usertype !== 'trainer') {
+      return res.status(404).json({ message: 'Trainer not found.' });
+    }
+
+    const trainee = await UserModel.findById(traineeId);
+    if (!trainee) {
+      return res.status(404).json({ message: 'Trainee not found.' });
+    }
+
+ 
+
+    const newBooking = new TrainerModel({
+      TrainerId: trainerId,
+      TraineeId: traineeId,
+      TrainingDate: trainingDate,
+    });
+
+    await newBooking.save();
+
+    res.status(200).json({ message: 'Booking successful.', booking: newBooking });
+  } catch (error) {
+    console.error('Error booking trainer:', error);
+    res.status(500).json({ message: 'An error occurred while booking the trainer.', error: error.message });
+  }
+};
+
+
+const checkBooking = async (req, res) => {
+  try {
+    const { trainerId, trainingDate } = req.body;
+
+    if (!trainerId || !trainingDate) {
+      return res.status(400).json({ message: 'TrainerId and TrainingDate are required.' });
+    }
+
+    const existingBooking = await TrainerModel.findOne({ 
+      TrainerId: trainerId, 
+      TrainingDate: new Date(trainingDate) 
+    });
+
+    if (existingBooking) {
+      return res.status(200).json({ isBooked: true });
+    }
+
+    return res.status(200).json({ isBooked: false });
+  } catch (error) {
+    console.error('Error checking booking:', error);
+    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
+
+const getTrainees = async (req, res) => {
+  try {
+    const { trainerId } = req.params;
+
+    if (!trainerId) {
+      return res.status(400).json({ message: 'TrainerId is required.' });
+    }
+
+    const bookings = await TrainerModel.find({ TrainerId: trainerId })
+      .populate('TraineeId', 'username avatar') 
+      .select('TraineeId TrainingDate');
+
+    if (!bookings.length) {
+      return res.status(200).json({ message: 'No current trainees.', trainees: [] });
+    }
+
+    const trainees = bookings.map(booking => ({
+      id: booking.TraineeId._id,
+      name: booking.TraineeId.username,
+      date: booking.TrainingDate,
+      avatar: booking.TraineeId.avatar
+    }));
+
+    res.json({ trainees });
+  } catch (error) {
+    console.error('Error fetching trainees:', error);
+    res.status(500).json({ message: 'An error occurred while fetching trainees.', error: error.message });
+  }
+};
+
+
+
 
 
 module.exports = {
   registerTrainer,
   getTrainerRequestStatus,
   getTrainers,
+  bookTrainer,
+  checkBooking,
+  getTrainees,
 };

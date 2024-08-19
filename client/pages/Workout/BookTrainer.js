@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import CustomAlert from '../../Components/CustomAlert';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../../Components/Config';
+import { AuthContext } from '../../Context/authContext';
 
 const BookTrainer = ({ route }) => {
   const { trainer } = route.params;
@@ -11,7 +14,9 @@ const BookTrainer = ({ route }) => {
   const [alertMessage, setAlertMessage] = useState('');
   const [isBookingSuccess, setIsBookingSuccess] = useState(false);
   const navigation = useNavigation();
-
+  const [state] = useContext(AuthContext);
+  const { user } = state;
+  
   const handleDateSelect = (date) => {
     const currentDate = new Date().toISOString().split('T')[0];
     if (date < currentDate) {
@@ -22,15 +27,55 @@ const BookTrainer = ({ route }) => {
     setSelectedDate(date);
   };
 
-  const handleBookAppointment = () => {
-    if (!selectedDate) {
-      setAlertMessage('Please select a date to book an appointment.');
-      setAlertVisible(true);
-      return;
+  const handleBookAppointment = async () => {
+    setAlertMessage('');  // Clear previous alert messages
+    try {
+      // First, check if there's already a booking for the trainer on the selected date
+      const checkResponse = await api.post('fitnet/checkBooking', {
+        trainerId: trainer._id,
+        trainingDate: selectedDate,
+      });
+
+      if (checkResponse.status === 200 && checkResponse.data.isBooked) {
+        setAlertMessage(`This trainer is already booked on ${selectedDate}. Please choose another date.`);
+        setAlertVisible(true);
+        return;  // Prevent further booking process
+      }
+
+      // If no booking exists for the selected date, proceed with the booking
+      const data = {
+        trainerId: trainer._id,
+        traineeId: user._id,
+        trainingDate: selectedDate,
+      };
+
+      const response = await api.post('fitnet/bookTrainer', data);
+      
+
+      if (response.status === 200) {
+        console.log(`Appointment booked with ${trainer.username} on ${selectedDate}`);
+        setAlertMessage(`Appointment booked with ${trainer.username} on ${selectedDate}.`);
+        setIsBookingSuccess(true);
+        await AsyncStorage.setItem('@booking', JSON.stringify(response.data));
+      } else {
+        setAlertMessage(response.data?.message || 'Failed to book the appointment. Please try again.');
+        console.error(error);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 500) {
+        setAlertMessage(error.response.data?.message || 'Internal Server Error');
+      } else if (error.response && error.response.status === 400) {
+        setAlertMessage(error.response.data?.message || 'Invalid request. Please check the details and try again.');
+      } else {
+        setAlertMessage('Failed to book the appointment. Please try again.');
+        console.error(error);
+      }
     }
-    setAlertMessage(`Appointment booked with ${trainer.username} on ${selectedDate}.`);
+
     setAlertVisible(true);
-    setIsBookingSuccess(true);
+    console.log('Trainer ID:', trainer._id);
+    console.log('Trainee ID:', user._id);
+    console.log('Selected Date:', selectedDate);
   };
 
   const closeAlert = () => {
@@ -50,7 +95,7 @@ const BookTrainer = ({ route }) => {
         </View>
       </View>
       <Calendar
-        style={styles.Calendar}
+        style={styles.calendar}
         onDayPress={(day) => handleDateSelect(day.dateString)}
         markedDates={selectedDate ? { [selectedDate]: { selected: true, selectedColor: '#FF4C0A' } } : {}}
         theme={{
@@ -102,9 +147,9 @@ const styles = StyleSheet.create({
   type: {
     color: '#FF4C0A',
     fontSize: 14,
-    top:5,
+    marginTop: 5,
   },
-  Calendar: {
+  calendar: {
     borderRadius: 10,
   },
   bookButton: {

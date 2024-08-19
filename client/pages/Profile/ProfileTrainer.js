@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ActivityIndicator
 import { useNavigation } from '@react-navigation/native';
 import api from '../../Components/Config';
 import { AuthContext } from '../../Context/authContext';
-import { Ionicons } from '@expo/vector-icons'; // Make sure to install this package if you haven't already
+import { Ionicons } from '@expo/vector-icons'; 
 
 const ProfileTrainer = () => {
   const navigation = useNavigation();
@@ -11,6 +11,8 @@ const ProfileTrainer = () => {
   const user = state?.user || {};
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [trainees, setTrainees] = useState([]);
+  const [noTrainees, setNoTrainees] = useState(false);
 
   useEffect(() => {
     const fetchTrainerStatus = async () => {
@@ -23,11 +25,30 @@ const ProfileTrainer = () => {
         setLoading(false);
       }
     };
-
+  
+    const fetchTrainees = async () => {
+      try {
+        const response = await api.get(`fitnet/getTrainees/${user._id}`);
+        if (response.data.trainees.length === 0) {
+          setNoTrainees(true);
+        } else {
+          setTrainees(response.data.trainees);
+          setNoTrainees(false); 
+        }
+      } catch (error) {
+        console.error('Failed to fetch trainees:', error);
+        setNoTrainees(true); 
+      }
+    };
+  
     if (user._id) {
       fetchTrainerStatus();
+      if (status === 'Accepted') {
+        fetchTrainees();
+      }
     }
-  }, [user._id]);
+  }, [user._id, status]);
+  
 
   if (loading) {
     return (
@@ -39,22 +60,22 @@ const ProfileTrainer = () => {
 
   const renderTraineeList = () => (
     <View style={styles.traineeListContainer}>
-      {[
-        { id: 1, name: 'John Doe', date: '2024-08-20', avatar: require('../../assets/images/logo.png') },
-        { id: 2, name: 'Jane Smith', date: '2024-08-21', avatar: require('../../assets/images/logo.png') },
-        { id: 3, name: 'Sam Wilson', date: '2024-08-22', avatar: require('../../assets/images/logo.png') },
-      ].map((trainee) => (
-        <View key={trainee.id} style={styles.traineeContainer}>
-          <Image source={trainee.avatar} style={styles.avatar} />
-          <View style={styles.traineeInfo}>
-            <Text style={styles.traineeName}>{trainee.name}</Text>
-            <Text style={styles.trainingDate}>{trainee.date}</Text>
+      {noTrainees ? (
+        <Text style={styles.noTraineesText}>No current trainees</Text>
+      ) : (
+        trainees.map(trainee => (
+          <View key={trainee.id} style={styles.traineeContainer}>
+            <Image source={{ uri: trainee.avatar }} style={styles.avatar} />
+            <View style={styles.traineeInfo}>
+              <Text style={styles.traineeName}>{trainee.name}</Text>
+              <Text style={styles.trainingDate}>{new Date(trainee.date).toLocaleDateString()}</Text>
+            </View>
+            <TouchableOpacity style={styles.messageIconContainer}>
+              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#FF4C0A" />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.messageIconContainer}>
-            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#FF4C0A" />
-          </TouchableOpacity>
-        </View>
-      ))}
+        ))
+      )}
     </View>
   );
 
@@ -69,22 +90,20 @@ const ProfileTrainer = () => {
       ) : status === 'Accepted' ? (
         renderTraineeList()
       ) : (
-        <>
-          <View style={styles.contentContainer}>
-            <Text style={styles.title}>
-              Are you a <Text style={styles.orangeText}>Trainer</Text>?
-            </Text>
-            <Text style={styles.subtitle}>
-              Sign up to start taking{'\n'}in clients
-            </Text>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('TrainerRegister')}
-            >
-              <Text style={styles.buttonText}>Register</Text>
-            </TouchableOpacity>
-          </View>
-        </>
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>
+            Are you a <Text style={styles.orangeText}>Trainer</Text>?
+          </Text>
+          <Text style={styles.subtitle}>
+            Sign up to start taking{'\n'}in clients
+          </Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('TrainerRegister')}
+          >
+            <Text style={styles.buttonText}>Register</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -102,15 +121,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     height: windowHeight / 2,
     justifyContent: 'center',
-  },
-  topLeftLabelContainer: {
-    position: 'absolute',
-    top: 10,
-    left: 20,
-  },
-  topLeftLabel: {
-    fontSize: 16,
-    color: 'gray',
   },
   contentContainer: {
     flex: 1,
@@ -177,5 +187,10 @@ const styles = StyleSheet.create({
   },
   messageIconContainer: {
     marginLeft: 'auto',
+  },
+  noTraineesText: {
+    fontSize: 18,
+    color: 'white',
+    textAlign: 'center',
   },
 });

@@ -2,16 +2,23 @@ const mongoose = require('mongoose');
 
 const trainerSchema = new mongoose.Schema({
   TrainerId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', 
     required: true,
   },
   TraineeId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', 
     required: true,
   },
   TrainingDate: {
     type: Date,
     required: true,
+  },
+  Review: {
+    type: Number,
+    min: 1, 
+    max: 5,
   },
 });
 

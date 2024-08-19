@@ -26,6 +26,7 @@ const TrainerInformation = ({ route }) => {
 
   const handleBookPress = () => {
     navigation.navigate('BookTrainer', { trainer });
+    console.log('Trainer passed to TrainerInformation:', trainer);
   };
 
   return (

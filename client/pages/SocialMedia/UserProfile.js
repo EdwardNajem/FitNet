@@ -28,7 +28,7 @@ const UserProfile = () => {
           },
         });
         if (response.status === 200) {
-          setIsFollowing(response.data.isFollowing); // Update state based on response
+          setIsFollowing(response.data.isFollowing); 
         }
       } catch (error) {
         console.error('Error fetching follow status:', error);
