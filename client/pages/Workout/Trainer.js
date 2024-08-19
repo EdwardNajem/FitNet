@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../Components/Config';
+import { AuthContext } from '../../Context/authContext';
 
 const Trainer = () => {
   const [trainers, setTrainers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const navigation = useNavigation();
+  const [state] = useContext(AuthContext);
+  const user = state?.user || {};
 
   useEffect(() => {
     const fetchTrainers = async () => {
@@ -17,7 +20,8 @@ const Trainer = () => {
       try {
         const response = await api.get('fitnet/getTrainers');
         if (response.status === 200) {
-          setTrainers(response.data);
+          const filteredTrainers = response.data.filter(trainer => trainer._id !== user._id);
+          setTrainers(filteredTrainers);
         } else {
           setErrorMessage(response.data?.message || 'Failed to fetch trainers');
         }
@@ -33,7 +37,7 @@ const Trainer = () => {
     };
 
     fetchTrainers();
-  }, []);
+  }, [user._id]);
 
   const handlePress = (trainer) => {
     navigation.navigate('TrainerInformation', { trainer });
@@ -102,7 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   description: {
-    color: '#FFFFFF',
+    color: '#FF4C0A',
     fontSize: 14,
     marginTop: 5,
   },
@@ -126,6 +130,28 @@ const styles = StyleSheet.create({
     color: '#FF4C0A',
     fontSize: 16,
     textAlign: 'center',
+  },
+  trainerSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#2F2F2F',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  trainerInfo: {
+    flexDirection: 'column',
+  },
+  trainerName: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+    fontSize: 20,
+    lineHeight: 30,
+  },
+  trainingDate: {
+    color: '#BBBBBB',
+    fontSize: 16,
   },
 });
 

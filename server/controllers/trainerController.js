@@ -167,6 +167,38 @@ const getTrainees = async (req, res) => {
 
 
 
+const getNearestTrainingSession = async (req, res) => {
+  try {
+    const { traineeId } = req.params;
+    const nearestSession = await TrainerModel.findOne({
+      TraineeId: traineeId,
+      TrainingDate: { $gte: new Date() },
+    })
+      .sort({ TrainingDate: 1 })
+      .populate('TrainerId', 'username',);
+
+    if (!nearestSession) {
+      return res.status(404).json({ message: 'No upcoming sessions found' });
+    }
+
+    res.status(200).json({ nearestSession });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching nearest session' });
+  }
+};
+
+
+const deleteTrainingSession = async (req, res) => {
+  try {
+    const { sessionId } = req.params; // sessionId corresponds to the _id of the training session
+    await TrainerModel.findByIdAndDelete(sessionId);
+    res.status(200).json({ message: 'Training session deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting training session' });
+  }
+};
 
 
 module.exports = {
@@ -176,4 +208,6 @@ module.exports = {
   bookTrainer,
   checkBooking,
   getTrainees,
+  getNearestTrainingSession,
+  deleteTrainingSession,
 };

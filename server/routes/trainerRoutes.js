@@ -6,6 +6,8 @@ getTrainers,
 bookTrainer,
 checkBooking,
 getTrainees,
+getNearestTrainingSession,
+deleteTrainingSession,
 } = require('../controllers/trainerController');
 
 const router = express.Router();
@@ -17,7 +19,8 @@ router.post('/bookTrainer', bookTrainer);
 router.post('/checkBooking', checkBooking);
 router.get('/getTrainees/:trainerId', getTrainees);
 
-
+router.get('/getNearestTrainingSession/:traineeId',getNearestTrainingSession);
+router.delete('/deleteTrainingSession/:sessionId',deleteTrainingSession);
 
 
 
