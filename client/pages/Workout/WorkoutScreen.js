@@ -9,22 +9,26 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image
 } from 'react-native';
 import api from '../../Components/Config';
 import { useIsFocused } from '@react-navigation/native';
 
 const WorkoutScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [sessionModalVisible, setSessionModalVisible] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
-
   const [workouts, setWorkouts] = useState([]);
+  const [nearestSession, setNearestSession] = useState(null);
 
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (isFocused)
+    if (isFocused) {
       getAllWorkoutPlansByUser();
-  }, [navigation,isFocused]);
+      getNearestTrainingSession();
+    }
+  }, [navigation, isFocused]);
 
   const getAllWorkoutPlansByUser = async () => {
     try {
@@ -32,33 +36,68 @@ const WorkoutScreen = ({ navigation }) => {
 
       const response = await api.get(`/fitnet/getAllWorkoutPlansByUser/${user.user._id}`);
 
-      if(response){
+      if (response) {
         setWorkouts(response.data.workoutPlans);
       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  // const workouts = [
-  //   { id: 1, name: 'Chest - Biceps' },
-  //   { id: 2, name: 'Legs - Abs' },
-  //   { id: 3, name: 'Shoulders - Triceps' },
-  // ];
+  const getNearestTrainingSession = async () => {
+    try {
+      const user = JSON.parse(await AsyncStorage.getItem('@auth'));
+      
+      const response = await api.get(`/fitnet/getNearestTrainingSession/${user.user._id}`);
+  
+      if (response.status === 200) {
+        if (response.data.message) {
+          setNearestSession(null); 
+          console.log(response.data.message); 
+        } else {
+          setNearestSession(response.data.nearestSession);
+          console.log('sessions found');
+
+        }
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setNearestSession(null); 
+        console.log('No upcoming sessions found');
+      } else {
+        console.log(error);
+        console.log('Error fetching nearest training session');
+      }
+    }
+  };
+  
+  
+
+  const handleDeleteSession = async (sessionId) => {
+    try {
+      const response = await api.delete(`/fitnet/deleteTrainingSession/${sessionId}`);
+  
+      if (response) {
+        setNearestSession(null); 
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setSessionModalVisible(false); 
+  };
 
   const handleStartWorkout = async (workout) => {
     console.log('Start workout:', workout);
 
-    // set startTime to the current time
     try {
       const data = {
         workoutId: workout._id,
         startTime: new Date(),
-      }
+      };
 
       const response = await api.post('/fitnet/startWorkout', data);
 
-      if(response){
+      if (response) {
         navigation.navigate('StartWorkout', {
           selectedWorkoutPlan: workout
         });
@@ -74,7 +113,6 @@ const WorkoutScreen = ({ navigation }) => {
   };
 
   const handleEditWorkout = () => {
-    // console.log('Edit workout:', selectedWorkout);
     navigation.navigate('EditWorkout', {
       selectedWorkoutPlan: selectedWorkout
     });
@@ -82,17 +120,15 @@ const WorkoutScreen = ({ navigation }) => {
   };
 
   const handleDeleteWorkout = async () => {
-    console.log('Delete workout:', selectedWorkout);
     setWorkouts((prevWorkouts) => prevWorkouts.filter(workout => workout !== selectedWorkout));
     try {
       const response = await api.delete(`/fitnet/deleteWorkoutPlanById/${selectedWorkout._id}`);
 
-      if(response){
+      if (response) {
         const data = await response.json();
         console.log(data);
         console.log('Deleted the workout with ID: ', selectedWorkout._id);
       }
-      
     } catch (error) {
       console.log(error);
     }
@@ -141,6 +177,35 @@ const WorkoutScreen = ({ navigation }) => {
           </View>
         </Modal>
 
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={sessionModalVisible}
+          onRequestClose={() => {
+            setSessionModalVisible(!sessionModalVisible);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalButtonText}>Are you sure you want to cancel the session?</Text>
+              <TouchableOpacity
+                onPress={() => handleDeleteSession(nearestSession._id)}
+                style={[styles.modalButton, styles.deleteButton]}
+              >
+                <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
+                  Yes
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setSessionModalVisible(false)}
+                style={styles.cancelButton}
+              >
+                <Text style={styles.cancelButtonText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
         <Text style={styles.sectionTitle}>Quick Start</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('CreateWorkout')}
@@ -156,15 +221,28 @@ const WorkoutScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>Trainer</Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Trainer')}
-          style={[styles.button, { backgroundColor: '#2F2F2F' }]}
-        >
-          <View style={styles.buttonContent}>
-            <AntDesign name="plus" size={24} color="#FF4C0A" />
-            <Text style={styles.buttonText}>Hire a Trainer</Text>
+        {nearestSession ? (
+          <View style={styles.trainerBar}>
+            <Image source={{ uri: nearestSession.Trainer.avatar }} style={styles.trainerAvatar} />
+            <View style={styles.trainerInfo}>
+              <Text style={styles.trainerName}>{nearestSession.Trainer.username}</Text>
+              <Text style={styles.trainerDate}>{new Date(nearestSession.TrainingDate).toDateString()}</Text>
+            </View>
+            <TouchableOpacity onPress={() => setSessionModalVisible(true)}>
+              <AntDesign name="close" size={24} color="#FF4C0A" />
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Trainer')}
+            style={[styles.button, { backgroundColor: '#2F2F2F' }]}
+          >
+            <View style={styles.buttonContent}>
+              <AntDesign name="plus" size={24} color="#FF4C0A" />
+              <Text style={styles.buttonText}>Hire a Trainer</Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Workout Plan</Text>
@@ -194,7 +272,6 @@ const WorkoutScreen = ({ navigation }) => {
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -284,43 +361,69 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
+    width: 300,
     backgroundColor: '#2F2F2F',
     borderRadius: 10,
     padding: 20,
-    width: '80%',
   },
   modalButton: {
+    backgroundColor: '#FF4C0A',
     paddingVertical: 10,
-    marginVertical: 5,
-    borderRadius: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  deleteButton: {
+    top: 10,
     backgroundColor: '#FF4C0A',
   },
   modalButtonText: {
+    color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: 'white',
-  },
-  cancelButton: {
-    paddingVertical: 10,
-    marginTop: 10,
-    borderRadius: 10,
-    backgroundColor: '#2F2F2F',
-    width: '80%',
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: 'white',
-  },
-  deleteButton: {
-    backgroundColor: '#FF0000',
   },
   deleteButtonText: {
     color: '#FFFFFF',
   },
+  cancelButton: {
+    marginTop: 10,
+    alignItems: 'center',
+    borderWidth: 2,          
+    borderColor: '#FF4C0A', 
+    borderRadius: 5,        
+    paddingVertical: 10,    
+    paddingHorizontal: 20,  
+  },
+  cancelButtonText: {
+    color: '#FF4C0A',
+    fontSize: 18,
+  },
+  trainerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2F2F2F',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  trainerAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  trainerInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  trainerName: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+    fontSize: 18,
+  },
+  trainerDate: {
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
 });
+
 
 export default WorkoutScreen;
