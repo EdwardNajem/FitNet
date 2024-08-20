@@ -41,6 +41,7 @@ const ProfileWorkout = (props) => {
 
       if(response){
         setPosts(response.data);
+        console.log(response.date);
         // console.log(response.data)
       }
     } catch (error) {
@@ -263,7 +264,7 @@ const ProfileWorkout = (props) => {
               </View>
             </View>
             <Text style={styles.postText}>{post.description}</Text>
-            <View style={styles.workoutStatistics}>
+            {post.postType!="text"&&post.postType!="image-gym"&&<View style={styles.workoutStatistics}>
               <View style={styles.workoutStatisticsContainer}>
                 <Text style={styles.workoutStatisticsHeaderText}>Duration</Text>
                 <Text style={styles.workoutStatisticsText}>{formatTime(post.workoutData.duration)}</Text>
@@ -272,8 +273,8 @@ const ProfileWorkout = (props) => {
                 <Text style={styles.workoutStatisticsHeaderText}>Volume</Text>
                 <Text style={styles.workoutStatisticsText}>{formatWeight(post.workoutData.volume)} KG</Text>
               </View>
-            </View>
-            {post.postType=="image"&&<Image source={{ uri: post.photo }} style={styles.postImage} resizeMode="cover" />}
+            </View>}
+            {(post.postType=="image"||post.postType=="image-gym")&&<Image source={{ uri: post.photo }} style={styles.postImage} resizeMode="cover" />}
             {post.postType=="workout"&&<PostExercises post={post}/>}
             <View style={styles.postStats}>
               <Text style={styles.likes}>{post.likes.length} likes</Text>

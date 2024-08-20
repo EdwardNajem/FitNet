@@ -84,6 +84,70 @@ const uploadPost = async (req,res) => {
     }
 }
 
+const uploadPostGym = async (req,res) => {
+    const {postType} = req.body;
+
+    if(!postType){
+        return res.status(400).send({
+            success: false,
+            message: 'Please provide post type',
+        });
+    }else{
+        if(postType=="text"){
+            const {description, createdBy} = req.body;
+
+            // now lets make the exercice array
+            try {
+
+                const newPost = new postModel({
+                    description,
+                    postType,
+                    createdBy,
+                });
+                            
+                await newPost.save();
+            
+                return res.status(201).send({
+                    success: true,
+                    message: 'Post created successfully',
+                });
+
+            } catch (error) {
+                return res.status(500).send({
+                    success: false,
+                    message: 'Error in creating post',
+                    error,
+                });
+            }
+        }else{
+            const {description, createdBy, imageURL} = req.body;
+
+            try {
+                // this one is very easy
+                const newPost = new postModel({
+                    description,
+                    photo: imageURL,
+                    postType,
+                    createdBy,
+                });
+            
+                await newPost.save();
+            
+                res.status(201).send({
+                    success: true,
+                    message: 'Post created successfully',
+                });
+            } catch (error) {
+                return res.status(500).send({
+                    success: false,
+                    message: 'Error in creating post',
+                    error,
+                });
+            }
+        }
+    }
+}
+
 // const getAllPosts = async (req, res) => {
 //     try {
 //         const posts = await postModel
@@ -335,6 +399,7 @@ const deleteCommentFromPost = async (req, res) => {
 
 module.exports = {
     uploadPost,
+    uploadPostGym,
     getAllPosts,
     getPostsByUser,
     addLikeToPost,

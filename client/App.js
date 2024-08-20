@@ -16,6 +16,8 @@ import LoginScreen from './pages/Login/LoginScreen';
 import OTPScreen from './pages/Login/OTPScreen';
 import SignUpScreen from './pages/Login/SignUp';
 import { CommentProvider } from './pages/Profile/Settings/CommentContext';
+import HomeNavGym from './Navigation/HomeNavGym';
+import ProfileNavGym from './Navigation/ProfileNavGym';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -36,12 +38,15 @@ const tabOptions = {
 export default function App() {
   const [loggedin, setLoggedin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState(null);
 
   useEffect(() => {
     const checkUserLoggedIn = async () => {
       try {
-        const user = await AsyncStorage.getItem('@auth');
+        // const user = await AsyncStorage.removeItem('@auth');
+        const user = JSON.parse(await AsyncStorage.getItem('@auth'));
         if (user) {
+          setUserType(user.user.usertype);
           setLoggedin(true);
         }
       } catch (error) {
@@ -100,9 +105,15 @@ export default function App() {
                   ),
                 }}
               >
-                {(props) => <HomeNav {...props} setLoggedin={setLoggedin} />}
+                {(props) => 
+                  userType === "Attendee" ? (
+                    <HomeNav {...props} setLoggedin={setLoggedin} />
+                  ) : (
+                    <HomeNavGym {...props} setLoggedin={setLoggedin} />
+                  )
+                }
               </Tab.Screen>
-              <Tab.Screen
+              {userType=="Attendee"&&<Tab.Screen
                 name="Workout"
                 component={WorkoutNav}
                 options={{
@@ -125,7 +136,7 @@ export default function App() {
                     </View>
                   ),
                 }}
-              />
+              />}
               <Tab.Screen
                 name="Profile"
                 options={{
@@ -149,7 +160,13 @@ export default function App() {
                   ),
                 }}
               >
-                {(props) => <ProfileNav {...props} setLoggedin={setLoggedin} />}
+                {(props) => 
+                  userType === "Attendee" ? (
+                    <ProfileNav {...props} setLoggedin={setLoggedin} />
+                  ) : (
+                    <ProfileNavGym {...props} setLoggedin={setLoggedin} />
+                  )
+                }
               </Tab.Screen>
             </Tab.Navigator>
           </AuthProvider>

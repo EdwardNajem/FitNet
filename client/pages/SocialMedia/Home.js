@@ -29,8 +29,11 @@ const HomeScreen = () => {
     setTimeout(() => {
         setRefreshing(false);
     }, await getAllPosts());
+  }, []);
 
-}, []);
+  const handleCreatePost = () => {
+    navigation.navigate('Create-Post-Gym');
+  }
 
   useEffect(() => {
     getAllPosts();
@@ -263,6 +266,14 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {state.user&&state.user.usertype=="Gym"&&
+          <View style={styles.createPostContainer}>
+            <TouchableOpacity style={styles.submitButton} onPress={() => handleCreatePost()}>
+              <Text style={styles.submitButtonText}>Create Post</Text>
+            </TouchableOpacity>
+          </View>
+        }
+
         {posts.map((post) => (
           <View key={post._id} style={styles.postCard}>
             <View style={styles.userInfo}>
@@ -274,6 +285,7 @@ const HomeScreen = () => {
               </View>
             </View>
             <Text style={styles.postText}>{post.description}</Text>
+            {post.postType!="text"&&post.postType!="image-gym"&&
             <View style={styles.workoutStatistics}>
               <View style={styles.workoutStatisticsContainer}>
                 <Text style={styles.workoutStatisticsHeaderText}>Duration</Text>
@@ -283,8 +295,8 @@ const HomeScreen = () => {
                 <Text style={styles.workoutStatisticsHeaderText}>Volume</Text>
                 <Text style={styles.workoutStatisticsText}>{formatWeight(post.workoutData.volume)} KG</Text>
               </View>
-            </View>
-            {post.postType=="image"&&<Image source={{ uri: post.photo }} style={styles.postImage} resizeMode="cover" />}
+            </View>}
+            {(post.postType=="image"||post.postType=="image-gym")&&<Image source={{ uri: post.photo }} style={styles.postImage} resizeMode="cover" />}
             {post.postType=="workout"&&<PostExercises post={post}/>}
             <View style={styles.postStats}>
               <Text style={styles.likes}>{post.likes.length} likes</Text>
@@ -543,6 +555,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  submitButton: {
+    backgroundColor: '#FF4C0A',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  createPostContainer: {
+    margin: 10
+  },
+  // descriptionInput: {
+  //   backgroundColor: '#2F2F2F',
+  //   color: '#FFFFFF',
+  //   borderRadius: 10,
+  //   padding: 10,
+  //   height: 100,
+  //   marginBottom: 20,
+  //   textAlignVertical: 'top',
+  // },
+  // createPostContainer: {
+  //   margin: 10
+  // },
 });
 
 export default HomeScreen;
