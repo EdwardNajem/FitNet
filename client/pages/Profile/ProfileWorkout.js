@@ -41,6 +41,7 @@ const ProfileWorkout = (props) => {
 
       if(response){
         setPosts(response.data);
+        console.log(response.date);
         // console.log(response.data)
       }
     } catch (error) {

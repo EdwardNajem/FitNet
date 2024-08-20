@@ -63,10 +63,10 @@ export default function CreatePostGymScreen({ navigation}) {
         }
     
         try {
-          const response = await api.post('/fitnet/uploadPost', data);
+          const response = await api.post('/fitnet/uploadPostGym', data);
     
           if(response){
-            // console.log(response);
+            console.log(response.data.error);
             navigation.goBack();
           }
         } catch (error) {

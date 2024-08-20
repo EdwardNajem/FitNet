@@ -14,7 +14,7 @@ const postSchema = new mongoose.Schema(
     postType: {
       type: String,
       required: true, // Make this required if every post must have a type
-      enum: ['image', 'workout'], // Example post types, adjust as needed
+      enum: ['image', 'workout', 'text', 'image-gym'], // Example post types, adjust as needed
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
