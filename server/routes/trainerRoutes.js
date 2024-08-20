@@ -8,6 +8,7 @@ checkBooking,
 getTrainees,
 getNearestTrainingSession,
 deleteTrainingSession,
+deleteTrainingSessionByDate,
 } = require('../controllers/trainerController');
 
 const router = express.Router();
@@ -21,6 +22,7 @@ router.get('/getTrainees/:trainerId', getTrainees);
 
 router.get('/getNearestTrainingSession/:traineeId',getNearestTrainingSession);
 router.delete('/deleteTrainingSession/:sessionId',deleteTrainingSession);
+router.post('/deleteTrainingSessionByDate', deleteTrainingSessionByDate);
 
 
 

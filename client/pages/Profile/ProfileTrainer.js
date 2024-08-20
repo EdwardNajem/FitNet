@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ActivityIndicator, Image, Modal, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../Components/Config';
 import { AuthContext } from '../../Context/authContext';
@@ -13,6 +13,8 @@ const ProfileTrainer = () => {
   const [loading, setLoading] = useState(true);
   const [trainees, setTrainees] = useState([]);
   const [noTrainees, setNoTrainees] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedSession, setSelectedSession] = useState(null);
 
   useEffect(() => {
     const fetchTrainerStatus = async () => {
@@ -25,7 +27,7 @@ const ProfileTrainer = () => {
         setLoading(false);
       }
     };
-  
+
     const fetchTrainees = async () => {
       try {
         const response = await api.get(`fitnet/getTrainees/${user._id}`);
@@ -40,7 +42,7 @@ const ProfileTrainer = () => {
         setNoTrainees(true); 
       }
     };
-  
+
     if (user._id) {
       fetchTrainerStatus();
       if (status === 'Accepted') {
@@ -48,15 +50,30 @@ const ProfileTrainer = () => {
       }
     }
   }, [user._id, status]);
-  
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#FF4C0A" />
-      </View>
-    );
-  }
+  const handleDeleteSession = async (trainingDate) => {
+    try {
+      const response = await api.post('fitnet/deleteTrainingSessionByDate', {
+        trainerId: user._id,
+        trainingDate
+      });
+      if (response.status === 200) {
+        // Refresh the list or handle successful deletion
+        setTrainees(trainees.filter(trainee => new Date(trainee.date).toISOString() !== new Date(trainingDate).toISOString()));
+        setIsModalVisible(false);
+      } else {
+        Alert.alert('Error', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error deleting training session:', error);
+      Alert.alert('Error', 'An error occurred while deleting the training session.');
+    }
+  };
+
+  const confirmDelete = (trainingDate) => {
+    setSelectedSession(trainingDate);
+    setIsModalVisible(true);
+  };
 
   const renderTraineeList = () => (
     <View style={styles.traineeListContainer}>
@@ -73,6 +90,15 @@ const ProfileTrainer = () => {
             <TouchableOpacity style={styles.messageIconContainer}>
               <Ionicons name="chatbubble-ellipses-outline" size={24} color="#FF4C0A" />
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.deleteIconContainer} 
+              onPress={() => confirmDelete(trainee.date)}
+            >
+              <Ionicons name="close-circle-outline" size={24} color="#FF4C0A" />
+            </TouchableOpacity>
+      
+
           </View>
         ))
       )}
@@ -88,7 +114,36 @@ const ProfileTrainer = () => {
           </Text>
         </View>
       ) : status === 'Accepted' ? (
-        renderTraineeList()
+        <>
+          {renderTraineeList()}
+          <Modal
+  transparent={true}
+  visible={isModalVisible}
+  animationType="slide"
+  onRequestClose={() => setIsModalVisible(false)}
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalText}>Are you sure you want to delete this session?</Text>
+      <View style={styles.modalButtons}>
+        <TouchableOpacity
+          style={styles.modalButton}
+          onPress={() => handleDeleteSession(selectedSession)}
+        >
+          <Text style={styles.modalButtonText}>Yes</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={() => setIsModalVisible(false)}
+        >
+          <Text style={styles.cancelButtonText}>No</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
+        </>
       ) : (
         <View style={styles.contentContainer}>
           <Text style={styles.title}>
@@ -185,7 +240,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
   },
-  messageIconContainer: {
+  deleteIconContainer: {
     marginLeft: 'auto',
   },
   noTraineesText: {
@@ -193,4 +248,54 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
+ modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    backgroundColor: '#2F2F2F',
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalButtons: {
+    marginTop: 10,
+  },
+  modalButton: {
+    backgroundColor: '#FF4C0A',
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    marginTop: 10,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FF4C0A',
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+  },
+  cancelButtonText: {
+    color: '#FF4C0A',
+    fontSize: 18,
+  },
+  modalText: {
+    marginBottom: 20,
+    fontSize: 16,
+    textAlign: 'center',
+    color:'white',
+  },
+ messageIconContainer: {
+  marginLeft: 'auto',
+  right:10,
+},
 });
+
