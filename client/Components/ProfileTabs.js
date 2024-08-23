@@ -5,7 +5,7 @@ import ProfileStats from '../pages/Profile/ProfileStats';
 import ProfileTrainer from '../pages/Profile/ProfileTrainer';
 import ProfileWorkout from '../pages/Profile/ProfileWorkout';
 
-const ProfileTabs = ({ type }) => {
+const ProfileTabs = ({ type, navigation }) => {
   // State to manage active tab and the corresponding component
   const [activeTab, setActiveTab] = useState('Workout');
   const [selectedComponent, setSelectedComponent] = useState(
@@ -23,7 +23,7 @@ const ProfileTabs = ({ type }) => {
         setSelectedComponent(<ProfileTrainer />);
         break;
       case 'Gym':
-        setSelectedComponent(<ProfileGym />);
+        setSelectedComponent(<ProfileGym navigation={navigation}/>);
         break;
       case 'Statistics':
         setSelectedComponent(<ProfileStats />);

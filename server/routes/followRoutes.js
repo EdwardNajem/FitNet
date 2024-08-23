@@ -1,5 +1,6 @@
 const express = require('express');
 const { searchUsers,
+    searchGyms,
     followUser,
     unfollowUser,
     followStatus,
@@ -8,6 +9,7 @@ const { searchUsers,
 const router = express.Router();
 
 router.get('/searchUsers', searchUsers);
+router.get('/searchGyms', searchGyms);
 router.post('/followUser',followUser);
 router.post('/unfollowUser',unfollowUser);
 router.get('/followStatus',followStatus);

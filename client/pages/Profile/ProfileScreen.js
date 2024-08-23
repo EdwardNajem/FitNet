@@ -192,7 +192,7 @@ const ProfileScreen = ({ navigation }) => {
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <ProfileHeader user={state.user} navigation={navigation} />
-        <ProfileTabs/>
+        <ProfileTabs navigation={navigation}/>
       </ScrollView>
     </View>
     {commentVisible && (

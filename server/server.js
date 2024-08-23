@@ -25,6 +25,7 @@ app.use('/fitnet', require('./routes/workoutRoutes'));
 app.use('/fitnet', require('./routes/postRoutes'));
 app.use('/fitnet', require('./routes/followRoutes'));
 app.use('/fitnet', require('./routes/trainerRoutes'));
+app.use('/fitnet', require('./routes/gymSubscriptionRoutes'));
 
 //PORT
 const PORT = process.env.PORT || 8080;

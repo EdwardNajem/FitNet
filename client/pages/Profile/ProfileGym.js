@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Dimensions,
   StyleSheet,
@@ -6,17 +6,25 @@ import {
   TouchableOpacity,
   View,
   Modal,
+  Image,
+  FlatList,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import axios from 'axios';
+import api from '../../Components/Config';
+import { AuthContext } from '../../Context/authContext';
+import { ScrollView } from 'react-native';
 
-const ProfileGym = () => {
+const ProfileGym = ({navigation}) => {
   const [mapVisible, setMapVisible] = useState(false);
   const [gyms, setGyms] = useState([]);
+  const [subscriptions, setSubscriptions] = useState();
+  const [state] = useContext(AuthContext);
   const API_KEY = 'AIzaSyBpCCbk0nQVbVQM0lYAE-YqcT3brK4hc-U';
 
   useEffect(() => {
     fetchAllGyms();
+    fetchUserSubscription();
   }, []);
 
   const gridCells = [
@@ -99,57 +107,158 @@ const ProfileGym = () => {
     setGyms(uniqueGyms);
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.topLeftLabelContainer}>
-        <Text style={styles.topLeftLabel}>Gym</Text>
-      </View>
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>
-          Find Your <Text style={styles.orangeText}>Gym</Text>
-        </Text>
-        <Text style={styles.subtitle}>
-          Locate and find a gym that{'\n'} best suits your goals
-        </Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setMapVisible(true)}
-        >
-          <Text style={styles.buttonText}>Select Gym</Text>
-        </TouchableOpacity>
-      </View>
+  const fetchUserSubscription = async () => {
+    // checkAllSubscriptionForUser
+    try {
+      const response = await api.get(`/fitnet/checkAllSubscriptionForUser/${state.user._id}`);
 
-      <Modal visible={mapVisible} animationType="slide">
-        <View style={{ flex: 1 }}>
-          <MapView
-            style={{ flex: 1 }}
-            initialRegion={{
-              latitude: 33.888629,
-              longitude: 35.495480,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-          >
-            {gyms.map((gym) => (
-              <Marker
-                key={gym.place_id} // Use a unique key
-                coordinate={{
-                  latitude: gym.geometry.location.lat,
-                  longitude: gym.geometry.location.lng,
-                }}
-                title={gym.name}
-              />
+      if(response.status==200){
+        setSubscriptions(response.data);
+        console.log(response.data);
+      }else{
+        console.log('no subscriptions')
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleSearchGyms = async () => {
+    navigation.navigate('SearchGyms');
+  }
+
+  const handleUnsubscribePress = async (subscriptionId, gymId) => {
+    try {
+      const data = {
+        userId: state.user._id,
+        gymId: gymId,
+      };
+  
+      const response = await api.post('/fitnet/removeSubscriptionRequest', data);
+  
+      if (response) {
+        alert('Successfully Unsubscribed');
+  
+        // Update the subscriptions state by filtering out the unsubscribed one
+        if(subscriptions.lenght==1){
+          setSubscriptions(null);
+        }else{
+          setSubscriptions((prevSubscriptions) => 
+            prevSubscriptions.filter(subscription => subscription._id !== subscriptionId)
+          );
+        } 
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+
+  return (
+      <View style={styles.container}>
+        <View style={styles.topLeftLabelContainer}>
+          <Text style={styles.topLeftLabel}>Gym</Text>
+        </View>
+        <ScrollView>
+        {subscriptions && subscriptions.length !=0&&
+          <ScrollView contentContainerStyle={styles.subscriptionsContainer}>
+            {subscriptions.map((subscription) => (
+            <View key={subscription._id} style={styles.subscriptionContainer}>
+              <Image source={{ uri: subscription.gym.avatar }} style={styles.userImage} />
+              <Text style={{ color: 'white' }}>{subscription.gym.username}</Text>
+              {subscription && subscription.status === "pending" && (
+                <TouchableOpacity
+                  style={[
+                    styles.followButton,
+                    subscription.status === 'pending' && styles.followingButton,
+                  ]}
+                  onPress={()=>handleUnsubscribePress(subscription._id,subscription.gym._id)}
+                >
+                  <Text
+                    style={[
+                      styles.followButtonText,
+                      subscription.status === 'pending' && styles.followingButtonText,
+                    ]}
+                  >
+                    Pending
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {subscription && subscription.status === "active" && (
+                <TouchableOpacity
+                  style={[
+                    styles.followButton,
+                    subscription.status === 'active' && styles.followingButton,
+                  ]}
+                  onPress={()=>handleUnsubscribePress(subscription._id,subscription.gym._id)}
+                >
+                  <Text
+                    style={[
+                      styles.followButtonText,
+                      subscription.status === 'active' && styles.followingButtonText,
+                    ]}
+                  >
+                    Unsubscribe
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
             ))}
-          </MapView>
+          </ScrollView>
+        }
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>
+            Find Your <Text style={styles.orangeText}>Gym</Text>
+          </Text>
+          <Text style={styles.subtitle}>
+            Locate and find a gym that{'\n'} best suits your goals
+          </Text>
           <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setMapVisible(false)}
+            style={styles.button}
+            onPress={() => setMapVisible(true)}
           >
-            <Text style={styles.closeButtonText}>Close</Text>
+            <Text style={styles.buttonText}>View Gyms</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handleSearchGyms()}
+          >
+            <Text style={styles.buttonText}>Search Gyms</Text>
           </TouchableOpacity>
         </View>
-      </Modal>
-    </View>
+        </ScrollView>
+
+        <Modal visible={mapVisible} animationType="slide">
+          <View style={{ flex: 1 }}>
+            <MapView
+              style={{ flex: 1 }}
+              initialRegion={{
+                latitude: 33.888629,
+                longitude: 35.495480,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }}
+            >
+              {gyms.map((gym) => (
+                <Marker
+                  key={gym.place_id} // Use a unique key
+                  coordinate={{
+                    latitude: gym.geometry.location.lat,
+                    longitude: gym.geometry.location.lng,
+                  }}
+                  title={gym.name}
+                />
+              ))}
+            </MapView>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setMapVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </View>
   );
 };
 
@@ -158,6 +267,47 @@ export default ProfileGym;
 const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
+  followButton: {
+    marginTop: 5,
+    marginBottom: 5,
+    backgroundColor: '#FF4C0A',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignSelf: 'center',
+    marginLeft: 'auto',
+    marginRight: '5%'
+  },
+  followButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  followingButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#FF4C0A',
+  },
+  followingButtonText: {
+    color: '#FF4C0A',
+  },
+  userImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 20,
+  },
+  subscriptionsContainer: {
+    marginTop: 30,
+  },
+  subscriptionContainer: {
+    flexDirection: 'row',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FFFFFF20',
+    padding: 10,
+    borderRadius: 40
+  },
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',

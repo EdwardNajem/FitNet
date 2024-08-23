@@ -7,6 +7,9 @@ import ChangePassword from '../pages/Profile/Settings/ChangePassword';
 import ContactUs from '../pages/Profile/Settings/ContactUs';
 import SettingsScreen from '../pages/Profile/SettingsScreen';
 import TrainerRegister from '../pages/Profile/TrainerRegister';
+import SearchGyms from '../pages/Profile/SearchGyms';
+import ProfileGym from '../pages/Profile/ProfileGym';
+import GymProfile from '../pages/Profile/GymProfile';
 const ProfileNav = ({ setLoggedin }) => {
   const Stack = createStackNavigator();
 
@@ -88,6 +91,31 @@ const ProfileNav = ({ setLoggedin }) => {
         component={TrainerRegister}
         options={{
           headerTitle: 'Trainer Registeration',
+          headerStyle: {
+            backgroundColor: '#2F2F2F',
+          },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SearchGyms"
+        component={SearchGyms}
+        options={{
+          headerTitle: 'Search Gyms',
+          headerStyle: {
+            backgroundColor: '#2F2F2F',
+          },
+          headerTintColor: '#DFE7EB',
+          headerShadowVisible: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="GymProfile"
+        component={GymProfile}
+        options={{
           headerStyle: {
             backgroundColor: '#2F2F2F',
           },

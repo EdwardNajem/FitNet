@@ -13,6 +13,20 @@ const searchUsers = async (req, res) => {
   }
 };
 
+const searchGyms = async (req, res) => {
+  try {
+    const searchQuery = req.query.q; 
+    const users = await UserModel.find({ 
+      username: { $regex: searchQuery, $options: 'i' } , 
+      usertype: "Gym"
+    }).select('username avatar'); 
+    
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 const followUser = async (req, res) => {
   try {
@@ -116,6 +130,7 @@ const getFollowingCount = async (req, res) => {
 
 module.exports = {
   searchUsers,
+  searchGyms,
   followUser,
   unfollowUser,
   followStatus,
