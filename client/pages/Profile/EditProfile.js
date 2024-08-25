@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
 import api from '../../Components/Config';
 import GreyCircle from '../../Components/GreyCircle';
 import LoadingAlert from '../../Components/LoadingAlert';
@@ -22,15 +21,94 @@ import WhiteLine from '../../Components/WhiteLine';
 import { AuthContext } from '../../Context/authContext';
 import { app } from '../../firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Dropdown } from 'react-native-element-dropdown';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const EditProfile = ({ navigation }) => {
+
+  const dataStatus = [
+    { label: 'Open', value: 'open' },
+    { label: 'Closed', value: 'closed' },
+  ];
+
+  // const [value, setValue] = useState(null);
+  // const [isFocusStatus, setIsFocusStatus] = useState(false);
+  // const [openingTime, setOpeningTime] = useState(new Date());
+  // const [closingTime, setClosingTime] = useState(new Date());
+
+  const [showOpeningTimePickers, setShowOpeningTimePickers] = useState(new Array(7).fill(false));
+  const [showClosingTimePickers, setShowClosingTimePickers] = useState(new Array(7).fill(false));
+  const [isFocus, setIsFocus] = useState(false);
+
+  const handleStatusChange = (index, newStatus) => {
+    const updatedWorkingHours = [...workingHours];
+    updatedWorkingHours[index].status = newStatus;
+    setWorkingHours(updatedWorkingHours);
+  };
+
+  const handleTimeChange = (event, selectedDate, index, isOpeningHour) => {
+    if (selectedDate) {
+      const updatedWorkingHours = [...workingHours];
+      if (isOpeningHour) {
+        updatedWorkingHours[index].openingHour = selectedDate;
+      } else {
+        updatedWorkingHours[index].closingHour = selectedDate;
+      }
+      setWorkingHours(updatedWorkingHours);
+    }
+  };
+
+  const toggleTimePicker = (index, isOpeningPicker) => {
+    if (isOpeningPicker) {
+      const updatedPickers = [...showOpeningTimePickers];
+      updatedPickers[index] = !updatedPickers[index];
+      setShowOpeningTimePickers(updatedPickers);
+    } else {
+      const updatedPickers = [...showClosingTimePickers];
+      updatedPickers[index] = !updatedPickers[index];
+      setShowClosingTimePickers(updatedPickers);
+    }
+  };
+
   const storage = getStorage();
   const [state, setState] = useContext(AuthContext);
   const user = state?.user || {};
 
+  // useEffect(() => {
+  //   console.log(userDateOfBirth);
+  // }, []);
+
   useEffect(() => {
-    console.log(userDateOfBirth);
-  }, []);
+    if(user.usertype=="Gym"){
+      getGymDetails();
+    }
+  }, [])
+
+  const getGymDetails = async () => {
+    try {
+      const response = await api.get(`/fitnet/getGymDetails/${user._id}`);
+  
+      if (response.data.success) {
+        const { workingHours, subscriptionFee } = response.data.data;
+  
+        // Convert date strings to Date objects
+        const formattedWorkingHours = workingHours.map(hour => ({
+          ...hour,
+          openingHour: new Date(hour.openingHour),
+          closingHour: new Date(hour.closingHour),
+        }));
+  
+        // Set state with the formatted data
+        setWorkingHours(formattedWorkingHours);
+        setSubscriptionFees(subscriptionFee);
+      } else {
+        console.error('Failed to fetch gym details:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching gym details:', error);
+    }
+  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -55,15 +133,18 @@ const EditProfile = ({ navigation }) => {
   }
   const [image, setImage] = useState(user.avatar || '');
   const [username, setUsername] = useState(user.username || '');
+  
   const [height, setHeight] = useState(user.height?.toString() || '');
   const [weight, setWeight] = useState(user.weight?.toString() || '');
   const [dateofbirth, setdateofbirth] = useState(formattedDateOfBirth || '');
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [gender, setGender] = useState(user.gender || null);
-  const [isFocus, setIsFocus] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [workingHours, setWorkingHours] = useState([]);
+  const [subscriptionFees, setSubscriptionFees] = useState();
   const data = [
     { label: 'Male', value: 'Male' },
     { label: 'Female', value: 'Female' },
@@ -180,6 +261,7 @@ const EditProfile = ({ navigation }) => {
       }
 
       const data = {
+        usertype: user.usertype,
         _id,
         username,
         avatar: savedImage,
@@ -187,6 +269,8 @@ const EditProfile = ({ navigation }) => {
         weight: parseInt(weight),
         dateofbirth: dateofbirth !== 'NaN/NaN/NaN' ? dateofbirth : null,
         gender,
+        subscriptionFees,
+        workingHours,
       };
 
       console.log('Sending data to API:', JSON.stringify(data, null, 2)); // Pretty-print the data
@@ -278,11 +362,12 @@ const EditProfile = ({ navigation }) => {
               <TextInput
                 style={styles.input}
                 placeholder="Username"
-                placeholderTextColor="#fff"
+                placeholderTextColor="#ffffff50"
                 value={username}
                 onChangeText={(text) => setUsername(text)}
               />
             </View>
+            {(state.user.usertype=="Attendee"||state.user.usertype=="trainer")&&<>
             <WhiteLine title={'Measurements'} />
             <View style={styles.inputContainer}>
               <TextInput
@@ -290,7 +375,7 @@ const EditProfile = ({ navigation }) => {
                 value={height}
                 onChangeText={(text) => setHeight(text)}
                 keyboardType="numeric"
-                placeholderTextColor="#fff"
+                placeholderTextColor="#ffffff50"
               />
               <Text style={[styles.inputText, { color: '#fff' }]}>
                 Height (cm)
@@ -302,7 +387,7 @@ const EditProfile = ({ navigation }) => {
                 value={weight}
                 onChangeText={(text) => setWeight(text)}
                 keyboardType="numeric"
-                placeholderTextColor="#fff"
+                placeholderTextColor="#ffffff50"
               />
               <Text style={[styles.inputText, { color: '#fff' }]}>
                 Weight (kg)
@@ -358,6 +443,83 @@ const EditProfile = ({ navigation }) => {
                 }}
               />
             </View>
+            </>}
+            {state.user.usertype=="Gym"&&<>
+              <WhiteLine title={'Working Hours'} />
+              {workingHours.map((workingHour, index) => (
+                <View key={index} style={{ flexDirection: 'row', display: 'flex', alignSelf: 'flex-start', marginHorizontal: 15 }}>
+                  <Text style={styles.label}>{workingHour.day}:</Text>
+                  <View style={styles.inputContainer}>
+                    <Dropdown
+                      style={[styles.statusDropdown, isFocus && { borderColor: 'blue' }]}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      data={dataStatus}
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={!isFocus ? 'Status' : '...'}
+                      value={workingHour.status}
+                      onFocus={() => setIsFocus(true)}
+                      onBlur={() => setIsFocus(false)}
+                      onChange={(item) => {
+                        handleStatusChange(index, item.value);
+                        setIsFocus(false);
+                      }}
+                    />
+                  </View>
+                  {workingHour.status === 'open' && (
+                    <View style={{ gap: 4, display: 'flex', flexDirection: 'row' }}>
+                      <TouchableOpacity onPress={() => toggleTimePicker(index, true)} style={styles.timePicker}>
+                        <Text style={styles.timeText}>{workingHour.openingHour.toLocaleTimeString()}</Text>
+                      </TouchableOpacity>
+                      {showOpeningTimePickers[index] && (
+                        <DateTimePicker
+                          value={workingHour.openingHour}
+                          mode="time"
+                          is24Hour={true}
+                          display="default"
+                          onChange={(event, selectedDate) => {
+                            handleTimeChange(event, selectedDate, index, true);
+                            toggleTimePicker(index, true);
+                          }}
+                        />
+                      )}
+                      <TouchableOpacity onPress={() => toggleTimePicker(index, false)} style={styles.timePicker}>
+                        <Text style={styles.timeText}>{workingHour.closingHour.toLocaleTimeString()}</Text>
+                      </TouchableOpacity>
+                      {showClosingTimePickers[index] && (
+                        <DateTimePicker
+                          value={workingHour.closingHour}
+                          mode="time"
+                          is24Hour={true}
+                          display="default"
+                          onChange={(event, selectedDate) => {
+                            handleTimeChange(event, selectedDate, index, false);
+                            toggleTimePicker(index, false);
+                          }}
+                        />
+                      )}
+                    </View>
+                  )}
+                </View>
+              ))}
+            </>}
+
+            {state.user.usertype=="Gym"&&<>
+              <WhiteLine title={'Subscription Fees'} />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter Subscription Fees"
+                  placeholderTextColor="#ffffff50"
+                  value={String(subscriptionFees)}
+                  keyboardType='numeric'
+                  onChangeText={(text) => setSubscriptionFees(text)}
+                />
+              </View>
+            </>}
+
             {errorMessage ? (
               <Text style={styles.errorText}>{errorMessage}</Text>
             ) : null}
@@ -378,12 +540,35 @@ const EditProfile = ({ navigation }) => {
 export default EditProfile;
 
 const styles = StyleSheet.create({
+  WorkingHourscontainer: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
   container: {
-    alignItems: 'center',
+    alignItems: 'flex',
     paddingBottom: 20,
     position: 'relative',
     flex: 1,
     backgroundColor: '#1C1C1E',
+  },
+  label: {
+    fontSize: 16,
+    // marginVertical: 10,
+    marginVertical: 'auto',
+    color: 'white',
+    width: 50,
+  },
+  timePicker: {
+    backgroundColor: '#fff',
+    padding: 10,
+    margin: 'auto',
+    borderRadius: 5,
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  timeText: {
+    fontSize: 16,
+    color: '#FF4C0A',
   },
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -412,6 +597,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     marginHorizontal: 15,
+    justifyContent: 'space-between',
   },
   input: {
     flex: 1,
@@ -448,6 +634,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  statusDropdown: {
+    height: 50,
+    borderColor: 'white',
+    borderBottomWidth: 1,
+    borderBttomRadius: 8,
+    // paddingRight: 8,
+    // width: '50%',
+    width: 90,
+  },
   dropdown: {
     height: 50,
     borderColor: 'white',
@@ -465,7 +660,7 @@ const styles = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: 14,
-    color: 'white',
+    color: 'white'
   },
   errorText: {
     color: 'red',

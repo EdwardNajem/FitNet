@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ProfileGym from '../pages/Profile/ProfileGym';
 import ProfileStats from '../pages/Profile/ProfileStats';
 import ProfileTrainer from '../pages/Profile/ProfileTrainer';
 import ProfileWorkout from '../pages/Profile/ProfileWorkout';
+import { AuthContext } from '../Context/authContext';
+import ProfileDetails from '../pages/Profile/ProfileDetails';
 
 const ProfileTabs = ({ type, navigation }) => {
   // State to manage active tab and the corresponding component
   const [activeTab, setActiveTab] = useState('Workout');
+  const [state] = useContext(AuthContext);
   const [selectedComponent, setSelectedComponent] = useState(
     <ProfileWorkout />
   );
@@ -27,6 +30,9 @@ const ProfileTabs = ({ type, navigation }) => {
         break;
       case 'Statistics':
         setSelectedComponent(<ProfileStats />);
+        break;
+      case 'Details':
+        setSelectedComponent(<ProfileDetails />);
         break;
       default:
         setSelectedComponent(null);
@@ -50,9 +56,27 @@ const ProfileTabs = ({ type, navigation }) => {
               activeTab === 'Workout' && styles.activeTabButtonText,
             ]}
           >
-            Workout
+            {(state.user.usertype=="Attendee"||state.user.usertype=="trainer")?'Workout':'Posts'}
           </Text>
         </TouchableOpacity>
+
+        {state.user.usertype=="Gym"&&<TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === 'Details' && styles.activeTabButton,
+          ]}
+          onPress={() => handleTabPress('Details')}
+        >
+          <Text
+            style={[
+              styles.tabButtonText,
+              activeTab === 'Details' && styles.activeTabButtonText,
+            ]}
+          >
+            Details
+          </Text>
+        </TouchableOpacity>}
+
         <TouchableOpacity
           style={[
             styles.tabButton,
@@ -66,10 +90,10 @@ const ProfileTabs = ({ type, navigation }) => {
               activeTab === 'Gym' && styles.activeTabButtonText,
             ]}
           >
-            Gym
+            {(state.user.usertype=="Attendee"||state.user.usertype=="trainer")?'Gym':'Subscriptions'}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        {(state.user.usertype=="Attendee"||state.user.usertype=="trainer")&&<TouchableOpacity
           style={[
             styles.tabButton,
             activeTab === 'Statistics' && styles.activeTabButton,
@@ -84,8 +108,9 @@ const ProfileTabs = ({ type, navigation }) => {
           >
             Statistics
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </TouchableOpacity>}
+
+        {(state.user.usertype=="Attendee"||state.user.usertype=="trainer")&&<TouchableOpacity
           style={[
             styles.tabButton,
             activeTab === 'Trainer' && styles.activeTabButton,
@@ -100,7 +125,7 @@ const ProfileTabs = ({ type, navigation }) => {
           >
             Trainer
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
       {/* Render the selected component */}
       {selectedComponent}

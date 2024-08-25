@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import {
   VictoryAxis,
@@ -6,14 +6,49 @@ import {
   VictoryChart,
   VictoryTheme,
 } from 'victory-native';
+import api from '../../Components/Config';
+import { AuthContext } from '../../Context/authContext';
+
 
 const ProfileStats = () => {
-  const data = [
-    { quarter: 1, earnings: 13000 },
-    { quarter: 2, earnings: 16500 },
-    { quarter: 3, earnings: 14250 },
-    { quarter: 4, earnings: 19000 },
-  ];
+  const [data, setData] = useState([]);
+  const [selectedData, setSelectedData] = useState(null);
+  const [state] = useContext(AuthContext);
+
+  useEffect(() => {
+    fetchVolumeData();
+  }, []);
+
+  // Fetch the workout volume data for the last 7 days from your backend
+  const fetchVolumeData = async () => {
+    try {
+      const response = await api.get(`/fitnet/getWorkoutVolumeForLast7Days/${state.user._id}`);
+      const fetchedData = response.data;
+      
+      // Helper function to get the day name from a date string
+      const getDayName = (dateStr) => {
+        const date = new Date(dateStr);
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return days[date.getDay()];
+      };
+
+      // Map fetched data to the format needed by VictoryChart
+      const chartData = fetchedData.map(item => ({
+        quarter: getDayName(item.date), // Use day name as x-axis
+        earnings: item.volume // Use volume as y-axis
+      }));
+      
+      setData(chartData);
+    } catch (error) {
+      console.error('Error fetching workout volume data:', error);
+    }
+  };
+
+  // Helper function to format tick labels
+  const formatTick = (tick) => {
+    // Format the tick value to a readable number
+    return tick.toLocaleString(); // Converts number to a string with commas as thousands separators
+  };
 
   return (
     <View style={styles.container}>
@@ -21,21 +56,23 @@ const ProfileStats = () => {
         <Text style={styles.topLeftLabel}>Statistics</Text>
       </View>
       <View style={styles.contentContainer}>
-        <VictoryChart width={350} theme={VictoryTheme.material}>
+      <VictoryChart width={350} theme={VictoryTheme.material}>
           <VictoryAxis
             style={{
               axis: { stroke: 'white' },
               tickLabels: { fill: 'white' },
               grid: { stroke: 'none' },
             }}
+            tickFormat={(tick) => tick} // Format the x-axis labels
           />
           <VictoryAxis
             dependentAxis
             style={{
               axis: { stroke: 'white' },
               tickLabels: { fill: 'white' },
-              // grid: { stroke: 'none' },
+              grid: { stroke: 'none' },
             }}
+            tickFormat={formatTick}
           />
           <VictoryBar
             data={data}
@@ -52,6 +89,13 @@ const ProfileStats = () => {
             }}
           />
         </VictoryChart>
+        {selectedData && (
+          <View style={styles.tooltipContainer}>
+            <Text style={styles.tooltipText}>
+              {`${selectedData.quarter}: ${selectedData.earnings}`}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -82,5 +126,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tooltipContainer: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#333',
+    borderRadius: 5,
+  },
+  tooltipText: {
+    color: 'white',
+    fontSize: 16,
   },
 });

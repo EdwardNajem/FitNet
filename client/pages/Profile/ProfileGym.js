@@ -153,113 +153,291 @@ const ProfileGym = ({navigation}) => {
     }
   };
   
-
-  return (
-      <View style={styles.container}>
-        <View style={styles.topLeftLabelContainer}>
-          <Text style={styles.topLeftLabel}>Gym</Text>
-        </View>
-        <ScrollView>
-        {subscriptions && subscriptions.length !=0&&
-          <ScrollView contentContainerStyle={styles.subscriptionsContainer}>
-            {subscriptions.map((subscription) => (
-            <View key={subscription._id} style={styles.subscriptionContainer}>
-              <Image source={{ uri: subscription.gym.avatar }} style={styles.userImage} />
-              <Text style={{ color: 'white' }}>{subscription.gym.username}</Text>
-              {subscription && subscription.status === "pending" && (
-                <TouchableOpacity
-                  style={[
-                    styles.followButton,
-                    subscription.status === 'pending' && styles.followingButton,
-                  ]}
-                  onPress={()=>handleUnsubscribePress(subscription._id,subscription.gym._id)}
-                >
-                  <Text
+  if(state.user.usertype=='trainer'||state.user.usertype=='Attendee'){
+    return (
+        <View style={styles.container}>
+          <View style={styles.topLeftLabelContainer}>
+            <Text style={styles.topLeftLabel}>Gym</Text>
+          </View>
+          <ScrollView>
+          {subscriptions && subscriptions.length !=0&&
+            <ScrollView contentContainerStyle={styles.subscriptionsContainer}>
+              {subscriptions.map((subscription) => (
+              <View key={subscription._id} style={styles.subscriptionContainer}>
+                <Image source={{ uri: subscription.gym.avatar }} style={styles.userImage} />
+                <Text style={{ color: 'white' }}>{subscription.gym.username}</Text>
+                {subscription && subscription.status === "pending" && (
+                  <TouchableOpacity
                     style={[
-                      styles.followButtonText,
-                      subscription.status === 'pending' && styles.followingButtonText,
+                      styles.followButton,
+                      subscription.status === 'pending' && styles.followingButton,
                     ]}
+                    onPress={()=>handleUnsubscribePress(subscription._id,subscription.gym._id)}
                   >
-                    Pending
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {subscription && subscription.status === "active" && (
-                <TouchableOpacity
-                  style={[
-                    styles.followButton,
-                    subscription.status === 'active' && styles.followingButton,
-                  ]}
-                  onPress={()=>handleUnsubscribePress(subscription._id,subscription.gym._id)}
-                >
-                  <Text
+                    <Text
+                      style={[
+                        styles.followButtonText,
+                        subscription.status === 'pending' && styles.followingButtonText,
+                      ]}
+                    >
+                      Pending
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {subscription && subscription.status === "active" && (
+                  <TouchableOpacity
                     style={[
-                      styles.followButtonText,
-                      subscription.status === 'active' && styles.followingButtonText,
+                      styles.followButton,
+                      subscription.status === 'active' && styles.followingButton,
                     ]}
+                    onPress={()=>handleUnsubscribePress(subscription._id,subscription.gym._id)}
                   >
-                    Unsubscribe
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            ))}
-          </ScrollView>
-        }
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>
-            Find Your <Text style={styles.orangeText}>Gym</Text>
-          </Text>
-          <Text style={styles.subtitle}>
-            Locate and find a gym that{'\n'} best suits your goals
-          </Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => setMapVisible(true)}
-          >
-            <Text style={styles.buttonText}>View Gyms</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleSearchGyms()}
-          >
-            <Text style={styles.buttonText}>Search Gyms</Text>
-          </TouchableOpacity>
-        </View>
-        </ScrollView>
-
-        <Modal visible={mapVisible} animationType="slide">
-          <View style={{ flex: 1 }}>
-            <MapView
-              style={{ flex: 1 }}
-              initialRegion={{
-                latitude: 33.888629,
-                longitude: 35.495480,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-              }}
-            >
-              {gyms.map((gym) => (
-                <Marker
-                  key={gym.place_id} // Use a unique key
-                  coordinate={{
-                    latitude: gym.geometry.location.lat,
-                    longitude: gym.geometry.location.lng,
-                  }}
-                  title={gym.name}
-                />
+                    <Text
+                      style={[
+                        styles.followButtonText,
+                        subscription.status === 'active' && styles.followingButtonText,
+                      ]}
+                    >
+                      Unsubscribe
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
               ))}
-            </MapView>
+            </ScrollView>
+          }
+          <View style={styles.contentContainer}>
+            <Text style={styles.title}>
+              Find Your <Text style={styles.orangeText}>Gym</Text>
+            </Text>
+            <Text style={styles.subtitle}>
+              Locate and find a gym that{'\n'} best suits your goals
+            </Text>
             <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setMapVisible(false)}
+              style={styles.button}
+              onPress={() => setMapVisible(true)}
             >
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text style={styles.buttonText}>View Gyms</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleSearchGyms()}
+            >
+              <Text style={styles.buttonText}>Search Gyms</Text>
             </TouchableOpacity>
           </View>
-        </Modal>
-      </View>
-  );
+          </ScrollView>
+
+          <Modal visible={mapVisible} animationType="slide">
+            <View style={{ flex: 1 }}>
+              <MapView
+                style={{ flex: 1 }}
+                initialRegion={{
+                  latitude: 33.888629,
+                  longitude: 35.495480,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+              >
+                {gyms.map((gym) => (
+                  <Marker
+                    key={gym.place_id} // Use a unique key
+                    coordinate={{
+                      latitude: gym.geometry.location.lat,
+                      longitude: gym.geometry.location.lng,
+                    }}
+                    title={gym.name}
+                  />
+                ))}
+              </MapView>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setMapVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        </View>
+    );
+  }else{
+      if(state.user.usertype=="Gym"){
+
+        const [activeSubscriptions, setActiveSubscriptions] = useState([]);
+        const [pendingSubscriptions, setPendingSubscriptions] = useState([]);
+        const [reload, setReload] = useState(false);
+
+        const terminateSubscription = async (subscriptionId) => {
+          try {
+            // Make sure to await the API call
+            const response = await api.get(`/fitnet/rejectSubscription/${subscriptionId}`);
+        
+            // Check if the response is successful
+            if (response && response.status === 200) {
+        
+              setActiveSubscriptions((prevPending) =>
+                prevPending.filter((sub) => sub._id !== subscriptionId)
+              );
+              setReload(!reload);
+
+            } else {
+              console.error('Failed to reject subscription:', response);
+            }
+            
+          } catch (error) {
+            console.log(error);
+          }
+        }
+
+        const rejectSubscription = async (subscriptionId) => {
+          try {
+            // Make sure to await the API call
+            const response = await api.get(`/fitnet/rejectSubscription/${subscriptionId}`);
+        
+            // Check if the response is successful
+            if (response && response.status === 200) {
+        
+              setPendingSubscriptions((prevPending) =>
+                prevPending.filter((sub) => sub._id !== subscriptionId)
+              );
+              setReload(!reload);
+
+            } else {
+              console.error('Failed to reject subscription:', response);
+            }
+            
+          } catch (error) {
+            console.log(error);
+          }
+        }
+
+        const acceptSubscription = async (subscriptionId) => {
+          try {
+            // Make sure to await the API call
+            const response = await api.get(`/fitnet/acceptSubscription/${subscriptionId}`);
+        
+            // Check if the response is successful
+            if (response && response.status === 200) {
+              const { subscription } = response.data; // Extract the updated subscription
+
+              // console.log(subscription)
+        
+              // Update pendingSubscriptions: remove the accepted subscription
+              setPendingSubscriptions((prevPending) =>
+                prevPending.filter((sub) => sub._id !== subscriptionId)
+              );
+
+              setReload(!reload);
+
+            } else {
+              console.error('Failed to accept subscription:', response);
+            }
+          } catch (error) {
+            console.error('Error accepting subscription:', error);
+          }
+        };
+
+        const findSubscriptionRequestsForGym = async() => {
+          try {
+            const response = await api.get(`/fitnet/getSubscriptionsForGym/${state.user._id}`);
+
+            if(response){
+              // console.log(response.data);
+              setActiveSubscriptions(response.data.activeSubscriptions);
+              setPendingSubscriptions(response.data.pendingSubscriptions);
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        }
+
+        useEffect(() => {
+          findSubscriptionRequestsForGym();
+        }, [reload])
+
+        return(
+          <View style={styles.container}>
+            <View style={styles.topLeftLabelContainer}>
+              <Text style={styles.topLeftLabel}>Subscriptions</Text>
+            </View>
+            <ScrollView contentContainerStyle={styles.subscriptionsContainer} fadingEdgeLength={100}>
+              <Text style={{ color: 'white', fontSize: 20, marginVertical: 10 }}>Pending Subscriptions</Text>
+              {
+                pendingSubscriptions&&pendingSubscriptions.map((subscription, index) => {
+                  return(
+                    <View key={index} style={styles.subscriptionContainer}>
+                      <Image source={{ uri: subscription.user.avatar }} style={styles.userImage} />
+                      <View>
+                        <Text style={{ color: 'white' }}>
+                          {subscription.user && subscription.user.username 
+                          ? subscription.user.username.length > 10
+                            ? `${subscription.user.username.slice(0, 10)}...`
+                            : subscription.user.username
+                          : 'No Username'}
+                        </Text>
+                      
+                        <View style={{ flexDirection: 'row' }}>
+                          <TouchableOpacity
+                            style={[
+                              styles.followButton,
+                            ]}
+                            onPress={() => acceptSubscription(subscription._id)}
+                          >
+                            <Text style={styles.closeButtonText}>Accept</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[
+                              styles.followButton,
+                              styles.followingButton,
+                            ]}
+                            onPress={() => rejectSubscription(subscription._id)}
+                          >
+                            <Text style={styles.closeButtonText}>Reject</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  )
+                })
+              }
+              {(!pendingSubscriptions||pendingSubscriptions.length==0)&&
+                <Text style={{ textAlign: 'center', fontSize: 18, color: '#FF4C0A' }}>No Pending Subscriptions!</Text>
+              }
+
+            <Text style={{ color: 'white', fontSize: 20, marginVertical: 10 }}>Active Subscriptions</Text>
+              {
+                activeSubscriptions&&activeSubscriptions.map((subscription, index) => {
+                  return(
+                    <View key={index} style={styles.subscriptionContainer}>
+                      <Image source={{ uri: subscription.user.avatar }} style={styles.userImage} />
+                        <Text style={{ color: 'white' }}>
+                          {subscription.user && subscription.user.username 
+                          ? subscription.user.username.length > 10
+                            ? `${subscription.user.username.slice(0, 10)}...`
+                            : subscription.user.username
+                          : 'No Username'}
+                        </Text>
+                        <TouchableOpacity
+                          style={[
+                            styles.followButton,
+                          ]}
+                          onPress={() => terminateSubscription(subscription._id)}
+                        >
+                          <Text style={styles.closeButtonText}>Terminate</Text>
+                        </TouchableOpacity>
+                    </View>
+                  )
+                })
+              }
+              {(!activeSubscriptions||activeSubscriptions.length==0)&&
+                <Text style={{ textAlign: 'center', fontSize: 18, color: '#FF4C0A' }}>No Active Subscriptions!</Text>
+              }
+            </ScrollView>
+
+          </View>
+        )
+      }
+    }
 };
 
 export default ProfileGym;
@@ -306,14 +484,15 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: '#FFFFFF20',
     padding: 10,
-    borderRadius: 40
+    borderRadius: 40,
+    marginVertical: 5,
   },
   container: {
     flex: 1,
     backgroundColor: '#1C1C1E',
     paddingHorizontal: 20,
     paddingTop: 10,
-    height: windowHeight / 2,
+    height: windowHeight / 1.8,
   },
   topLeftLabelContainer: {
     position: 'absolute',

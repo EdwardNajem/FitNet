@@ -14,10 +14,10 @@ const uploadPost = async (req,res) => {
         });
     }else{
         if(postType=="workout"){
-            const {description, workoutData, createdBy, workoutPlanId} = req.body;
+            const {description, workoutData, createdBy, workoutPlanId, postVisibility} = req.body;
 
             // now lets make the exercice array
-            try {
+            // try {
                 const workoutPlan = await WorkoutPlanModel.findById(workoutPlanId);
                 const exercisesSummary = workoutPlan.exercises.map(exercise => ({
                     image: exercise.image,
@@ -38,6 +38,7 @@ const uploadPost = async (req,res) => {
                     createdBy,
                     workoutData,
                     workoutPlan: workoutPlanPost,
+                    postVisibility: postVisibility,
                 });
                             
                 await newPost.save();
@@ -47,24 +48,25 @@ const uploadPost = async (req,res) => {
                     message: 'Post created successfully',
                 });
 
-            } catch (error) {
-                return res.status(500).send({
-                    success: false,
-                    message: 'Error in creating post',
-                    error,
-                });
-            }
+            // } catch (error) {
+            //     return res.status(500).send({
+            //         success: false,
+            //         message: 'Error in creating post',
+            //         error,
+            //     });
+            // }
         }else{
-            const {description, workoutData, createdBy, imageURL} = req.body;
+            const {description, workoutData, createdBy, imageURL, postVisibility} = req.body;
 
-            try {
+            // try {
                 // this one is very easy
                 const newPost = new postModel({
                     description,
                     photo: imageURL,
                     postType,
                     createdBy,
-                    workoutData
+                    workoutData,
+                    postVisibility: postVisibility,
                 });
             
                 await newPost.save();
@@ -73,13 +75,13 @@ const uploadPost = async (req,res) => {
                     success: true,
                     message: 'Post created successfully',
                 });
-            } catch (error) {
-                return res.status(500).send({
-                    success: false,
-                    message: 'Error in creating post',
-                    error,
-                });
-            }
+            // } catch (error) {
+            //     return res.status(500).send({
+            //         success: false,
+            //         message: 'Error in creating post',
+            //         error,
+            //     });
+            // }
         }
     }
 }
@@ -94,7 +96,7 @@ const uploadPostGym = async (req,res) => {
         });
     }else{
         if(postType=="text"){
-            const {description, createdBy} = req.body;
+            const {description, createdBy, postVisibility} = req.body;
 
             // now lets make the exercice array
             try {
@@ -103,6 +105,7 @@ const uploadPostGym = async (req,res) => {
                     description,
                     postType,
                     createdBy,
+                    postVisibility: postVisibility,
                 });
                             
                 await newPost.save();
@@ -120,7 +123,7 @@ const uploadPostGym = async (req,res) => {
                 });
             }
         }else{
-            const {description, createdBy, imageURL} = req.body;
+            const {description, createdBy, imageURL, postVisibility} = req.body;
 
             try {
                 // this one is very easy
@@ -129,6 +132,7 @@ const uploadPostGym = async (req,res) => {
                     photo: imageURL,
                     postType,
                     createdBy,
+                    postVisibility: postVisibility,
                 });
             
                 await newPost.save();
@@ -181,7 +185,10 @@ const getAllPosts = async (req, res) => {
 
         // Step 2: Fetch posts created by the followed users
         const posts = await postModel
-            .find({ createdBy: { $in: followingIds } })
+            .find({
+                createdBy: { $in: followingIds },
+                postVisibility: 'public', // Filter for posts with 'public' visibility
+            })
             .populate('createdBy') // Populate the user who created the post
             .populate('comments.user') // Populate the user in each comment
             .sort({ createdAt: -1 }) // Sort posts by newest first
@@ -212,7 +219,10 @@ const getPostsByUser = async (req, res) => {
 
         // Fetch posts created by the specific user
         const posts = await postModel
-            .find({ createdBy: userIdObj })
+            .find({
+                createdBy: userIdObj,
+                postVisibility: 'public', // Filter for posts with 'public' visibility
+            })
             .populate('createdBy') // Populate the user who created the post
             .populate('comments.user') // Populate the user in each comment
             .sort({ createdAt: -1 }) // Sort posts by newest first

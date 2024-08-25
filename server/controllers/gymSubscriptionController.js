@@ -117,9 +117,87 @@ const checkAllSubscriptionForUser = async (req, res) => {
   }
 };
 
+const getSubscriptionsForGym = async (req, res) => {
+  try {
+    const { gymId } = req.params;
+
+    if (!gymId) {
+      return res.status(400).json({ message: 'Gym ID is required.' });
+    }
+
+    // Find active subscriptions
+    const activeSubscriptions = await GymSubscriptionModel.find({
+      gym: gymId,
+      status: 'active'
+    }).populate('user').populate('gym');
+
+    // Find pending subscriptions
+    const pendingSubscriptions = await GymSubscriptionModel.find({
+      gym: gymId,
+      status: 'pending'
+    }).populate('user').populate('gym');
+
+    if (activeSubscriptions.length === 0 && pendingSubscriptions.length === 0) {
+      return res.status(201).json({ message: 'No subscriptions found for this gym.' });
+    }
+
+    res.status(200).json({
+      activeSubscriptions,
+      pendingSubscriptions
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const acceptSubscription = async (req, res) => {
+  const { subscriptionId } = req.params;
+
+  if (!subscriptionId) {
+    return res.status(400).json({ message: 'Subscription ID is required.' });
+  }
+
+  try {
+    const subscription = await GymSubscriptionModel.findByIdAndUpdate(
+      subscriptionId,
+      { status: 'active' },
+      { new: true }
+    );
+
+    if (!subscription) {
+      return res.status(404).json({ message: 'Subscription not found.' });
+    }
+
+    res.status(200).json({ message: 'Subscription accepted.', subscription });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const rejectSubscription = async (req, res) => {
+  const { subscriptionId } = req.params;
+
+  if (!subscriptionId) {
+    return res.status(400).json({ message: 'Subscription ID is required.' });
+  }
+
+  try {
+    await GymSubscriptionModel.findByIdAndDelete(
+      subscriptionId,
+    );
+
+    res.status(200).json({ message: 'Subscription rejected.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
     sendSubscriptionRequest,
     checkGymSubscription,
     removeSubscriptionRequest,
-    checkAllSubscriptionForUser
+    checkAllSubscriptionForUser,
+    getSubscriptionsForGym,
+    acceptSubscription,
+    rejectSubscription,
 };

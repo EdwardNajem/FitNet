@@ -237,7 +237,7 @@ const ProfileWorkout = (props) => {
     return (
       <View style={styles.container}>
         <View style={styles.topLeftLabelContainer}>
-          <Text style={styles.topLeftLabel}>Workout</Text>
+          <Text style={styles.topLeftLabel}>{(state.user.usertype=="Attendee"||state.user.usertype=="trainer")?'Workout':'Posts'}</Text>
         </View>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>

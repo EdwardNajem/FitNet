@@ -74,14 +74,14 @@ const WorkoutNav = ({ setLoggedin }) => {
           headerStyle: { backgroundColor: '#2F2F2F' },
           headerTintColor: '#DFE7EB',
           headerShadowVisible: false,
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Workout-Screen')}
-              style={styles.headerButton}
-            >
-              <Text style={styles.headerButtonText}>Skip</Text>
-            </TouchableOpacity>
-          ),
+          // headerRight: () => (
+          //   <TouchableOpacity
+          //     onPress={() => navigation.navigate('Workout-Screen')}
+          //     style={styles.headerButton}
+          //   >
+          //     <Text style={styles.headerButtonText}>Skip</Text>
+          //   </TouchableOpacity>
+          // ),
         })}
       />
 

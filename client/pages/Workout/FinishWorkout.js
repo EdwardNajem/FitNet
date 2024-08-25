@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -24,30 +24,58 @@ const FinishWorkout = ({ route, navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [description, setDescription] = useState('');
   const [isEnabled, setIsEnabled] = useState(false);
+  const isEnabledRef = useRef(isEnabled);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-  const handlePost = async () => {
+  useEffect(() => {
+    isEnabledRef.current = isEnabled;
+  }, [isEnabled]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Finish Workout',
+      headerStyle: { backgroundColor: '#2F2F2F' },
+      headerTintColor: '#DFE7EB',
+      headerShadowVisible: false,
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Workout-Screen');
+            setIsEnabled(true);
+            handlePost('private');
+          }}
+          style={styles.headerButton}
+        >
+          <Text style={styles.headerButtonText}>Skip</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
+  const handlePost = async (postVisibility) => {
 
     const user = JSON.parse(await AsyncStorage.getItem('@auth'));
 
     let data;
 
-    if(isEnabled){
+    if(isEnabledRef.current){
       data = {
         postType: "workout",
-        description: description,
+        description: description.length>0?description:'no desc',
         workoutData: workoutData,
         createdBy: user.user._id,
         workoutPlanId: workoutPlanId,
+        postVisibility: postVisibility,
       }
     }else{
       savedImage = await uploadImage(selectedImage, user.user._id);
       data = {
         postType: "image",
-        description: description,
+        description: description.length>0?description:'no desc',
         workoutData: workoutData,
         createdBy: user.user._id,
         imageURL: savedImage,
+        postVisibility: postVisibility,
       }
     }
 
@@ -176,7 +204,7 @@ const FinishWorkout = ({ route, navigation }) => {
           onChangeText={setDescription}
         />
 
-        <TouchableOpacity style={styles.submitButton} onPress={() => {handlePost()}}>
+        <TouchableOpacity style={styles.submitButton} onPress={() => {handlePost('public')}}>
           <Text style={styles.submitButtonText}>Post</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -187,6 +215,17 @@ const FinishWorkout = ({ route, navigation }) => {
 export default FinishWorkout;
 
 const styles = StyleSheet.create({
+  headerButton: {
+    marginLeft: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  headerButtonText: {
+    color: '#FF4C0A',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   postTypeContainer: {
     display: 'flex',
     flexDirection: 'row',

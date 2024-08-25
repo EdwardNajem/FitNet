@@ -16,6 +16,11 @@ const postSchema = new mongoose.Schema(
       required: true, // Make this required if every post must have a type
       enum: ['image', 'workout', 'text', 'image-gym'], // Example post types, adjust as needed
     },
+    postVisibility: {
+      type: String,
+      required: true,
+      enum: ['public', 'private'],
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

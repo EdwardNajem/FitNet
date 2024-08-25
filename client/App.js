@@ -41,6 +41,7 @@ export default function App() {
   const [userType, setUserType] = useState(null);
 
   useEffect(() => {
+    console.log('user type is :' + userType)
     const checkUserLoggedIn = async () => {
       try {
         // const user = await AsyncStorage.removeItem('@auth');
@@ -106,14 +107,14 @@ export default function App() {
                 }}
               >
                 {(props) => 
-                  userType === "Attendee" ? (
+                  userType&&userType === "Attendee"||userType&&userType === "trainer" ? (
                     <HomeNav {...props} setLoggedin={setLoggedin} />
                   ) : (
                     <HomeNavGym {...props} setLoggedin={setLoggedin} />
                   )
                 }
               </Tab.Screen>
-              {userType=="Attendee"&&<Tab.Screen
+              {(userType=='Attendee'||userType=='trainer')&&<Tab.Screen
                 name="Workout"
                 component={WorkoutNav}
                 options={{
@@ -161,7 +162,7 @@ export default function App() {
                 }}
               >
                 {(props) => 
-                  userType === "Attendee" ? (
+                  (userType === "Attendee"||userType === "trainer") ? (
                     <ProfileNav {...props} setLoggedin={setLoggedin} />
                   ) : (
                     <ProfileNavGym {...props} setLoggedin={setLoggedin} />

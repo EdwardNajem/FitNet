@@ -51,6 +51,7 @@ export default function CreatePostGymScreen({ navigation}) {
             postType: "text",
             description: description,
             createdBy: user.user._id,
+            postVisibility: 'public',
           }
         }else{
           savedImage = await uploadImage(selectedImage, user.user._id);
@@ -59,6 +60,7 @@ export default function CreatePostGymScreen({ navigation}) {
             description: description,
             createdBy: user.user._id,
             imageURL: savedImage,
+            postVisibility: 'public',
           }
         }
     

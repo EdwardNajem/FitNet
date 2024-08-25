@@ -1,5 +1,6 @@
 const JWT = require('jsonwebtoken');
 const UserModel = require('../models/userModel');
+const GymDetails = require('../models/gymDetailsModel');
 const { hashPassword, comparePassword } = require('../helpers/authHelper');
 
 // sign up
@@ -8,52 +9,57 @@ const registerUser = async (req, res) => {
     let { username, email, password, userType } = req.body;
 
     email = email.toLowerCase();
-    //validation
+
+    // Validation
     if (!username) {
-      return res
-        .status(401)
-        .send({ success: false, message: 'Username is required!' });
+      return res.status(401).send({ success: false, message: 'Username is required!' });
     }
     if (!email) {
-      return res
-        .status(402)
-        .send({ success: false, message: 'Email is required!' });
+      return res.status(402).send({ success: false, message: 'Email is required!' });
     }
     if (!password || password.length < 8) {
       return res.status(403).send({
         success: false,
-        message: 'Password is required and 8 characters long!',
+        message: 'Password is required and must be at least 8 characters long!',
       });
     }
 
-    //exisiting user
-    const existingEntrep = await UserModel.findOne({ email });
-    if (existingEntrep) {
+    // Check for existing user
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
       return res.status(500).send({
         success: false,
         message: 'User already registered with this email',
       });
     }
 
-    //hash password
+    // Hash password
     const hashedPassword = await hashPassword(password);
 
-    //save user into database
+    // Save user into database
     const user = await UserModel({
       username,
       email,
       password: hashedPassword,
-      usertype: userType=="Gym"?'Gym':'Attendee',
+      usertype: userType === 'Gym' ? 'Gym' : 'Attendee',
     }).save();
 
-    return res
-      .status(201)
-      .send({ success: true, message: 'Account Registered' });
+    // Create GymDetails if the userType is "Gym"
+    if (userType === 'Gym') {
+      await GymDetails({
+        gym: user._id,
+        // You can initialize other fields as needed
+        subscriptionFee: 0, // Example default value
+        gymLocation: { latitude: 0, longitude: 0 }, // Example default value
+      }).save();
+    }
+
+    return res.status(201).send({ success: true, message: 'Account Registered' });
   } catch (error) {
     console.log(error);
     return res.status(500).send({
       success: false,
-      message: 'Error in register API Entrep Register',
+      message: 'Error in register API',
       error,
     });
   }
@@ -110,8 +116,7 @@ const loginUser = async (req, res) => {
 
 const updateUserInfo = async (req, res) => {
   try {
-    const { _id, username, height, weight, dateofbirth, gender, avatar } =
-      req.body;
+    const { _id, usertype, username, height, weight, dateofbirth, gender, avatar, subscriptionFees, workingHours } = req.body;
 
     console.log('Incoming request data:', JSON.stringify(req.body, null, 2)); // Pretty-print the request data
 
@@ -122,6 +127,16 @@ const updateUserInfo = async (req, res) => {
       });
     }
 
+    if (usertype === "Gym") {
+      if (!subscriptionFees || !workingHours) {
+        return res.status(400).send({
+          success: false,
+          message: 'Missing required fields for Gym',
+        });
+      }
+    }
+
+    // Handle birthdate
     let birthdate = null;
     if (dateofbirth && dateofbirth !== 'NaN/NaN/NaN') {
       const birthdateParts = dateofbirth.split('/');
@@ -143,24 +158,50 @@ const updateUserInfo = async (req, res) => {
       }
     }
 
+    // Update user information
     const updatedUser = await UserModel.findOneAndUpdate(
       { _id },
       { username, height, weight, dateofbirth: birthdate, gender, avatar },
       { new: true }
     );
 
-    if (!updatedUser) {
-      return res.status(404).send({
-        success: false,
-        message: 'User not found',
+    if (usertype === "Gym") {
+      // Update gymDetails
+      if (updatedUser) {
+        const updatedGymDetails = await GymDetails.findOneAndUpdate(
+          { gym: _id },
+          { subscriptionFee: subscriptionFees, workingHours },
+          { new: true }
+        );
+
+        if (!updatedGymDetails) {
+          return res.status(404).send({
+            success: false,
+            message: 'Gym details not found or update failed',
+          });
+        }
+
+        // Send response with updated gym details
+        res.status(200).send({
+          success: true,
+          message: 'Account and Gym Details Updated',
+          user: updatedUser,
+          gymDetails: updatedGymDetails,
+        });
+      } else {
+        return res.status(404).send({
+          success: false,
+          message: 'User not found',
+        });
+      }
+    } else {
+      // Send response with updated user only
+      res.status(200).send({
+        success: true,
+        message: 'Account Updated',
+        user: updatedUser,
       });
     }
-
-    res.status(200).send({
-      success: true,
-      message: 'Account Updated',
-      user: updatedUser,
-    });
   } catch (error) {
     console.error('Error in updateUserInfo:', error);
     res.status(500).send({
@@ -326,10 +367,30 @@ const updateUserEmail = async (req, res) => {
   }
 };
 
+const getGymDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find GymDetails by user ID
+    const gymDetails = await GymDetails.findOne({ gym: userId });
+
+    if (!gymDetails) {
+      return res.status(404).send({ success: false, message: 'Gym details not found' });
+    }
+
+    // Send the gym details in the response
+    return res.status(200).send({ success: true, data: gymDetails });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ success: false, message: 'Error retrieving gym details', error });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   updateUserInfo,
   updateUserPassword,
   updateUserEmail,
+  getGymDetails,
 };
