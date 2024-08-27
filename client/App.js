@@ -18,6 +18,9 @@ import SignUpScreen from './pages/Login/SignUp';
 import { CommentProvider } from './pages/Profile/Settings/CommentContext';
 import HomeNavGym from './Navigation/HomeNavGym';
 import ProfileNavGym from './Navigation/ProfileNavGym';
+import { Octicons } from '@expo/vector-icons';
+import Messages from './pages/Messages/Messages';
+import Chat from './pages/Messages/Chat';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -59,6 +62,52 @@ export default function App() {
 
     checkUserLoggedIn();
   }, []);
+
+  function MessagesScreen({ navigation }) {
+    React.useLayoutEffect(() => {
+      const unsubscribe = navigation.addListener('state', (e) => {
+        const currentRoute = e.data.state.routes[e.data.state.index];
+        const leafRouteName = getCurrentRouteName(currentRoute);
+
+
+        if (leafRouteName === "Chat") {
+          navigation.setOptions({
+            tabBarStyle: { display: 'none' }
+          });
+        } else {
+
+          navigation.setOptions({
+            tabBarStyle: { backgroundColor: 'transparent', position: 'absolute', left: 0, right: 0, bottom: 0, elevation: 0, marginTop: 10, marginBottom: 20, borderTopColor: 'transparent' },
+
+          });
+        }
+      });
+
+
+      return unsubscribe;
+    }, [navigation]);
+
+    const getCurrentRouteName = (route) => {
+      if (route.state) {
+        return getCurrentRouteName(route.state.routes[route.state.index]);
+      }
+      return route.name;
+    };
+
+    return (
+      // <KeyboardAvoidingView style={{ flex: 1}} behavior='height' keyboardVerticalOffset={-500}>
+          <Stack.Navigator screenOptions={{
+              presentation: 'transparentModal',
+            }}
+          >
+            <Stack.Screen name="MessagesStack" options={{ headerShown: false, presentation: 'transparentModal' }}>
+              {({ navigation }) => <Messages navigation={navigation}/>}
+            </Stack.Screen>
+            <Stack.Screen options={{ headerShown: false, presentation: 'transparentModal' }} name="Chat" component={Chat} />
+          </Stack.Navigator>
+      // </KeyboardAvoidingView>
+    );
+  }
 
   if (loading) {
     <View style={{ backgroundColor: '#1C1C1E' }}>
@@ -114,6 +163,30 @@ export default function App() {
                   )
                 }
               </Tab.Screen>
+              <Tab.Screen
+                name="Messages"
+                component={MessagesScreen}
+                options={{
+                  tabBarIcon: ({ focused }) => (
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        top: 10,
+                      }}
+                    >
+                      <Image
+                        source={HomeLogo}
+                        style={{
+                          width: 35,
+                          height: 35,
+                          tintColor: focused ? '#FF4C0A' : '#fff',
+                        }}
+                      />
+                    </View>
+                  ),
+                }}
+              />
               {(userType=='Attendee'||userType=='trainer')&&<Tab.Screen
                 name="Workout"
                 component={WorkoutNav}

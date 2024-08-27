@@ -2,6 +2,7 @@ const JWT = require('jsonwebtoken');
 const UserModel = require('../models/userModel');
 const GymDetails = require('../models/gymDetailsModel');
 const { hashPassword, comparePassword } = require('../helpers/authHelper');
+const mongoose = require('mongoose');
 
 // sign up
 const registerUser = async (req, res) => {
@@ -233,6 +234,47 @@ const getUserInfo = async (req, res) => {
   }
 };
 
+const getUserDetails = async (req, res) => {
+  try {
+    const { userIds } = req.body;
+
+    if(!userIds){
+      return res.status(404).send({
+        success: false,
+        message: 'Please provide the user ids array',
+      })
+    }
+
+    // Convert the string IDs to ObjectId instances
+    const objectIds = userIds.map(id => new mongoose.Types.ObjectId(id));
+
+    // Find users with _id in the array of ObjectIds
+    const users = await UserModel.find({ _id: { $in: objectIds } }, '_id username avatar');
+
+    if (users.length > 0) {
+      res.status(200).send({
+        success: true,
+        message: 'Users Found',
+        users, // Array of user objects
+      });
+    } else {
+      console.log('No users found');
+      res.status(404).send({
+        success: false,
+        message: 'No users found',
+      });
+    }
+
+  } catch (error) {
+    console.error('Error retrieving user details:', error);
+    res.status(500).send({
+      success: false,
+      message: 'Error in retrieving user details',
+      error: error.message,
+    });
+  }
+};
+
 const updateUserPassword = async (req, res) => {
   try {
     const { _id, oldPassword, newPassword } = req.body;
@@ -393,4 +435,5 @@ module.exports = {
   updateUserPassword,
   updateUserEmail,
   getGymDetails,
+  getUserDetails,
 };

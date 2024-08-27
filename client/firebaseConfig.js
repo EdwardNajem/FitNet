@@ -1,5 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -11,7 +12,9 @@ const firebaseConfig = {
   storageBucket: 'fitnet-10b79.appspot.com',
   messagingSenderId: '355978045775',
   appId: '1:355978045775:web:6e98d8c3a64e338e3d7d3a',
+  databaseURL: 'https://fitnet-10b79-default-rtdb.europe-west1.firebasedatabase.app',
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+export const database = getFirestore();
