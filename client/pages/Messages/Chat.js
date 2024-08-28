@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef, useContext } from 'react'
+import React, { useState, useEffect,useRef, useContext, useCallback } from 'react'
 import api from '../../Components/Config'
 import userimg from '../../assets/images/user.png'
 import { RefreshControl } from 'react-native-gesture-handler';
@@ -6,12 +6,81 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { ScrollView, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Image, View, StatusBar } from 'react-native';
 import { database } from '../../firebaseConfig';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { AuthContext } from '../../Context/authContext';
+import { collection, query, where, getDocs, orderBy, onSnapshot, addDoc } from 'firebase/firestore';
+import { AuthContext } from '../../Context/authContext'
+import { useHeaderHeight } from '@react-navigation/elements';;
+import { GiftedChat } from 'react-native-gifted-chat';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Chat({route, navigation}) {
 
+    const insets = useSafeAreaInsets();
+
     const { receivingUser } = route.params;
+    const [state] = useContext(AuthContext);
+    const cameraCutoutHeight = insets.top;
+    const [messages, setMessages] = useState([])
+    const headerHeight = useHeaderHeight();
+
+    useEffect(() => {
+        const collectionRef = collection(database, 'chats');
+
+        const receivingUserId = receivingUser._id; // Example receiving user ID
+        const currentUserID = state.user._id; // Example current user ID
+
+        if (state.user._id) {
+            // const q = query(collectionRef, ref => ref.orderBy('createdAt', 'desc'));
+            const q = query(
+                collectionRef,
+                where('receivingUser', 'in', [receivingUserId, currentUserID]), // Filter by receiving user
+                where('user._id', 'in', [receivingUserId, currentUserID]), // Filter by current user
+                orderBy('createdAt', 'desc')
+            );
+
+
+            const unsubscribe = onSnapshot(q, snapshot => {
+                setMessages(
+                    snapshot.docs.map(doc => ({
+                        _id: doc.id,
+                        createdAt: doc.data().createdAt.toDate(),
+                        text: doc.data().text,
+                        user: doc.data().user
+                    }))
+                )
+            })
+            return () => unsubscribe();
+        }
+    }, []);
+
+    // Create a ref for the FlatList inside GiftedChat
+    const messageContainerRef = useRef(null);
+
+    const flatList = messageContainerRef.current;
+    // Check if the FlatList exists
+    if (flatList) {
+        flatList.setNativeProps({
+            style: {
+                marginTop: headerHeight + cameraCutoutHeight,
+                marginBottom: 30,
+                paddingHorizontal: 10
+            },
+            fadingEdgeLength: 100
+        });
+    };
+
+    const onSend = useCallback(async (messages = []) => {
+        setMessages(previousMessages =>
+            GiftedChat.append(previousMessages, messages),
+        )
+        const { _id, createdAt, text, user } = messages[0];
+        addDoc(collection(database, 'chats'), {
+            _id,
+            createdAt,
+            text,
+            user,
+            receivingUser: receivingUser._id
+        });
+    }, [])
 
   return (
     <View style={styles.container}>
@@ -25,12 +94,10 @@ export default function Chat({route, navigation}) {
                 messages={messages.sort((a, b) => b.createdAt - a.createdAt)}
                 onSend={messages => onSend(messages)}
                 user={{
-                    _id: parseInt(loggedInUserID),
+                    _id: state.user._id,
                 }}
                 messageContainerRef={messageContainerRef}
                 renderAvatar={null}
-                onInputTextChanged={onInputTextChanged}
-                isTyping={receiverTyping}
                 scrollToBottom={true}
             />
         </View>
