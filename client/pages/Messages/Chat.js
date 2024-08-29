@@ -88,7 +88,7 @@ export default function Chat({route, navigation}) {
   return (
     <View style={styles.container}>
         <View style={styles.header}>
-            
+            <AntDesign name="arrowleft" size={20} color="white"  onPress={() => navigation.goBack()} padding={5} />
             <Image source={receivingUser.avatar?{ uri: receivingUser.avatar }: require('../../assets/images/user.png')} style={styles.userImage} />
             <Text style={styles.title}>{receivingUser.username}</Text>
         </View>
