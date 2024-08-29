@@ -112,7 +112,7 @@ const Messages = ({ navigation }) => {
                   :
                   <>
                   <Text style={styles.titleNoUsers}>
-                      <Text style={styles.orangeText}>No Bitches Available!</Text>
+                      <Text style={styles.orangeText}>No Messages Available!</Text>
                   </Text>
                       
                   </>

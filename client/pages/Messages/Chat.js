@@ -17,6 +17,7 @@ export default function Chat({route, navigation}) {
     const insets = useSafeAreaInsets();
 
     const { receivingUser } = route.params;
+    // console.log(receivingUser);
     const [state] = useContext(AuthContext);
     const cameraCutoutHeight = insets.top;
     const [messages, setMessages] = useState([])
@@ -27,6 +28,8 @@ export default function Chat({route, navigation}) {
 
         const receivingUserId = receivingUser._id; // Example receiving user ID
         const currentUserID = state.user._id; // Example current user ID
+        // console.log("receivingUserId: " + receivingUserId);
+        // console.log("currentUserID: " + currentUserID);
 
         if (state.user._id) {
             // const q = query(collectionRef, ref => ref.orderBy('createdAt', 'desc'));
@@ -85,6 +88,7 @@ export default function Chat({route, navigation}) {
   return (
     <View style={styles.container}>
         <View style={styles.header}>
+            
             <Image source={receivingUser.avatar?{ uri: receivingUser.avatar }: require('../../assets/images/user.png')} style={styles.userImage} />
             <Text style={styles.title}>{receivingUser.username}</Text>
         </View>

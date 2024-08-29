@@ -35,7 +35,15 @@ const TrainerInformation = ({ route }) => {
       <View style={styles.infoContainer}>
         <View style={styles.headerContainer}>
           <Text style={styles.name}>{trainer.username}</Text>
-          <TouchableOpacity style={styles.messageButton}>
+          <TouchableOpacity style={styles.messageButton} onPress={() => navigation.push('Chat',
+                  {
+                    receivingUser: {
+                      _id: trainer._id,
+                      avatar: trainer.avatar,
+                      username: trainer.username,
+                    },
+                  }
+                )}>
             <FontAwesome name="comment" size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>

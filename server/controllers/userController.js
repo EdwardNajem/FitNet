@@ -259,7 +259,7 @@ const getUserDetails = async (req, res) => {
       });
     } else {
       console.log('No users found');
-      res.status(404).send({
+      res.status(204).send({
         success: false,
         message: 'No users found',
       });

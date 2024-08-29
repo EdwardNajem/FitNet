@@ -88,7 +88,15 @@ const ProfileTrainer = () => {
               <Text style={styles.trainingDate}>{new Date(trainee.date).toLocaleDateString()}</Text>
             </View>
             <TouchableOpacity style={styles.messageIconContainer}>
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#FF4C0A" />
+              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#FF4C0A" onPress={() => navigation.push('Chat',
+                  {
+                    receivingUser: {
+                      _id: trainee.id,
+                      avatar: trainee.avatar,
+                      username: trainee.name,
+                    },
+                  }
+                )}/>
             </TouchableOpacity>
 
             <TouchableOpacity 
