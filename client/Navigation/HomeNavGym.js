@@ -7,8 +7,50 @@ import NotificationScreen from '../pages/SocialMedia/Notifications';
 import UserProfileScreen from '../pages/SocialMedia/UserProfile';
 import { Ionicons } from '@expo/vector-icons';
 import CreatePostGymScreen from '../pages/SocialMedia/CreatePostGymScreen';
-const HomeNavGym = ({ setLoggedin })=> {
+import Chat from '../pages/Messages/Chat';
+const HomeNavGym = ({ setLoggedin, navigation })=> {
   const Stack = createStackNavigator();
+
+  const tabOptions = {
+    activeTintColor: '#FF4C0A',
+    inactiveTintColor: '#ADB5B9',
+    style: {
+      backgroundColor: '#1C1C1E',
+      height: 70,
+      borderTopWidth: 0,
+    },
+    labelStyle: {
+      fontSize: 12,
+    },
+  };
+
+  React.useLayoutEffect(() => {
+    const unsubscribe = navigation.addListener('state', (e) => {
+      const currentRoute = e.data.state.routes[e.data.state.index];
+      const leafRouteName = getCurrentRouteName(currentRoute);
+
+
+      if (leafRouteName === "Chat") {
+        navigation.setOptions({
+          tabBarStyle: { display: 'none' }
+        });
+      } else {
+        navigation.setOptions({
+          tabBarStyle: tabOptions.style ,
+        });
+      }
+    });
+
+
+    return unsubscribe;
+  }, [navigation]);
+
+  const getCurrentRouteName = (route) => {
+    if (route.state) {
+      return getCurrentRouteName(route.state.routes[route.state.index]);
+    }
+    return route.name;
+  };
 
   return (
     <Stack.Navigator
@@ -67,6 +109,7 @@ const HomeNavGym = ({ setLoggedin })=> {
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen options={{ headerShown: false, presentation: 'transparentModal' }} name="Chat" component={Chat} />
     </Stack.Navigator>
   )
 }

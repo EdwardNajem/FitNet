@@ -5,7 +5,7 @@ import api from '../../Components/Config';
 import { AuthContext } from '../../Context/authContext';
 import { CommentContext } from '../Profile/Settings/CommentContext';
 
-const UserProfile = () => {
+const UserProfile = ({ navigation }) => {
   const route = useRoute();
   const { user } = route.params;
   const [isFollowing, setIsFollowing] = useState(false);
@@ -273,6 +273,24 @@ useEffect(() => {
         >
           {isFollowing ? 'Following' : 'Follow'}
         </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+          style={[
+          styles.followButton,
+          ]}
+          onPress={() => navigation.push('Chat',
+            {
+              receivingUser: user,
+            }
+          )}
+      >
+          <Text
+          style={[
+              styles.followButtonText,
+          ]}
+          >
+          Message
+          </Text>
       </TouchableOpacity>
       {/* {commentVisible && (
         <Animated.View style={[styles.commentSection, { transform: [{ translateY: slideAnim }] }]}>

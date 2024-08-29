@@ -9,7 +9,7 @@ import { Entypo, FontAwesome, Ionicons } from '@expo/vector-icons';
 import PostExercises from '../../Components/PostExercises';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const GymProfile = () => {
+const GymProfile = ({ navigation }) => {
   const route = useRoute();
   const { user } = route.params;
   const [isFollowing, setIsFollowing] = useState(false);
@@ -170,7 +170,7 @@ useEffect(() => {
         const response = await api.post('/fitnet/removeSubscriptionRequest', data);
 
         if(response){
-            alert('Sucksefully Unsubscribed');
+            alert('Successfully Unsubscribed');
             setSubscription(null);
         }
     } catch (error) {
@@ -455,6 +455,24 @@ useEffect(() => {
             Unsubscribe
             </Text>
         </TouchableOpacity>}
+        <TouchableOpacity
+            style={[
+            styles.followButton,
+            ]}
+            onPress={() => navigation.push('Chat',
+              {
+                receivingUser: user,
+              }
+            )}
+        >
+            <Text
+            style={[
+                styles.followButtonText,
+            ]}
+            >
+            Message
+            </Text>
+        </TouchableOpacity>
         <TouchableOpacity
             style={[
             styles.followButton,

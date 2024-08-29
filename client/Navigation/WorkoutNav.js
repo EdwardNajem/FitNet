@@ -19,7 +19,19 @@ const Stack = createStackNavigator();
 
 const WorkoutNav = ({ setLoggedin, navigation }) => {
 
-  
+  const tabOptions = {
+    activeTintColor: '#FF4C0A',
+    inactiveTintColor: '#ADB5B9',
+    style: {
+      backgroundColor: '#1C1C1E',
+      height: 70,
+      borderTopWidth: 0,
+    },
+    labelStyle: {
+      fontSize: 12,
+    },
+  };
+
   React.useLayoutEffect(() => {
     const unsubscribe = navigation.addListener('state', (e) => {
       const currentRoute = e.data.state.routes[e.data.state.index];
@@ -31,10 +43,8 @@ const WorkoutNav = ({ setLoggedin, navigation }) => {
           tabBarStyle: { display: 'none' }
         });
       } else {
-
         navigation.setOptions({
-          tabBarStyle: { backgroundColor: 'transparent', position: 'absolute', left: 0, right: 0, bottom: 0, elevation: 0, marginTop: 10, marginBottom: 20, borderTopColor: 'transparent' },
-
+          tabBarStyle: tabOptions.style ,
         });
       }
     });

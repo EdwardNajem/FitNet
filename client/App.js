@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Image, StatusBar, View } from 'react-native';
 import HomeLogo from '../client/assets/icons/home.png';
 import ProfileLogo from '../client/assets/icons/profile.png';
@@ -44,7 +44,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    getUserType();
+  }, [loggedin]);
+
+  const getUserType = async () => {
     console.log('user type is :' + userType)
     const checkUserLoggedIn = async () => {
       try {
@@ -62,7 +66,7 @@ export default function App() {
     };
 
     checkUserLoggedIn();
-  }, []);
+  }
 
   function MessagesScreen({ navigation }) {
     React.useLayoutEffect(() => {
@@ -76,10 +80,8 @@ export default function App() {
             tabBarStyle: { display: 'none' }
           });
         } else {
-
           navigation.setOptions({
-            tabBarStyle: { backgroundColor: 'transparent', position: 'absolute', left: 0, right: 0, bottom: 0, elevation: 0, marginTop: 10, marginBottom: 20, borderTopColor: 'transparent' },
-
+            tabBarStyle: tabOptions.style ,
           });
         }
       });
