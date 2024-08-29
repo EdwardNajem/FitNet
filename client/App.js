@@ -7,6 +7,7 @@ import { Image, StatusBar, View } from 'react-native';
 import HomeLogo from '../client/assets/icons/home.png';
 import ProfileLogo from '../client/assets/icons/profile.png';
 import WorkoutLogo from '../client/assets/icons/workout.png';
+import MessageLogo from '../client/assets/icons/Messages.png';
 import { AuthProvider } from './Context/authContext';
 import HomeNav from './Navigation/HomeNav';
 import ProfileNav from './Navigation/ProfileNav';
@@ -176,7 +177,7 @@ export default function App() {
                       }}
                     >
                       <Image
-                        source={HomeLogo}
+                        source={MessageLogo}
                         style={{
                           width: 35,
                           height: 35,
