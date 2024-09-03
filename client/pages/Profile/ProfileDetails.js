@@ -8,17 +8,29 @@ import {
   Modal,
   Image,
   FlatList,
+  Button,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import axios from 'axios';
 import api from '../../Components/Config';
 import { AuthContext } from '../../Context/authContext';
 import { ScrollView } from 'react-native';
+import { Linking } from 'react-native';
 
 const ProfileDetails = ({navigation}) => {
     const [state] = useContext(AuthContext);
     const [workingHours, setWorkingHours] = useState([]);
     const [subscriptionFees, setSubscriptionFees] = useState();
+    const [selectedLocation, setSelectedLocation] = useState(null);
+
+    const openInGoogleMaps = () => {
+      if (selectedLocation) {
+        const { latitude, longitude } = selectedLocation;
+        const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+        Linking.openURL(url);
+      }
+    };
+
 
     useEffect(() => {
         if(state.user.usertype=="Gym"){
@@ -31,7 +43,7 @@ const ProfileDetails = ({navigation}) => {
           const response = await api.get(`/fitnet/getGymDetails/${state.user._id}`);
       
           if (response.data.success) {
-            const { workingHours, subscriptionFee } = response.data.data;
+            const { workingHours, subscriptionFee, gymLocation } = response.data.data;
       
             // Convert date strings to Date objects
             const formattedWorkingHours = workingHours.map(hour => ({
@@ -43,6 +55,7 @@ const ProfileDetails = ({navigation}) => {
             // Set state with the formatted data
             setWorkingHours(formattedWorkingHours);
             setSubscriptionFees(subscriptionFee);
+            setSelectedLocation(gymLocation);
           } else {
             console.error('Failed to fetch gym details:', response.data.message);
           }
@@ -77,6 +90,30 @@ const ProfileDetails = ({navigation}) => {
                     )
                 })
             }
+            {selectedLocation&&
+            <>
+              <Text style={styles.title}>Location:</Text>
+                <MapView
+                  style={styles.mapPreview}
+                  region={{
+                    latitude: selectedLocation.latitude,
+                    longitude: selectedLocation.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }}
+                  scrollEnabled={false}
+                  zoomEnabled={false}
+                >
+                  <Marker coordinate={selectedLocation} />
+                </MapView>
+                <TouchableOpacity
+                  style={styles.googleMapsButton}
+                  onPress={openInGoogleMaps}
+                >
+                  <Text style={styles.followButtonText}>View On Google Maps</Text>
+                </TouchableOpacity>
+            </>
+            }
         </ScrollView>
 
         </View>
@@ -88,6 +125,23 @@ export default ProfileDetails;
 const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
+  mapPreview: {
+    marginTop: 10,
+    width: '95%',
+    alignSelf: 'center',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  googleMapsButton: {
+    backgroundColor: '#FF4C0A',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: '100%',
+    borderRadius: 10,
+    alignSelf: 'center',
+    marginBottom: 50,
+  },
   followButton: {
     marginTop: 5,
     marginBottom: 5,

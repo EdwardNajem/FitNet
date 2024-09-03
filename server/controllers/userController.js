@@ -117,7 +117,7 @@ const loginUser = async (req, res) => {
 
 const updateUserInfo = async (req, res) => {
   try {
-    const { _id, usertype, username, height, weight, dateofbirth, gender, avatar, subscriptionFees, workingHours } = req.body;
+    const { _id, usertype, username, height, weight, dateofbirth, gender, avatar, subscriptionFees, workingHours, selectedLocation } = req.body;
 
     console.log('Incoming request data:', JSON.stringify(req.body, null, 2)); // Pretty-print the request data
 
@@ -129,7 +129,7 @@ const updateUserInfo = async (req, res) => {
     }
 
     if (usertype === "Gym") {
-      if (!subscriptionFees || !workingHours) {
+      if (!subscriptionFees || !workingHours || !selectedLocation) {
         return res.status(400).send({
           success: false,
           message: 'Missing required fields for Gym',
@@ -171,7 +171,7 @@ const updateUserInfo = async (req, res) => {
       if (updatedUser) {
         const updatedGymDetails = await GymDetails.findOneAndUpdate(
           { gym: _id },
-          { subscriptionFee: subscriptionFees, workingHours },
+          { subscriptionFee: subscriptionFees, workingHours, gymLocation: selectedLocation },
           { new: true }
         );
 

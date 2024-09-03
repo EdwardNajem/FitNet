@@ -505,6 +505,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+    marginTop: 30,
     alignItems: 'center',
     justifyContent: 'center',
   },

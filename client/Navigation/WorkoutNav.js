@@ -14,6 +14,7 @@ import WorkoutListEdit from '../pages/Workout/WorkoutListEdit'
 import WorkoutListStartWorkout from '../pages/Workout/WorkoutListStartWorkout';
 import Chat from '../pages/Messages/Chat';
 import React from 'react';
+import AIChat from '../pages/Messages/AIChat';
 
 const Stack = createStackNavigator();
 
@@ -38,7 +39,7 @@ const WorkoutNav = ({ setLoggedin, navigation }) => {
       const leafRouteName = getCurrentRouteName(currentRoute);
 
 
-      if (leafRouteName === "Chat") {
+      if (leafRouteName === "Chat" || leafRouteName === "AIChat") {
         navigation.setOptions({
           tabBarStyle: { display: 'none' }
         });
@@ -191,6 +192,7 @@ const WorkoutNav = ({ setLoggedin, navigation }) => {
       />
 
     <Stack.Screen options={{ headerShown: false, presentation: 'transparentModal' }} name="Chat" component={Chat} />
+    <Stack.Screen options={{ headerShown: false, presentation: 'transparentModal' }} name="AIChat" component={AIChat} />
     </Stack.Navigator>
   );
 };
