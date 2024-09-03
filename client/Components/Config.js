@@ -6,8 +6,8 @@
 // export const API_URL = 'http://172.23.48.1:8080'; //The Nook
 // export const API_URL = 'http://192.168.0.102:8080'; //Ralph Home
 // export const API_URL = 'http://192.168.8.119:8080'; //Ralph Kaa
-export const API_URL = 'http://192.168.1.23:8080'; //Ralph Mhammad Home
-  // export const API_URL = 'http://192.168.1.106:8080'; //Ahmad Hom
+//export const API_URL = 'http://192.168.1.23:8080'; //Ralph Mhammad Home
+  export const API_URL = 'http://192.168.1.106:8080'; //Ahmad Hom
 
 import axios from 'axios';
 
