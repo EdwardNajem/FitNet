@@ -22,6 +22,7 @@ import ProfileNavGym from './Navigation/ProfileNavGym';
 import { Octicons } from '@expo/vector-icons';
 import Messages from './pages/Messages/Messages';
 import Chat from './pages/Messages/Chat';
+import AIChat from './pages/Messages/AIChat';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();

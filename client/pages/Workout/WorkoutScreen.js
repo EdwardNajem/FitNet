@@ -1,4 +1,4 @@
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import {
@@ -9,7 +9,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image
+  Image,
+  Button
 } from 'react-native';
 import api from '../../Components/Config';
 import { useIsFocused } from '@react-navigation/native';
@@ -136,8 +137,24 @@ const WorkoutScreen = ({ navigation }) => {
   };
 
   return (
+    <>
+    <TouchableOpacity 
+      onPress={() => navigation.push('AIChat',
+          {
+            receivingUser: {
+              _id: 'ai_helper',
+              username: 'AI Assistant',
+              avatar: 'https://firebasestorage.googleapis.com/v0/b/chatfuze-e6658.appspot.com/o/ChatFuze%2FProfile%2Fd4d8df1645a4f1e243b37cb00b857db4_t.jpeg?alt=media&token=0d616e33-1017-4ff9-8430-a38cbc17a7f3',
+            },
+          }
+        )} 
+      style={{ zIndex: 100, borderColor: '#FF4C0A', borderWidth: 1, borderRadius: 30 ,backgroundColor: '#2f2f2f', padding: 10, width: 80, margin: 10, right:0, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0 }}
+    >
+      <MaterialCommunityIcons name='robot-excited-outline' color={'#FF4C0A'} size={40} />
+    </TouchableOpacity>
     <ScrollView style={styles.container}>
       <StatusBar backgroundColor="#2f2f2f" />
+
       <View style={styles.header}>
         <Text style={styles.title}>Workout</Text>
       </View>
@@ -270,6 +287,7 @@ const WorkoutScreen = ({ navigation }) => {
         </View>
       </View>
     </ScrollView>
+    </>
   );
 };
 const styles = StyleSheet.create({

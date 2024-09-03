@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Modal,
+  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -24,6 +26,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import MapPicker from '../../Components/MapPicker';
+import MapView, { Marker } from 'react-native-maps';
 
 const EditProfile = ({ navigation }) => {
 
@@ -31,6 +35,18 @@ const EditProfile = ({ navigation }) => {
     { label: 'Open', value: 'open' },
     { label: 'Closed', value: 'closed' },
   ];
+
+  const [mapVisible, setMapVisible] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  const handleMapPress = (event) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setSelectedLocation({
+      latitude,
+      longitude,
+    });
+    // setMapVisible(false);
+  };
 
   // const [value, setValue] = useState(null);
   // const [isFocusStatus, setIsFocusStatus] = useState(false);
@@ -90,7 +106,7 @@ const EditProfile = ({ navigation }) => {
       const response = await api.get(`/fitnet/getGymDetails/${user._id}`);
   
       if (response.data.success) {
-        const { workingHours, subscriptionFee } = response.data.data;
+        const { workingHours, subscriptionFee, gymLocation } = response.data.data;
   
         // Convert date strings to Date objects
         const formattedWorkingHours = workingHours.map(hour => ({
@@ -102,6 +118,7 @@ const EditProfile = ({ navigation }) => {
         // Set state with the formatted data
         setWorkingHours(formattedWorkingHours);
         setSubscriptionFees(subscriptionFee);
+        setSelectedLocation(gymLocation);
       } else {
         console.error('Failed to fetch gym details:', response.data.message);
       }
@@ -271,6 +288,7 @@ const EditProfile = ({ navigation }) => {
         gender,
         subscriptionFees,
         workingHours,
+        selectedLocation,
       };
 
       console.log('Sending data to API:', JSON.stringify(data, null, 2)); // Pretty-print the data
@@ -520,6 +538,66 @@ const EditProfile = ({ navigation }) => {
               </View>
             </>}
 
+            {/* <View style={{ flex: 1 }}> */}
+            {state.user.usertype === 'Gym' && (
+              <>
+                <WhiteLine title={'Gym Location'} />
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setMapVisible(true)}
+                >
+                  <Text style={styles.buttonText}>Select Location</Text>
+                </TouchableOpacity>
+
+                {/* Map Modal for Selecting Location */}
+                <Modal visible={mapVisible} animationType="slide">
+                  <View style={{ flex: 1 }}>
+                    <MapView
+                      style={{ flex: 1 }}
+                      initialRegion={{
+                        latitude: 33.888629,
+                        longitude: 35.495480,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                      }}
+                      onPress={handleMapPress}
+                    >
+                      {selectedLocation && (
+                        <Marker
+                          coordinate={selectedLocation}
+                          title="Selected Location"
+                        />
+                      )}
+                    </MapView>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setMapVisible(false)}
+                    >
+                      <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Modal>
+
+                {/* Non-interactive Map Below the Select Button */}
+                {selectedLocation && (
+                  <MapView
+                    style={styles.mapPreview}
+                    region={{
+                      latitude: selectedLocation.latitude,
+                      longitude: selectedLocation.longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }}
+                    scrollEnabled={false}
+                    zoomEnabled={false}
+                  >
+                    <Marker coordinate={selectedLocation} />
+                  </MapView>
+                )}
+              </>
+            )}
+          {/* </View> */}
+
             {errorMessage ? (
               <Text style={styles.errorText}>{errorMessage}</Text>
             ) : null}
@@ -540,6 +618,38 @@ const EditProfile = ({ navigation }) => {
 export default EditProfile;
 
 const styles = StyleSheet.create({
+  button: {
+    backgroundColor: '#FF4C0A',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 80,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    backgroundColor: '#FF4C0A',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  closeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  mapPreview: {
+    marginTop: 10,
+    width: '95%',
+    height: 200,
+    borderRadius: 10,
+  },
   WorkingHourscontainer: {
     display: 'flex',
     flexDirection: 'row',
