@@ -9,6 +9,7 @@ const {
     addCommentToPost,
     deleteCommentFromPost,
     getNotifications,
+    getPostCount,
 } = require('../controllers/postController');
 
 //router object
@@ -24,6 +25,7 @@ router.post('/removeLikeFromPost', removeLikeFromPost);
 router.post('/addCommentToPost', addCommentToPost);
 router.post('/deleteCommentFromPost', deleteCommentFromPost);
 router.get('/getNotifications', getNotifications);
+router.get('/getPostCount', getPostCount);
 
 //export
 module.exports = router;

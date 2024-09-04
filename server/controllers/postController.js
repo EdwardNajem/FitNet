@@ -491,7 +491,38 @@ const getNotifications = async (req, res) => {
 
 
 
-
+const getPostCount = async (req, res) => {
+    const { userId } = req.query;
+  
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a userId',
+      });
+    }
+  
+    try {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid userId format',
+        });
+      }
+  
+      const postCount = await postModel.countDocuments({ createdBy: userId });
+  
+      return res.status(200).json({
+        success: true,
+        count: postCount,
+      });
+    } catch (error) {
+      console.error('Error fetching post count:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: `Error fetching post count: ${error.message}`,
+      });
+    }
+  };
 
 
 
@@ -509,4 +540,5 @@ module.exports = {
     addCommentToPost,
     deleteCommentFromPost,
     getNotifications,
+    getPostCount,
 };
