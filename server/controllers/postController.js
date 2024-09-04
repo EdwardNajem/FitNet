@@ -382,10 +382,9 @@ const addCommentToPost = async (req, res) => {
             });
         }
   
-        // Create a new notification
         const notification = new Notification({
-            user: updatedPost.createdBy,  // The post's owner
-            sender: userId,  // The user who commented on the post
+            user: updatedPost.createdBy,  
+            sender: userId,  
             post: postId,
             notificationType: 'comment',
             message: `commented on your post.`,
@@ -457,7 +456,6 @@ const getNotifications = async (req, res) => {
     }
 
     try {
-        // Fetch notifications and populate user and sender fields
         const notifications = await Notification.find({ user: userId })
             .populate({
                 path: 'user',
@@ -467,7 +465,7 @@ const getNotifications = async (req, res) => {
                 path: 'sender',
                 select: 'username avatar'
             })
-            .sort({ createdAt: -1 }); // Sort by most recent notifications
+            .sort({ createdAt: -1 });
 
         if (!notifications.length) {
             return res.status(404).json({
