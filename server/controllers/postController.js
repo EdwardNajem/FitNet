@@ -2,6 +2,7 @@ const WorkoutPlanModel = require('../models/workoutPlanModel');
 const userModel = require('../models/userModel');
 const Follow = require('../models/followModel');
 const postModel = require('../models/postModel');
+const Notification = require('../models/notificationModel'); 
 const mongoose = require('mongoose');
 
 const uploadPost = async (req,res) => {
@@ -257,28 +258,52 @@ const addLikeToPost = async (req, res) => {
             message: 'Please provide postId and userId',
         });
     }
-
+  
     try {
-        // Find the post by ID and update it by adding the userId to the likes array
         const updatedPost = await postModel.findByIdAndUpdate(
             postId,
-            { $addToSet: { likes: userId } }, // $addToSet ensures no duplicate likes
-            { new: true } // Return the updated post
+            { $addToSet: { likes: userId } },
+            { new: true }
         );
-
+  
         if (!updatedPost) {
             return res.status(404).json({
                 success: false,
                 message: 'Post not found',
             });
         }
+  
+        // Log values for debugging
+        console.log('Updated Post:', updatedPost);
+        console.log('User ID:', userId);
+        console.log('Post ID:', postId);
 
+        // Create a new notification
+        const notification = new Notification({
+            user: updatedPost.createdBy,  // The post's owner
+            sender: userId,  // The user who liked the post
+            post: postId,
+            notificationType: 'like',
+            message: `liked your post.`,
+        });
+  
+        console.log('Notification Data:', {
+            user: updatedPost.createdBy,
+            sender: userId,
+            post: postId,
+            notificationType: 'like',
+            message: `liked your post.`,
+        });
+
+        await notification.save();
+  
         return res.status(200).json({
             success: true,
             message: 'Post liked successfully',
             post: updatedPost,
         });
     } catch (error) {
+        console.error('Error adding like:', error.message);
         return res.status(500).json({
             success: false,
             message: `Error adding like: ${error.message}`,
@@ -286,6 +311,7 @@ const addLikeToPost = async (req, res) => {
     }
 };
 
+  
 const removeLikeFromPost = async (req, res) => {
     const { postId, userId } = req.body;
     
@@ -326,14 +352,14 @@ const removeLikeFromPost = async (req, res) => {
 
 const addCommentToPost = async (req, res) => {
     const { postId, userId, text } = req.body;
-
+  
     if (!postId || !userId || !text) {
         return res.status(400).json({
             success: false,
             message: 'Please provide postId, userId, and comment text',
         });
     }
-
+  
     try {
         // Create the comment object
         const comment = {
@@ -341,21 +367,32 @@ const addCommentToPost = async (req, res) => {
             text: text,
             createdAt: new Date(),
         };
-
+  
         // Find the post by ID and update it by adding the new comment to the comments array
         const updatedPost = await postModel.findByIdAndUpdate(
             postId,
             { $push: { comments: comment } }, // $push adds the comment to the comments array
             { new: true } // Return the updated post
         );
-
+  
         if (!updatedPost) {
             return res.status(404).json({
                 success: false,
                 message: 'Post not found',
             });
         }
-
+  
+        // Create a new notification
+        const notification = new Notification({
+            user: updatedPost.createdBy,  // The post's owner
+            sender: userId,  // The user who commented on the post
+            post: postId,
+            notificationType: 'comment',
+            message: `commented on your post.`,
+        });
+  
+        await notification.save();
+  
         return res.status(200).json({
             success: true,
             message: 'Comment added successfully',
@@ -367,7 +404,8 @@ const addCommentToPost = async (req, res) => {
             message: `Error adding comment: ${error.message}`,
         });
     }
-};
+  };
+  
 
 const deleteCommentFromPost = async (req, res) => {
     const { postId, commentId } = req.body;
@@ -407,6 +445,62 @@ const deleteCommentFromPost = async (req, res) => {
     }
 };
 
+
+const getNotifications = async (req, res) => {
+    const { userId } = req.query;
+
+    if (!userId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Please provide a userId',
+        });
+    }
+
+    try {
+        // Fetch notifications and populate user and sender fields
+        const notifications = await Notification.find({ user: userId })
+            .populate({
+                path: 'user',
+                select: 'username avatar'
+            })
+            .populate({
+                path: 'sender',
+                select: 'username avatar'
+            })
+            .sort({ createdAt: -1 }); // Sort by most recent notifications
+
+        if (!notifications.length) {
+            return res.status(404).json({
+                success: false,
+                message: 'No notifications found',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            notifications,
+        });
+    } catch (error) {
+        console.error('Error fetching notifications:', error.message);
+        return res.status(500).json({
+            success: false,
+            message: `Error fetching notifications: ${error.message}`,
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
     uploadPost,
     uploadPostGym,
@@ -416,4 +510,5 @@ module.exports = {
     removeLikeFromPost,
     addCommentToPost,
     deleteCommentFromPost,
+    getNotifications,
 };

@@ -1,33 +1,43 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, Swipeable,RefreshControl } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons';
-
-const UserNotifications = [
-  {
-    id: 1,
-    type: 'like',
-    user: 'Ahmad Zaarour',
-    action: 'liked your post',
-    image: require('../../assets/images/logo.png'),
-  },
-  {
-    id: 2,
-    type: 'comment',
-    user: 'Ahmad Zaarour',
-    action: 'commented on your post',
-    image: require('../../assets/images/logo.png'),
-  },
-  {
-    id: 3,
-    type: 'request',
-    user: 'Edward Najem',
-    action: 'requested to follow you',
-    image: require('../../assets/images/logo.png'),
-  },
-];
+import { AuthContext } from '../../Context/authContext';
+import api from '../../Components/Config';
 
 const Notifications = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [state] = useContext(AuthContext);
+  const userId = state.user._id;
+  const [refreshing, setRefreshing] = React.useState(false);
+
+ 
+ 
+
+  const getNotifications = async () => {
+    try {
+      const response = await api.get(`fitnet/getNotifications?userId=${userId}`);
+      setNotifications(response.data.notifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error.message);
+    }
+  };
+  
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    setNotifications([]);
+    await getNotifications(); 
+    setRefreshing(false);
+  }, [userId]);  
+  
+  useEffect(() => {
+    getNotifications();
+  }, [userId]);  
+  
+
+
+
+
   const handlePress = (notification) => {
     console.log('Notification:', notification);
   };
@@ -54,24 +64,28 @@ const Notifications = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
-        {UserNotifications.map((notification) => (
+          <ScrollView style={styles.container} refreshControl={<RefreshControl colors={["#FF4C0A"]} refreshing={refreshing} onRefresh={onRefresh} />}>
+
+      <ScrollView>
+        {notifications.map((notification) => (
           <Swipeable
-            key={notification.id}
-            renderRightActions={() => notification.type === 'request' && renderRightActions(notification)}
-            renderLeftActions={() => notification.type === 'request' && renderLeftActions(notification)}
+            key={notification._id}
+            renderRightActions={() => notification.notificationType === 'request' && renderRightActions(notification)}
+            renderLeftActions={() => notification.notificationType === 'request' && renderLeftActions(notification)}
           >
             <TouchableOpacity style={styles.card} onPress={() => handlePress(notification)}>
-              <Image source={notification.image} style={styles.image} />
+              <Image source={{ uri: notification.sender.avatar }} style={styles.image} />
               <View style={styles.infoContainer}>
                 <Text style={styles.name}>
-                  {notification.user} <Text style={styles.actionText}>{notification.action}</Text>
+                  {notification.sender.username} <Text style={styles.actionText}>{notification.message}</Text>
                 </Text>
               </View>
             </TouchableOpacity>
           </Swipeable>
         ))}
       </ScrollView>
+      </ScrollView>
+
     </GestureHandlerRootView>
   );
 };
@@ -119,7 +133,6 @@ const styles = StyleSheet.create({
   accept: {
     backgroundColor: 'green',
     borderRadius: 10,
-  
   },
   decline: {
     backgroundColor: 'red',

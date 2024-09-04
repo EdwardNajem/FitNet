@@ -207,7 +207,6 @@ const HomeScreen = () => {
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInHours / 24);
 
-    console.log(diffInMinutes)
   
     if (diffInSeconds < 60) {
       return "just now";
