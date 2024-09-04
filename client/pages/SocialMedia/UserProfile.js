@@ -15,6 +15,7 @@ const UserProfile = ({ navigation }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [postCount, setPostCount] = useState(0);
   const { commentVisible, setCommentVisible, currentPostId, setCurrentPostId, posts, setPosts, slideAnim } = useContext(CommentContext);
   // const slideAnim = new Animated.Value(0); // Assuming you have this in your existing code
   const [comment, setComment] = useState(''); // Local state for the comment input
@@ -162,6 +163,28 @@ useEffect(() => {
     fetchFollowingCount();
   }
 }, [user._id]);
+
+useEffect(() => {
+  const fetchPostCount = async () => {
+    try {
+      const response = await api.get('fitnet/getPostCount', {
+        params: {
+          userId: user._id,
+        },
+      });
+      if (response.status === 200) {
+        setPostCount(response.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching post count:', error);
+    }
+  };
+
+  if (user._id) {
+    fetchPostCount();
+  }
+}, [user._id]);
+
 
 
 
@@ -326,8 +349,8 @@ useEffect(() => {
         </View>
         <View style={styles.stats}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>10</Text>
-            <Text style={styles.statLabel}>Workouts</Text>
+            <Text style={styles.statNumber}>{postCount}</Text>
+            <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{followerCount}</Text>
@@ -419,9 +442,7 @@ useEffect(() => {
               <TouchableOpacity style={styles.iconButton} onPress={() => handleCommentPress(post._id)}>
                 <FontAwesome name="comment-o" size={24} color="#FF4C0A" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <Entypo name="share" size={24} color="#FF4C0A" />
-              </TouchableOpacity>
+              
             </View>
           </View>
         ))}

@@ -20,40 +20,45 @@ const ProfileHeader = ({ user, navigation }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [postCount, setPostCount] = useState(0);
+
   const fetchData = async () => {
     setLoading(true);
     setErrorMessage('');
     try {
-     const followerResponse = await api.get(`fitnet/getFollowerCount?userId=${user._id}`);
+      const followerResponse = await api.get(`fitnet/getFollowerCount?userId=${user._id}`);
       const followingResponse = await api.get(`fitnet/getFollowingCount?userId=${user._id}`);
-
-      if (followerResponse.status === 200 && followingResponse.status === 200) {
+      const postResponse = await api.get(`fitnet/getPostCount?userId=${user._id}`);
+  
+  
+      if (followerResponse.status === 200 && followingResponse.status === 200 && postResponse.status === 200) {
         setFollowerCount(followerResponse.data.followerCount);
         setFollowingCount(followingResponse.data.followingCount);
+        setPostCount(postResponse.data.count); // Ensure 'count' is correctly assigned
       } else {
-        setErrorMessage('Failed to fetch follower/following counts');
+        setErrorMessage('Failed to fetch data');
       }
     } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
       if (error.response && error.response.status === 500) {
         setErrorMessage(error.response.data?.message || 'Internal Server Error');
       } else if (error.response && error.response.status === 400) {
-        setErrorMessage(error.response.data?.message || 'Failed to fetch counts');
+        setErrorMessage(error.response.data?.message || 'Failed to fetch data');
       } else {
-        setErrorMessage('Failed to fetch follower/following counts');
+        setErrorMessage('Failed to fetch data');
       }
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     setLoading(true);
-    // Simulate fetching user data
     setTimeout(() => {
       fetchData();
       setLoading(false);
     }, 2000);
-    // Start the loading animation
     startAnimation();
   }, []);
 
@@ -95,35 +100,35 @@ const ProfileHeader = ({ user, navigation }) => {
           <View style={styles.infoContainer}>
             {loading ? (
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Workouts</Text>
                 <Text style={styles.infoText}>{0}</Text>
+                <Text style={styles.infoLabel}>Posts</Text>
               </View>
             ) : (
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Workouts</Text>
-                <Text style={styles.infoText}>{1}</Text>
+                <Text style={styles.infoText}>{postCount}</Text>
+                <Text style={styles.infoLabel}>Posts</Text>      
               </View>
             )}
             {loading ? (
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Followers</Text>
-                <Text style={styles.infoText}>{0}</Text>
+               <Text style={styles.infoText}>{0}</Text>
+                <Text style={styles.infoLabel}>Followers</Text>              
               </View>
             ) : (
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Followers</Text>
                 <Text style={styles.infoText}>{followerCount}</Text>
+                <Text style={styles.infoLabel}>Followers</Text>                
               </View>
             )}
             {loading ? (
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Following</Text>
                 <Text style={styles.infoText}>{0}</Text>
+                <Text style={styles.infoLabel}>Following</Text>
               </View>
             ) : (
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Following</Text>
                 <Text style={styles.infoText}>{followingCount}</Text>
+                <Text style={styles.infoLabel}>Following</Text>               
               </View>
             )}
           </View>
