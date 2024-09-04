@@ -16,7 +16,7 @@ import api from './Config';
 
 const ProfileHeader = ({ user, navigation }) => {
   const [loading, setLoading] = useState(true);
-  const [animation] = useState(new Animated.Value(0)); // Initialize animation value
+  const [animation] = useState(new Animated.Value(0)); 
   const [errorMessage, setErrorMessage] = useState('');
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -34,7 +34,7 @@ const ProfileHeader = ({ user, navigation }) => {
       if (followerResponse.status === 200 && followingResponse.status === 200 && postResponse.status === 200) {
         setFollowerCount(followerResponse.data.followerCount);
         setFollowingCount(followingResponse.data.followingCount);
-        setPostCount(postResponse.data.count); // Ensure 'count' is correctly assigned
+        setPostCount(postResponse.data.count); 
       } else {
         setErrorMessage('Failed to fetch data');
       }
