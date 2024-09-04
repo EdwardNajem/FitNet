@@ -296,9 +296,6 @@ const ProfileWorkout = (props) => {
               <TouchableOpacity style={styles.iconButton} onPress={() => handleCommentPress(post._id)}>
                 <FontAwesome name="comment-o" size={24} color="#FF4C0A" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <Entypo name="share" size={24} color="#FF4C0A" />
-              </TouchableOpacity>
             </View>
           </View>
         ))}

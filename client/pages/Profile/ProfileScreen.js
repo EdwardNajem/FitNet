@@ -180,9 +180,7 @@ const ProfileScreen = ({ navigation }) => {
       <StatusBar backgroundColor="#2F2F2F" />
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
-        <TouchableOpacity style={styles.chatButton}>
-          <Fontisto name="share" color="white" size={24} />
-        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.chatButton}
           onPress={() => navigation.navigate('Settings')}
