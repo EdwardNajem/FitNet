@@ -16,6 +16,8 @@ const GymProfile = ({ navigation }) => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [subscription, setSubscription] = useState(null);
+  const [postCount, setPostCount] = useState(0);
+
   // const { commentVisible, setCommentVisible, currentPostId, setCurrentPostId, posts, setPosts } = useContext(CommentContext);
   // const slideAnim = new Animated.Value(0); // Assuming you have this in your existing code
   // const [comment, setComment] = useState(''); // Local state for the comment input
@@ -392,8 +394,8 @@ useEffect(() => {
         </View>
         <View style={styles.stats}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>10</Text>
-            <Text style={styles.statLabel}>Workouts</Text>
+            <Text style={styles.statNumber}>{postCount}</Text>
+            <Text style={styles.statLabel}>Posts</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{followerCount}</Text>
@@ -748,6 +750,8 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 15,
     marginBottom: 20,
+    borderRadius: 20,
+
   },
   userInfo: {
     flexDirection: 'row',

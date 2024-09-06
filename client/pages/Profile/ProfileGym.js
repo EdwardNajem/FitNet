@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: '#FFFFFF20',
     padding: 10,
-    borderRadius: 40,
+    borderRadius: 20,
     marginVertical: 5,
   },
   container: {

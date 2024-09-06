@@ -48,25 +48,8 @@ const TrainerInformation = ({ route }) => {
           </TouchableOpacity>
         </View>
         <Text style={styles.role}>{trainer.type}</Text>
-        <Text style={styles.sectionTitle}>Reviews</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.reviewSlider}>
-          {reviews.map((review) => (
-            <View key={review.id} style={styles.reviewCard}>
-              <View style={styles.reviewHeader}>
-                <Image source={review.reviewerImage} style={styles.reviewerImage} />
-                <View style={styles.reviewerInfo}>
-                  <View style={styles.reviewerInfoHeader}>
-                    <Text style={styles.reviewerName}>{review.reviewerName}</Text>
-                    <View style={styles.reviewRatingContainer}>
-                      <Text style={styles.reviewRating}>{review.rating}</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-              <Text style={styles.reviewText}>{review.reviewText}</Text>
-            </View>
-          ))}
-        </ScrollView>
+        <Text style={styles.sectionTitle}>I will help you in {trainer.type}</Text>
+     
         <TouchableOpacity style={styles.bookButton} onPress={handleBookPress}>
           <Text style={styles.bookButtonText}>Book Appointment</Text>
         </TouchableOpacity>
@@ -107,7 +90,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   role: {
-    color: '#FFFFFF',
+    color: '#FF4C0A',
     fontSize: 18,
     marginVertical: 10,
   },
@@ -172,6 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 20,
+    top:'12%',
   },
   bookButtonText: {
     color: '#FFFFFF',

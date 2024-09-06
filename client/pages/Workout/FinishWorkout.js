@@ -145,29 +145,8 @@ const FinishWorkout = ({ route, navigation }) => {
           </View>
         </View>
 
-        <Text style={styles.trainerTitle}>Trainer</Text>
-        <Text style={styles.trainerFeedback}>How was Trainer ?</Text>
 
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            {/* <Image source={selectedImage ? { uri: selectedImage } : require('../../assets/images/logo.png')} style={styles.trainerImage} /> */}
-            <Image source={require('../../assets/images/logo.png')} style={styles.trainerImage} />
-            <Text style={styles.trainerName}>Trainer Name</Text>
-          </View>
-
-          <View style={styles.ratingContainer}>
-            {[...Array(5)].map((_, index) => (
-              <TouchableOpacity key={index} onPress={() => setRating(index + 1)}>
-                <FontAwesome
-                  name={index < rating ? 'star' : 'star-o'}
-                  size={24}
-                  color="#FFD700"
-                  style={styles.star}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+      
 
         <View style={styles.postTypeContainer}>
           <Text style={styles.postTypeText}>Upload workout plan only</Text>
@@ -344,7 +323,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
-    height:'11%',
+    height:'17%',
   },
   statItem: {
     flexDirection: 'row',
