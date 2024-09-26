@@ -17,8 +17,7 @@ const UserProfile = ({ navigation }) => {
   const [followingCount, setFollowingCount] = useState(0);
   const [postCount, setPostCount] = useState(0);
   const { commentVisible, setCommentVisible, currentPostId, setCurrentPostId, posts, setPosts, slideAnim } = useContext(CommentContext);
-  // const slideAnim = new Animated.Value(0); // Assuming you have this in your existing code
-  const [comment, setComment] = useState(''); // Local state for the comment input
+  const [comment, setComment] = useState(''); 
   const [gymDetails, setGymDetails] = useState(null);
 
   const [state] = useContext(AuthContext);
@@ -381,13 +380,11 @@ useEffect(() => {
     } else if (diffInHours < 24) {
       return `${diffInHours} hours ago`;
     } else {
-      // Return the date without the time
       return createdAt.toLocaleDateString();
     }
   };
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Function to toggle the expanded state
   const toggleDetails = () => {
     setIsExpanded(prevState => !prevState);
   };
