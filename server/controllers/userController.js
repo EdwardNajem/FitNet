@@ -428,6 +428,34 @@ const getGymDetails = async (req, res) => {
   }
 };
 
+const getGymDetailsHeader = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    console.log('Received request for gym details with userId:', userId); // Log userId
+    
+    const user = await UserModel.findById(userId).select('username avatar usertype');
+    if (!user || user.usertype !== 'Gym') {
+      console.log('User not found or not a gym:', user);
+      return res.status(404).json({ message: 'Gym not found' });
+    }
+
+    const gymDetails = await GymDetails.findOne({ gym: userId }).populate('gym');
+    console.log('Gym Details Found:', gymDetails); // Log the gym details
+    if (!gymDetails) {
+      return res.status(404).json({ message: 'Gym details not found' });
+    }
+
+    res.status(200).json(gymDetails);
+  } catch (error) {
+    console.error('Error fetching gym details:', error);
+    res.status(500).json({ message: 'Error fetching gym details', error });
+  }
+};
+
+
+
+
+
 module.exports = {
   registerUser,
   loginUser,
@@ -436,4 +464,5 @@ module.exports = {
   updateUserEmail,
   getGymDetails,
   getUserDetails,
+  getGymDetailsHeader,
 };

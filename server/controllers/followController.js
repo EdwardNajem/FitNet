@@ -5,8 +5,10 @@ const searchUsers = async (req, res) => {
     const searchQuery = req.query.q; 
     const users = await UserModel.find({ 
       username: { $regex: searchQuery, $options: 'i' } 
-    }).select('username avatar'); 
+    }).select('username avatar usertype'); 
     
+    console.log('Fetched Users:', users);
+
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });

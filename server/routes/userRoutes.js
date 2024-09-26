@@ -7,6 +7,7 @@ const {
   updateUserEmail,
   getGymDetails,
   getUserDetails,
+  getGymDetailsHeader,
 } = require('../controllers/userController');
 const { sendOTPController } = require('../controllers/otpController');
 
@@ -22,6 +23,6 @@ router.put('/updateUserPassword', updateUserPassword);
 router.put('/updateUserEmail', updateUserEmail);
 router.get('/getGymDetails/:userId', getGymDetails);
 router.post('/getUserDetails', getUserDetails);
-
+router.get('/getGymDetailsHeader/:userId', getGymDetailsHeader);
 //export
 module.exports = router;

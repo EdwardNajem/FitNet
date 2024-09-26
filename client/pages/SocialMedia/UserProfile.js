@@ -19,17 +19,63 @@ const UserProfile = ({ navigation }) => {
   const { commentVisible, setCommentVisible, currentPostId, setCurrentPostId, posts, setPosts, slideAnim } = useContext(CommentContext);
   // const slideAnim = new Animated.Value(0); // Assuming you have this in your existing code
   const [comment, setComment] = useState(''); // Local state for the comment input
+  const [gymDetails, setGymDetails] = useState(null);
 
   const [state] = useContext(AuthContext);
   const userFollowerId = state.user?._id; 
 
-  useEffect(() => {
-    getPostsByUser();
-  }, [])
+
 
   // useEffect(() => {
   //   console.log(posts[0])
   // }, [posts])
+
+
+
+
+  const fetchData = async () => {
+    try {
+      console.log('Fetching gym details...');
+  
+      if (!user) {
+        console.log('User is not defined');
+        return;
+      }
+  
+      console.log('User object:', user);
+      console.log('User type:', user.usertype);
+      console.log('Is user a Gym?', user.usertype === 'Gym');
+  
+      if (user.usertype === 'Gym') {
+        console.log('Fetching gym details for gym user...');
+        const gymResponse = await api.get(`/fitnet/getGymDetailsHeader/${user._id}`);
+        console.log('Request hit the route');
+        console.log('Gym Response:', gymResponse); // Log the entire response to verify
+        if (gymResponse.status === 200) {
+          setGymDetails(gymResponse.data);
+          console.log('Gym Details:', gymResponse.data); // Log the data being set
+        } else {
+          console.log('Failed to fetch gym details');
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+    }
+  };
+  
+  
+
+  useEffect(() => {
+    getPostsByUser();
+    if (user) {
+      fetchData();  // Ensure user is available before fetching gym details
+    }
+    else
+    {
+      console.log("there is no user");
+    }
+  }, [user]);
+
 
   const getPostsByUser = async () => {
     const data = {
@@ -339,7 +385,12 @@ useEffect(() => {
       return createdAt.toLocaleDateString();
     }
   };
+  const [isExpanded, setIsExpanded] = useState(false);
 
+  // Function to toggle the expanded state
+  const toggleDetails = () => {
+    setIsExpanded(prevState => !prevState);
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -362,6 +413,33 @@ useEffect(() => {
           </View>
         </View>
       </View>
+     
+      {user.usertype === 'Gym' && gymDetails && (
+        <View style={styles.gymDetailsContainer}>
+          <TouchableOpacity onPress={toggleDetails} style={styles.detailsHeader}>
+            <Text style={styles.detailsHeaderText}>Details</Text>
+            <Text style={styles.toggleIcon}>{isExpanded ? '-' : '+'}</Text>
+          </TouchableOpacity>
+          {isExpanded && (
+            <View style={styles.detailsContent}>
+              <Text style={styles.gymDetailsText}>Subscription Fee: ${gymDetails.subscriptionFee}</Text>
+              {gymDetails.workingHours.map((hours, index) => {
+                const openingTime = new Date(hours.openingHour).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const closingTime = new Date(hours.closingHour).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return (
+                  <Text key={index} style={styles.gymDetailsText}>
+                    {hours.day}: {hours.status === 'open' ? `${openingTime} - ${closingTime}` : 'Closed'}
+                  </Text>
+                );
+              })}
+            </View>
+          )}
+        </View>
+  
+)}
+
+
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={[
@@ -398,6 +476,7 @@ useEffect(() => {
             </Text>
         </TouchableOpacity>
       </View>
+      
       <ScrollView fadingEdgeLength={100} style={{ marginTop: 10 }}>
         {posts.map((post) => (
           <View key={post._id} style={styles.postCard}>
@@ -630,26 +709,7 @@ const styles = StyleSheet.create({
   workoutStatisticsContainer: {
   margin: 5
   },
-  // container: {
-  //   flex: 1,
-  //   backgroundColor: '#1C1C1E',
-  // },
-  //   header: {
-  //     flexDirection: 'row',
-  //     alignItems: 'center',
-  //     justifyContent: 'flex-end',
-  //     gap: 15,
-  //     width: '100%',
-  //     paddingHorizontal: 10,
-  //     paddingVertical: 10,
-  //     backgroundColor: '#2F2F2F',
-  //   },
-  // title: {
-  //   color: '#FFFFFF',
-  //   fontSize: 24,
-  //   fontWeight: 'bold',
-  //   flex: 1,
-  // },
+  
   postCard: {
   backgroundColor: '#2F2F2F',
   width: '100%',
@@ -801,6 +861,37 @@ const styles = StyleSheet.create({
   color: '#FFFFFF',
   fontSize: 16,
   fontWeight: 'bold',
+  },
+  gymDetailsContainer: {
+    margin: 10,
+    padding: 10,
+    backgroundColor: '#2F2F2F',
+    borderRadius: 5,
+    elevation: 2,
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#FF4C0A',
+    borderRadius: 5,
+  },
+  detailsHeaderText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  toggleIcon: {
+    fontSize: 16,
+  },
+  detailsContent: {
+    padding: 10,
+  },
+  gymDetailsText: {
+    fontSize: 14,
+    marginVertical: 2,
+    color:'white',
   },
 });
 
